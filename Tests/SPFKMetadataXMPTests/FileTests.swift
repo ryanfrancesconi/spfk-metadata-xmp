@@ -40,6 +40,9 @@ class FileTests: BinTestCase {
 
         let newXML = try xml(named: "id3.xml")
         XMPWrapper.write(newXML, toPath: url.path)
+
+        let xmp2 = try XMPMetadata(url: url)
+        Log.debug(xmp2.document.xml)
     }
 
     @Test func parseBEXT() async throws {
