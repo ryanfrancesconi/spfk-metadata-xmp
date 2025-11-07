@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 #import "SPFKXMPFile.h"
 
-#import "XMPUtil.hh"
+#import "XMPUtil.hpp"
 
 @implementation SPFKXMPFile : NSObject
 

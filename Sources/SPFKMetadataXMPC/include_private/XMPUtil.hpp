@@ -1,5 +1,3 @@
-// MARK: - C++
-
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -26,6 +24,7 @@
 
 using namespace std;
 
+//namespace XMPUtil {
 class XMPUtil {
 private:
     inline static bool _isInitialized = false;
@@ -74,6 +73,33 @@ public:
     }
 
     // MARK: - Helpers
+
+    /**
+     * Creates an XMP object from an RDF string.  The string is used to
+     * to simulate creating and XMP object from multiple input buffers.
+     * The last call to ParseFromBuffer has no kXMP_ParseMoreBuffers options,
+     * thereby indicating this is the last input buffer.
+     */
+    static SXMPMeta
+    createXMPFromRDF(std::string string) {
+        const char *cstring = string.c_str();
+
+        SXMPMeta meta;
+
+        // Loop over the string and create the XMP object
+        // 10 characters at a time
+        int i;
+
+        for (i = 0; i < (long)strlen(cstring) - 10; i += 10) {
+            meta.ParseFromBuffer(&string[i], 10, kXMP_ParseMoreBuffers);
+        }
+
+        // The last call has no kXMP_ParseMoreBuffers options, signifying
+        // this is the last input buffer
+        meta.ParseFromBuffer(&cstring[i], (XMP_StringLen)strlen(cstring) - i);
+
+        return meta;
+    }
 
     /**
      * Initializes the toolkit and attempts to open a file for reading metadata.  Initially
@@ -189,32 +215,6 @@ public:
             cout << "ERROR: " << e.GetErrMsg() << endl;
             return NULL;
         }
-    }
-
-/**
- * Creates an XMP object from an RDF string.  The string is used to
- * to simulate creating and XMP object from multiple input buffers.
- * The last call to ParseFromBuffer has no kXMP_ParseMoreBuffers options,
- * thereby indicating this is the last input buffer.
- */
-    static SXMPMeta createXMPFromRDF(string string) {
-        const char *cstring = string.c_str();
-
-        SXMPMeta meta;
-
-        // Loop over the string and create the XMP object
-        // 10 characters at a time
-        int i;
-
-        for (i = 0; i < (long)strlen(cstring) - 10; i += 10) {
-            meta.ParseFromBuffer(&string[i], 10, kXMP_ParseMoreBuffers);
-        }
-
-        // The last call has no kXMP_ParseMoreBuffers options, signifying
-        // this is the last input buffer
-        meta.ParseFromBuffer(&cstring[i], (XMP_StringLen)strlen(cstring) - i);
-
-        return meta;
     }
 };
 

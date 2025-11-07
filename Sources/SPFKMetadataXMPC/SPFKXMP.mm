@@ -8,7 +8,7 @@
 #include <vector>
 
 #import "SPFKXMP.h"
-#import "XMPUtil.hh"
+#import "XMPUtil.hpp"
 
 @implementation SPFKXMP
 

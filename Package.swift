@@ -30,12 +30,12 @@ private let dependencies: [PackageDescription.Package.Dependency] = [
     .package(name: "SPFKTesting", path: "../SPFKTesting"),
 ]
 
-
 private let targets: [PackageDescription.Target] = [
     // Swift
     .target(
         name: name,
-        dependencies: [.target(name: nameC)]
+        dependencies: [.target(name: nameC)],
+        swiftSettings: [.interoperabilityMode(.Cxx)]
     ),
     
     // C
@@ -53,7 +53,6 @@ private let targets: [PackageDescription.Target] = [
         ],
         cxxSettings: [
             // Xcode resolves relative to the target root
-
             .headerSearchPath("include_private"),
             .headerSearchPath("Adobe"),
             .headerSearchPath("Adobe/client-glue"),
@@ -63,7 +62,7 @@ private let targets: [PackageDescription.Target] = [
             .headerSearchPath("Adobe/XMPCommon/Utilities"),
             .headerSearchPath("Adobe/XMPCommon/Interfaces/BaseInterfaces"),
             .headerSearchPath("Adobe/XMPCore/Interfaces")
-        ]
+        ],
     ),
     
     .binaryTarget(
@@ -85,7 +84,8 @@ private let targets: [PackageDescription.Target] = [
         ],
         resources: [
             .process("Resources")
-        ]
+        ],
+        swiftSettings: [.interoperabilityMode(.Cxx)]
     )
 ]
 
@@ -96,5 +96,5 @@ let package = Package(
     products: products,
     dependencies: dependencies,
     targets: targets,
-    cxxLanguageStandard: .cxx20
+    cxxLanguageStandard: .cxx20,
 )
