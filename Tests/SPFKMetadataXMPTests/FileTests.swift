@@ -7,42 +7,48 @@ import SPFKUtils
 import Testing
 import TimecodeKit
 
+/// XMP will translate existing metadata into XMP and return it as xml
+/// see id3.xml, wave.xml
+@Suite(.serialized)
 class FileTests: BinTestCase {
-    func write(document: AEXMLDocument, to url: URL) throws {
-        try document.xml.write(
-            to: url.appendingPathExtension("xml"),
-            atomically: false,
-            encoding: .utf8
-        )
-    }
-
     @Test func parseMP3() async throws {
         deleteBinOnExit = false
 
-        let url = try copyToBin(url: TestBundleResources.shared.mp3_id3)
-
-        let newXML = try xml(named: "sample1.xml")
-
-        XMPWrapper.write(newXML, toPath: url.path)
-
+        let url = TestBundleResources.shared.mp3_id3
         let xmp = try XMPMetadata(url: url)
         Log.debug(xmp.document.xml)
+
+        #expect(xmp.title == "Stonehenge")
     }
 
-    @Test func parse2() async throws {
+    @Test func writeID3_XMP() async throws {
         deleteBinOnExit = false
 
-        let tmp = URL(fileURLWithPath: "/Users/rf/Downloads/TestResources/no metadata.mp3")
-        let url = try copyToBin(url: tmp)
-
+        let url = try copyToBin(url: TestBundleResources.shared.mp3_no_metadata)
         let xmp = try XMPMetadata(url: url)
-        Log.debug(xmp.document.xml)
+        Log.debug(xmp.document.root.xml)
 
+        // if there is no metadata xmp will return a minimal doc :
+
+        // <x:xmpmeta x:xmptk="XMP Core 6.0.0" xmlns:x="adobe:ns:meta/">
+        //    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        //        <rdf:Description rdf:about="" />
+        //    </rdf:RDF>
+        // </x:xmpmeta>
+
+        let description = try #require(xmp.document.root[.rdf]?[.description])
+        #expect(description.children.isEmpty)
+
+        // read in an xml definition from this file
         let newXML = try xml(named: "id3.xml")
-        XMPWrapper.write(newXML, toPath: url.path)
+
+        // write to the new file
+        SPFKXMPFile.write(newXML, toPath: url.path)
 
         let xmp2 = try XMPMetadata(url: url)
         Log.debug(xmp2.document.xml)
+
+        #expect(xmp2.title == "Stonehenge")
     }
 
     @Test func parseBEXT() async throws {
@@ -52,5 +58,33 @@ class FileTests: BinTestCase {
         let xmp = try XMPMetadata(url: url)
 
         Log.debug(xmp.document.xml)
+
+        #expect(xmp.title == "Stonehenge")
+    }
+
+    @Test func sharedState() async throws {
+        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)"); defer { benchmark.stop() }
+
+        let urls = TestBundleResources.shared.formats + TestBundleResources.shared.audioCases
+
+        let group = try await withThrowingTaskGroup(of: String?.self, returning: [String].self) { taskGroup in
+            for url in urls {
+                taskGroup.addTask {
+                    SPFKXMPFile(path: url.path)?.xmpString
+                }
+            }
+
+            var mutableResults = [String]()
+
+            for try await result in taskGroup {
+                if let result {
+                    mutableResults.append(result)
+                }
+            }
+
+            return mutableResults
+        }
+
+        #expect(group.count == urls.count)
     }
 }

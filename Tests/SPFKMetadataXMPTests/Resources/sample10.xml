@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 6.0.0">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <rdf:Description xmlns:bext="http://ns.adobe.com/bwf/bext/1.0/" xmlns:iXML="http://ns.adobe.com/ixml/1.0/" xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/" rdf:about="">
+            <xmpDM:tapeName>22Y12M05</xmpDM:tapeName>
+            <xmpDM:shotNumber>03</xmpDM:shotNumber>
+            <xmpDM:scene>101M-7</xmpDM:scene>
+            <xmpDM:projectName>AUDIO-M</xmpDM:projectName>
+            <xmpDM:good>False</xmpDM:good>
+            <xmpDM:audioSampleRate>48000</xmpDM:audioSampleRate>
+            <xmpDM:audioSampleType>24Int</xmpDM:audioSampleType>
+            <xmpDM:startTimecode rdf:parseType="Resource">
+                <xmpDM:timeValue>14:27:39:00</xmpDM:timeValue>
+                <xmpDM:timeFormat>23976Timecode</xmpDM:timeFormat>
+            </xmpDM:startTimecode>
+            <bext:timeReference>2501330833</bext:timeReference>
+            <bext:description>sSPEED=023.976-ND
+
+sTAKE=03
+
+sUBITS=$12052022
+
+sSWVER=4.60.03
+
+sSCENE=101M-7
+
+sFILENAME=101M-7T03.WAV
+
+sTAPE=22Y12M05
+
+sCIRCLED=FALSE
+
+sTRK1=MixL
+
+sTRK2=MixR
+
+sTRK3=Boom
+
+sTRK4=Lav 1
+
+sTRK5=Lav 2
+
+sNOTE=</bext:description>
+            <bext:originator>Sound Dev: Mix633 S#LL0113312014</bext:originator>
+            <bext:originatorReference>USSDVLL0113312014221205FSOBs  11</bext:originatorReference>
+            <bext:originationDate>2022-12-05</bext:originationDate>
+            <bext:originationTime>15:28:48</bext:originationTime>
+            <bext:version>1</bext:version>
+            <bext:codingHistory>A=PCM,F=48000,W=24,M=multi,R=48000,T=5 Ch</bext:codingHistory>
+            <iXML:trackList>
+                <rdf:Bag>
+                    <rdf:li rdf:parseType="Resource">
+                        <iXML:channelIndex>1</iXML:channelIndex>
+                        <iXML:interleaveIndex>1</iXML:interleaveIndex>
+                        <iXML:name>MixL</iXML:name>
+                    </rdf:li>
+                    <rdf:li rdf:parseType="Resource">
+                        <iXML:channelIndex>2</iXML:channelIndex>
+                        <iXML:interleaveIndex>2</iXML:interleaveIndex>
+                        <iXML:name>MixR</iXML:name>
+                    </rdf:li>
+                    <rdf:li rdf:parseType="Resource">
+                        <iXML:channelIndex>3</iXML:channelIndex>
+                        <iXML:interleaveIndex>3</iXML:interleaveIndex>
+                        <iXML:name>Boom</iXML:name>
+                    </rdf:li>
+                    <rdf:li rdf:parseType="Resource">
+                        <iXML:channelIndex>4</iXML:channelIndex>
+                        <iXML:interleaveIndex>4</iXML:interleaveIndex>
+                        <iXML:name>Lav 1</iXML:name>
+                    </rdf:li>
+                    <rdf:li rdf:parseType="Resource">
+                        <iXML:channelIndex>5</iXML:channelIndex>
+                        <iXML:interleaveIndex>5</iXML:interleaveIndex>
+                        <iXML:name>Lav 2</iXML:name>
+                    </rdf:li>
+                </rdf:Bag>
+            </iXML:trackList>
+        </rdf:Description>
+    </rdf:RDF>
+</x:xmpmeta>

@@ -2,28 +2,33 @@
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 6.0.0">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
         <rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/" rdf:about="">
+            
             <xmpDM:artist>Spinal Tap</xmpDM:artist>
             <xmpDM:album>This Is Spinal Tap</xmpDM:album>
             <xmpDM:trackNumber>9/13</xmpDM:trackNumber>
             <xmpDM:genre>Soundtracks</xmpDM:genre>
-            <xmpDM:logComment>And oh how they danced. The little children of Stonehenge.
-Beneath the haunted moon.
-For fear that daybreak might come too soon.</xmpDM:logComment>
-            <xmpDM:lyrics>Stonehenge! Where the demons dwell. Where the banshees live and they do live well. Stonehenge! Where a man's a manAnd the children dance to the Pipes of Pan.</xmpDM:lyrics>
             <xmpDM:composer>Nigel Tufnel</xmpDM:composer>
             <xmpDM:discNumber>1/1</xmpDM:discNumber>
             <xmpDM:engineer>SPFKMetadata</xmpDM:engineer>
+            <xmpDM:logComment>And oh how they danced. The little children of Stonehenge.
+                Beneath the haunted moon.
+                For fear that daybreak might come too soon.</xmpDM:logComment>
+            <xmpDM:lyrics>Stonehenge! Where the demons dwell. Where the banshees live and they do live well. Stonehenge! Where a man's a manAnd the children dance to the Pipes of Pan.</xmpDM:lyrics>
+            
             <dc:title>
                 <rdf:Alt>
                     <rdf:li xml:lang="x-default">Stonehenge</rdf:li>
                 </rdf:Alt>
             </dc:title>
+            
             <dc:rights>
                 <rdf:Alt>
                     <rdf:li xml:lang="x-default">1984 Universal Records, a Division of UMG Recordings, Inc.</rdf:li>
                 </rdf:Alt>
             </dc:rights>
+            
             <xmp:CreateDate>1984</xmp:CreateDate>
+            
         </rdf:Description>
     </rdf:RDF>
 </x:xmpmeta>

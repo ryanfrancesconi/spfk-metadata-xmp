@@ -53,6 +53,8 @@ private let targets: [PackageDescription.Target] = [
         ],
         cxxSettings: [
             // Xcode resolves relative to the target root
+
+            .headerSearchPath("include_private"),
             .headerSearchPath("Adobe"),
             .headerSearchPath("Adobe/client-glue"),
             .headerSearchPath("Adobe/XMPCommon"),

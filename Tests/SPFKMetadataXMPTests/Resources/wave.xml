@@ -2,6 +2,7 @@
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 6.0.0">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
         <rdf:Description xmlns:bext="http://ns.adobe.com/bwf/bext/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:riffinfo="http://ns.adobe.com/riff/info/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/" rdf:about="">
+            
             <bext:description>And oh how they danced
 The little children of Stonehenge
 Beneath the haunted moon
@@ -13,20 +14,26 @@ For fear that daybreak might come too soon</bext:description>
             <bext:timeReference>158760000</bext:timeReference>
             <bext:version>2</bext:version>
             <bext:codingHistory>A=PCM,F=44100,W=16,M=stereo,T=original</bext:codingHistory>
+            
             <xmpDM:artist>Spinal Tap</xmpDM:artist>
+            
             <xmpDM:logComment>And oh how they danced. The little children of Stonehenge.Beneath the haunted moon.For fear that daybreak might come too soon.</xmpDM:logComment>
             <xmpDM:genre>Soundtracks</xmpDM:genre>
+            
             <dc:rights>
                 <rdf:Alt>
                     <rdf:li xml:lang="x-default">1984 Universal Records, a Division of UMG Recordings, Inc.</rdf:li>
                 </rdf:Alt>
             </dc:rights>
+            
             <dc:title>
                 <rdf:Alt>
                     <rdf:li xml:lang="x-default">Stonehenge</rdf:li>
                 </rdf:Alt>
             </dc:title>
+            
             <xmp:CreateDate>1984</xmp:CreateDate>
+            
             <riffinfo:name>
                 <rdf:Alt>
                     <rdf:li xml:lang="x-default">Stonehenge</rdf:li>
@@ -35,6 +42,9 @@ For fear that daybreak might come too soon</bext:description>
             <riffinfo:product>This Is Spinal Tap</riffinfo:product>
             <riffinfo:source>AA6Q72000047</riffinfo:source>
             <riffinfo:technician>SPFKMetadata</riffinfo:technician>
+            
         </rdf:Description>
     </rdf:RDF>
 </x:xmpmeta>
+
+<!-- TestBundleResources.shared.wav_bext_v2 -->

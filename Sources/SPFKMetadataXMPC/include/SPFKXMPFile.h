@@ -1,15 +1,19 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMP
 
-#ifndef XMPWrapper_h
-#define XMPWrapper_h
+#ifndef SPFKXMPFILE_H
+#define SPFKXMPFILE_H
 
 #import <Foundation/Foundation.h>
 
+#include "SPFKXMPFile.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
-@interface XMPWrapper : NSObject
+@interface SPFKXMPFile : NSObject
 
-+ (nullable NSString *)parse:(NSString *)path;
+@property (nonatomic, strong, nullable) NSString *xmpString;
+
+- (nullable id)initWithPath:(nonnull NSString *)path;
 
 + (void)write:(nonnull NSString *)xmlString
        toPath:(nonnull NSString *)toPath;
@@ -18,4 +22,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif /* XMPWrapper_h */
+#endif /* SPFKXMPFILE_H */
