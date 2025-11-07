@@ -1,11 +1,9 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMP
 
-#ifndef SPFKXMPFILE_H
-#define SPFKXMPFILE_H
+#ifndef SPFKXMPFile_H
+#define SPFKXMPFile_H
 
 #import <Foundation/Foundation.h>
-
-#include "SPFKXMPFile.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,4 +20,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif /* SPFKXMPFILE_H */
+#endif /* SPFKXMPFile_H */

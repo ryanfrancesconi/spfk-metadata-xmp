@@ -8,22 +8,22 @@
 #include <vector>
 
 #import "SPFKXMP.h"
-#import "XMPUtil.hpp"
+#import "XMPLifecycle.hpp"
 
 @implementation SPFKXMP
 
 + (bool)isInitialized {
-    return XMPUtil::isInitialized();
+    return XMPLifecycle::isInitialized();
 }
 
 + (bool)initialize {
-    XMPUtil::initialize();
+    XMPLifecycle::initialize();
 }
 
 + (void)terminate {
     NSLog(@"Terminating SXMPFiles + SXMPMeta...");
 
-    XMPUtil::terminate();
+    XMPLifecycle::terminate();
 }
 
 @end

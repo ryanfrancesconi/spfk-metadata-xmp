@@ -3,10 +3,6 @@
 
 import PackageDescription
 
-// This package will assume C / Objective-C interoperability as it's more common.
-// C++ could be enabled with:
-// swiftSettings: [.interoperabilityMode(.Cxx)]
-
 // Swift target
 private let name: String = "SPFKMetadataXMP"
 
@@ -34,8 +30,12 @@ private let targets: [PackageDescription.Target] = [
     // Swift
     .target(
         name: name,
-        dependencies: [.target(name: nameC)],
-        swiftSettings: [.interoperabilityMode(.Cxx)]
+        dependencies: [
+            .target(name: nameC),
+            .byNameItem(name: "SPFKUtils", condition: nil),
+            .byNameItem(name: "SPFKTime", condition: nil),
+        ],
+        //swiftSettings: [.interoperabilityMode(.Cxx)]
     ),
     
     // C
@@ -44,12 +44,10 @@ private let targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "XMPCore"),
             .target(name: "XMPFiles"),
-            .byNameItem(name: "SPFKUtils", condition: nil),
-            .byNameItem(name: "SPFKTime", condition: nil),
         ],
         publicHeadersPath: "include",
         cSettings: [
-            .headerSearchPath("include_private")
+            .headerSearchPath("include_private"),
         ],
         cxxSettings: [
             // Xcode resolves relative to the target root
@@ -85,7 +83,7 @@ private let targets: [PackageDescription.Target] = [
         resources: [
             .process("Resources")
         ],
-        swiftSettings: [.interoperabilityMode(.Cxx)]
+        //swiftSettings: [.interoperabilityMode(.Cxx)]
     )
 ]
 

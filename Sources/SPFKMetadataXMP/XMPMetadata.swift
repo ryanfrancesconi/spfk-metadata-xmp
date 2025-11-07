@@ -135,6 +135,9 @@ public struct XMPMetadata: Equatable {
     /// Create a XMPMetadata struct by passing it a path to a file
     /// - Parameter path: the file to open
     public init(path: String) throws {
+        
+        // XMPLifecycle.initialize()
+        
         guard let xmlString = SPFKXMPFile(path: path)?.xmpString else {
             throw NSError(description: "Failed to find an XMP chunk in the file: " + path)
         }

@@ -7,9 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SPFKXMP : NSObject
 
 + (bool)initialize;
-
 + (bool)isInitialized;
-
 + (void)terminate;
 
 @end
