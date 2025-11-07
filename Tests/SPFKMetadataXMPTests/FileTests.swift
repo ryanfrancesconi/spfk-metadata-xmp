@@ -43,7 +43,7 @@ class FileTests: BinTestCase {
         let newXML = try xml(named: "id3.xml")
 
         // write to the new file
-        SPFKXMPFile.write(newXML, toPath: url.path)
+        XMPFile.write(newXML, toPath: url.path)
 
         let xmp2 = try XMPMetadata(url: url)
         Log.debug(xmp2.document.xml)
@@ -70,7 +70,7 @@ class FileTests: BinTestCase {
         let group = try await withThrowingTaskGroup(of: String?.self, returning: [String].self) { taskGroup in
             for url in urls {
                 taskGroup.addTask {
-                    SPFKXMPFile(path: url.path)?.xmpString
+                    XMPFile(path: url.path)?.xmpString
                 }
             }
 

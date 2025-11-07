@@ -138,7 +138,7 @@ public struct XMPMetadata: Equatable {
         
         // XMPLifecycle.initialize()
         
-        guard let xmlString = SPFKXMPFile(path: path)?.xmpString else {
+        guard let xmlString = XMPFile(path: path)?.xmpString else {
             throw NSError(description: "Failed to find an XMP chunk in the file: " + path)
         }
 

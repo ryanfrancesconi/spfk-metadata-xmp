@@ -3,11 +3,11 @@
 #include <iostream>
 
 #import <Foundation/Foundation.h>
-#import "SPFKXMPFile.h"
+#import "XMPFile.h"
 
 #import "XMPUtil.hpp"
 
-@implementation SPFKXMPFile : NSObject
+@implementation XMPFile : NSObject
 
 - (nullable id)initWithPath:(nonnull NSString *)path {
     self = [super init];
