@@ -15,7 +15,7 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:",
+        "containerPath" : "container:Packages\/SPFKMetadataXMP",
         "identifier" : "SPFKMetadataXMPTests",
         "name" : "SPFKMetadataXMPTests"
       }
