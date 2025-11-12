@@ -28,7 +28,7 @@ class FileTests: BinTestCase {
         let xmp = try XMPMetadata(url: url)
         Log.debug(xmp.document.root.xml)
 
-        // if there is no metadata xmp will return a minimal doc :
+        // if there is no metadata, xmp will return a minimal doc :
 
         // <x:xmpmeta x:xmptk="XMP Core 6.0.0" xmlns:x="adobe:ns:meta/">
         //    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
