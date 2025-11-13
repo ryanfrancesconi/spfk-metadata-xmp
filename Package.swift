@@ -35,7 +35,6 @@ private let targets: [PackageDescription.Target] = [
             .byNameItem(name: "SPFKUtils", condition: nil),
             .byNameItem(name: "SPFKTime", condition: nil),
         ],
-        //swiftSettings: [.interoperabilityMode(.Cxx)]
     ),
     
     // C
@@ -83,7 +82,6 @@ private let targets: [PackageDescription.Target] = [
         resources: [
             .process("Resources")
         ],
-        //swiftSettings: [.interoperabilityMode(.Cxx)]
     )
 ]
 

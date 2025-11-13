@@ -9,7 +9,8 @@ import SPFKTime
 import SPFKUtils
 import TimecodeKit
 
-/// A subset of XMP metadata focused on markers and timecode
+/// A subset of XMP metadata focused on markers and timecode.
+/// This is currently a parser only.
 public struct XMPMetadata: Equatable {
     public static func == (lhs: XMPMetadata, rhs: XMPMetadata) -> Bool {
         lhs.frameRate == rhs.frameRate &&
@@ -135,9 +136,8 @@ public struct XMPMetadata: Equatable {
     /// Create a XMPMetadata struct by passing it a path to a file
     /// - Parameter path: the file to open
     public init(path: String) throws {
-        
         // XMPLifecycle.initialize()
-        
+
         guard let xmlString = XMPFile(path: path)?.xmpString else {
             throw NSError(description: "Failed to find an XMP chunk in the file: " + path)
         }
@@ -232,7 +232,7 @@ public struct XMPMetadata: Equatable {
         }
     }
 
-    /*
+    /**
      <xmpDM:duration rdf:parseType="Resource">
          <xmpDM:value>8800</xmpDM:value>
          <xmpDM:scale>1/2500</xmpDM:scale>
@@ -263,7 +263,7 @@ public struct XMPMetadata: Equatable {
         return timecode
     }
 
-    /*
+    /**
      <rdf:li rdf:parseType="Resource">
          <xmpDM:startTime>57</xmpDM:startTime>
          <xmpDM:duration>8</xmpDM:duration>

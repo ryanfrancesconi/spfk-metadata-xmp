@@ -30,6 +30,7 @@
 // ! be no decent way to do that on our own in UNIX. Forcing it on the client isn't acceptable.
 
 #define MAC_ENV 1
+#define DEBUG  1
 
 #if defined ( MAC_ENV ) && !defined (IOS_ENV)
 

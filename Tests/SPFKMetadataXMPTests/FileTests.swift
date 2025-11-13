@@ -11,6 +11,10 @@ import TimecodeKit
 /// see id3.xml, wave.xml
 @Suite(.serialized)
 class FileTests: BinTestCase {
+    deinit {
+        Log.debug("* { FileTests }")
+    }
+
     @Test func parseMP3() async throws {
         deleteBinOnExit = false
 
@@ -28,7 +32,7 @@ class FileTests: BinTestCase {
         let xmp = try XMPMetadata(url: url)
         Log.debug(xmp.document.root.xml)
 
-        // if there is no metadata, xmp will return a minimal doc :
+        // if there is no metadata, xmp will return a minimal doc that it creates.
 
         // <x:xmpmeta x:xmptk="XMP Core 6.0.0" xmlns:x="adobe:ns:meta/">
         //    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -51,6 +55,7 @@ class FileTests: BinTestCase {
         #expect(xmp2.title == "Stonehenge")
     }
 
+    /// Resources/wave.xml
     @Test func parseBEXT() async throws {
         deleteBinOnExit = false
 
@@ -62,19 +67,20 @@ class FileTests: BinTestCase {
         #expect(xmp.title == "Stonehenge")
     }
 
+    /// tests calling C++ API with multiple threads
     @Test func sharedState() async throws {
         let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)"); defer { benchmark.stop() }
 
         let urls = TestBundleResources.shared.formats + TestBundleResources.shared.audioCases
 
-        let group = try await withThrowingTaskGroup(of: String?.self, returning: [String].self) { taskGroup in
+        let group = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) { taskGroup in
             for url in urls {
                 taskGroup.addTask {
-                    XMPFile(path: url.path)?.xmpString
+                    try XMPMetadata(url: url)
                 }
             }
 
-            var mutableResults = [String]()
+            var mutableResults = [XMPMetadata]()
 
             for try await result in taskGroup {
                 if let result {

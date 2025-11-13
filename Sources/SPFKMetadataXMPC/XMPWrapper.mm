@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMPC
+
 #import <Foundation/Foundation.h>
 
 #include <cstdio>
@@ -7,10 +9,10 @@
 #include <string>
 #include <vector>
 
-#import "SPFKXMP.h"
 #import "XMPLifecycle.hpp"
+#import "XMPWrapper.h"
 
-@implementation SPFKXMP
+@implementation XMPWrapper
 
 + (bool)isInitialized {
     return XMPLifecycle::isInitialized();

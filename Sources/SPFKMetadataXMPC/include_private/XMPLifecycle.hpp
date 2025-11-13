@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+// One of MAC_ENV, WIN_ENV, UNIX_ENV or IOS_ENV must be defined by the client
 #define MAC_ENV              1
 
 // Must be defined to instantiate template classes

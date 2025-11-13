@@ -4,7 +4,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface SPFKXMP : NSObject
+/// Wraps XMPLifecycle for Swift interop
+@interface XMPWrapper : NSObject
 
 + (bool)initialize;
 + (bool)isInitialized;
