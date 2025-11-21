@@ -1,11 +1,10 @@
 import SPFKMetadataXMP
-import SPFKMetadataXMPC
 import Testing
 
 struct LifecycleTests {
-    @Test func canInitialize() {
-        #expect(XMPWrapper.initialize())
-        #expect(XMPWrapper.isInitialized())
-        XMPWrapper.terminate()
+    @Test func canInitialize() async throws {
+        let xmp = XMP.shared
+        #expect(await xmp.isInitialized)
+        await xmp.terminate()
     }
 }

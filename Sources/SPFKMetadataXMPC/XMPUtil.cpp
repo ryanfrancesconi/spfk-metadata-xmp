@@ -1,6 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMPC
 
-#include "XMPLifecycle.hpp"
+#include "XMPLifecycleCXX.hpp"
 #include "XMPUtil.hpp"
 
 using namespace std;
@@ -26,7 +26,7 @@ SXMPMeta XMPUtil::createXMPFromRDF(string string) {
 }
 
 string XMPUtil::getXMP(string filename) {
-    XMPLifecycle::initialize();
+    XMPLifecycleCXX::initialize();
 
     string buffer;
 
@@ -77,7 +77,7 @@ string XMPUtil::getXMP(string filename) {
 }
 
 bool XMPUtil::writeXMP(string xmlString, string filePath) {
-    XMPLifecycle::initialize();
+    XMPLifecycleCXX::initialize();
 
     try {
         // Options to open the file with - open for editing and use a smart handler

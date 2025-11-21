@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "XMPLifecycle.hpp"
+#include "XMPLifecycleCXX.hpp"
 
 using namespace std;
 

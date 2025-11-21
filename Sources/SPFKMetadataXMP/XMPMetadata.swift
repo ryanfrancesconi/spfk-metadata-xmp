@@ -4,7 +4,6 @@ import AEXML
 import CoreMedia
 import Foundation
 import OTCore
-import SPFKMetadataXMPC
 import SPFKTime
 import SPFKUtils
 import TimecodeKit
@@ -129,18 +128,8 @@ public struct XMPMetadata: Equatable {
 
     /// Create a XMPMetadata struct by passing it a URL to a file
     /// - Parameter path: the file to open
-    public init(url: URL) throws {
-        try self.init(path: url.path)
-    }
-
-    /// Create a XMPMetadata struct by passing it a path to a file
-    /// - Parameter path: the file to open
-    public init(path: String) throws {
-        // XMPLifecycle.initialize()
-
-        guard let xmlString = XMPFile(path: path)?.xmpString else {
-            throw NSError(description: "Failed to find an XMP chunk in the file: " + path)
-        }
+    public init(url: URL) async throws {
+        let xmlString = try await XMP.shared.parse(url: url)
 
         try self.init(xml: xmlString)
     }

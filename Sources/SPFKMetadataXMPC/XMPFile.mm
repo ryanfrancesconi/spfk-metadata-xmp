@@ -24,10 +24,10 @@
     return self;
 }
 
-+ (void)write:(NSString *)xmlString
++ (bool)write:(NSString *)xmlString
        toPath:(NSString *)toPath {
     //
-    XMPUtil::writeXMP(xmlString.UTF8String, toPath.UTF8String);
+    return XMPUtil::writeXMP(xmlString.UTF8String, toPath.UTF8String);
 }
 
 @end

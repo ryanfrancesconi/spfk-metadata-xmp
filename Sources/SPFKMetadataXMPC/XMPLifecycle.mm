@@ -9,23 +9,23 @@
 #include <string>
 #include <vector>
 
-#import "XMPLifecycle.hpp"
-#import "XMPWrapper.h"
+#import "XMPLifecycleCXX.hpp"
+#import "XMPLifecycle.h"
 
-@implementation XMPWrapper
+@implementation XMPLifecycle
 
 + (bool)isInitialized {
-    return XMPLifecycle::isInitialized();
+    return XMPLifecycleCXX::isInitialized();
 }
 
 + (bool)initialize {
-    return XMPLifecycle::initialize();
+    return XMPLifecycleCXX::initialize();
 }
 
 + (void)terminate {
     NSLog(@"Terminating SXMPFiles + SXMPMeta...");
 
-    XMPLifecycle::terminate();
+    XMPLifecycleCXX::terminate();
 }
 
 @end

@@ -1,13 +1,13 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMPC
 
 #include <iostream>
-#include "XMPLifecycle.hpp"
+#include "XMPLifecycleCXX.hpp"
 
-bool XMPLifecycle::isInitialized() {
+bool XMPLifecycleCXX::isInitialized() {
     return _isInitialized;
 }
 
-bool XMPLifecycle::initialize() {
+bool XMPLifecycleCXX::initialize() {
     if (_isInitialized) {
         return true;
     }
@@ -30,7 +30,7 @@ bool XMPLifecycle::initialize() {
     return true;
 }
 
-void XMPLifecycle::terminate() {
+void XMPLifecycleCXX::terminate() {
     if (!_isInitialized) {
         return;
     }

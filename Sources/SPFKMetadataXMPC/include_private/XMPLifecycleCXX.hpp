@@ -21,7 +21,7 @@
 /// Provide access to the API
 #include "XMP.hpp"
 
-class XMPLifecycle {
+class XMPLifecycleCXX {
 private:
     inline static bool _isInitialized = false;
 

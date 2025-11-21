@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Wraps XMPLifecycle for Swift interop. API will be initialized automatically lazily, but
 /// terminate should be called on application shutdown once.
-@interface XMPWrapper : NSObject
+@interface XMPLifecycle : NSObject
 
 + (bool)initialize;
 + (bool)isInitialized;

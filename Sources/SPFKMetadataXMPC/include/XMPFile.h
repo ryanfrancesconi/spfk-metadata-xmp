@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id)initWithPath:(nonnull NSString *)path;
 
 /// write XMP xml string to file
-+ (void)write:(nonnull NSString *)xmlString
++ (bool)write:(nonnull NSString *)xmlString
        toPath:(nonnull NSString *)toPath;
 
 @end
