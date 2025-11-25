@@ -119,7 +119,7 @@ class FileTests: BinTestCase {
                 // bind per-iteration values so the closure captures immutable Sendable values
                 let urlCopy = url
                 let xmlCopy = newXML
-                
+
                 taskGroup.addTask {
                     // write to the new file using the actor reference
                     try await xmp.write(string: xmlCopy, to: urlCopy)
