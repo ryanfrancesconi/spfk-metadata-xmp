@@ -8,7 +8,7 @@ import TimecodeKit
 
 /// XMP will translate existing metadata into XMP and return it as xml
 /// see id3.xml, wave.xml
-//@Suite(.serialized)
+// @Suite(.serialized)
 class FileTests: BinTestCase {
     let xmp = XMP.shared
 
@@ -111,12 +111,19 @@ class FileTests: BinTestCase {
         // read in an xml definition from this file
         let newXML = try xml(named: "id3.xml")
 
+        // capture a local actor reference (avoids capturing self in the sending closure)
+        let xmp = self.xmp
+
         let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) { taskGroup in
             for url in urls {
+                // bind per-iteration values so the closure captures immutable Sendable values
+                let urlCopy = url
+                let xmlCopy = newXML
+                
                 taskGroup.addTask {
-                    // write to the new file
-                    try await self.xmp.write(string: newXML, to: url)
-                    return try await XMPMetadata(url: url)
+                    // write to the new file using the actor reference
+                    try await xmp.write(string: xmlCopy, to: urlCopy)
+                    return try await XMPMetadata(url: urlCopy)
                 }
             }
 

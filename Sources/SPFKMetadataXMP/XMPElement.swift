@@ -6,7 +6,7 @@ import SPFKUtils
 
 /// https://www.adobe.io/xmp/docs/XMPNamespaces/
 /// https://www.w3.org/TR/rdf-syntax-grammar/
-public enum XMPElement: String {
+public enum XMPElement: String, Sendable {
     /// Adobe XMP Basic namespace
     case creatorTool = "xmp:CreatorTool"
     case createDate = "xmp:CreateDate"

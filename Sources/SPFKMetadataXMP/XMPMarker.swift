@@ -4,7 +4,7 @@ import Foundation
 import TimecodeKit
 
 /// https://developer.adobe.com/xmp/docs/XMPNamespaces/XMPDataTypes/Marker/
-public struct XMPMarker: Equatable, CustomStringConvertible {
+public struct XMPMarker: Equatable, CustomStringConvertible, Sendable {
     // copy and paste the output into a test to instantiate this marker value
     public var description: String {
         return "XMPMarker(name: \"\(name)\", comment: \"\(comments)\", " +

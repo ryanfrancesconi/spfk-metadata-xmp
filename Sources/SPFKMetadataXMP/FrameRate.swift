@@ -15,7 +15,7 @@ extension XMPMetadata {
          <xmpDM:timeValue>00:00:00:00</xmpDM:timeValue>
      </xmpDM:startTimecode>
      */
-    public enum FrameRate: String {
+    public enum FrameRate: String, Sendable {
         case fps23_976 =    "23976Timecode"
         case fps24 =        "24Timecode"
         case fps25 =        "25Timecode"

@@ -1,6 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/SPFKMetadataXMP
 
-import AEXML
+@preconcurrency import AEXML
 import CoreMedia
 import Foundation
 import OTCore
@@ -10,7 +10,7 @@ import TimecodeKit
 
 /// A subset of XMP metadata focused on markers and timecode.
 /// This is currently a parser only.
-public struct XMPMetadata: Equatable {
+public struct XMPMetadata: Equatable, Sendable {
     public static func == (lhs: XMPMetadata, rhs: XMPMetadata) -> Bool {
         lhs.frameRate == rhs.frameRate &&
             lhs.markers == rhs.markers &&

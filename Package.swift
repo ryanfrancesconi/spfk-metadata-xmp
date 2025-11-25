@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -8,7 +8,7 @@ private let name: String = "SPFKMetadataXMP" // Swift target
 private let dependencyNames: [String] = ["SPFKBase", "SPFKTime", "SPFKUtils", "SPFKTesting"]
 private let dependencyNamesC: [String] = []
 private let dependencyBranch = "main"
-private let useLocalDependencies: Bool = true
+private let useLocalDependencies: Bool = false
 private let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12),
 ]
@@ -103,7 +103,7 @@ private var swiftTargetDependencies: [PackageDescription.Target.Dependency] {
 private let swiftTarget: PackageDescription.Target = .target(
     name: name,
     dependencies: swiftTargetDependencies,
-    resources: swiftTargetResources
+    resources: nil
 )
 
 private var testTargetDependencies: [PackageDescription.Target.Dependency] {
@@ -121,7 +121,10 @@ private var testTargetDependencies: [PackageDescription.Target.Dependency] {
 
 private let testTarget: PackageDescription.Target = .testTarget(
     name: nameTests,
-    dependencies: testTargetDependencies
+    dependencies: testTargetDependencies,
+    resources: [
+        .process("Resources")
+    ]
 )
 
 private let cTarget: PackageDescription.Target = .target(
