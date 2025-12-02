@@ -4,23 +4,52 @@
 import PackageDescription
 
 let name: String = "SPFKMetadataXMP" // Swift target
-let dependencyNames: [String] = ["SPFKBase", "SPFKTime", "SPFKUtils", "SPFKTesting"]
+var localDependencies: [RemoteDependency] { [
+    .init(package: .package(url: "\(githubBase)/SPFKBase", from: "0.0.1"),
+          product: .product(name: "SPFKBase", package: "SPFKBase")),
+    .init(package: .package(url: "\(githubBase)/SPFKTime", from: "0.0.1"),
+          product: .product(name: "SPFKTime", package: "SPFKTime")),
+    .init(package: .package(url: "\(githubBase)/SPFKTesting", from: "0.0.1"),
+          product: .product(name: "SPFKTesting", package: "SPFKTesting")),
+    .init(package: .package(url: "\(githubBase)/SPFKUtils", from: "0.0.1"),
+          product: .product(name: "SPFKUtils", package: "SPFKUtils")),
+] }
+
+let remoteDependencies: [RemoteDependency] = []
+let resources: [PackageDescription.Resource]? = nil
+let testResources: [PackageDescription.Resource]? = [.process("Resources")]
+
+// C/C++ target, nil if no C target
+let nameC: String? = "\(name)C"
 let dependencyNamesC: [String] = []
-let dependencyBranch: String = "development"
+let remoteDependenciesC: [RemoteDependency] = [] // 3rd party
+var cSettings: [PackageDescription.CSetting]? { [
+    .headerSearchPath("include_private")
+] }
+var cxxSettings: [PackageDescription.CXXSetting]? { [
+    // Xcode resolves relative to the target root
+    .headerSearchPath("include_private"),
+    .headerSearchPath("Adobe"),
+    .headerSearchPath("Adobe/client-glue"),
+    .headerSearchPath("Adobe/XMPCommon"),
+    .headerSearchPath("Adobe/XMPCore"),
+    .headerSearchPath("Adobe/XMPCommon/Interfaces"),
+    .headerSearchPath("Adobe/XMPCommon/Utilities"),
+    .headerSearchPath("Adobe/XMPCommon/Interfaces/BaseInterfaces"),
+    .headerSearchPath("Adobe/XMPCore/Interfaces")
+] }
 
 let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12)
 ]
 
-let remoteDependencies: [RemoteDependency] = []
+// MARK: - the binary targets create additional inclusion below that most packages don't have
 
 // Special case for local binary targets
 let binaryTargetNames = ["XMPCore", "XMPFiles"]
 
-var cTargetDependencies: [PackageDescription.Target.Dependency] {
-    binaryTargetNames.map {
-        .target(name: $0)
-    }
+var cTargetBinaryDependencies: [PackageDescription.Target.Dependency] {
+    binaryTargetNames.map { .target(name: $0) }
 }
 
 let binaryTargets: [PackageDescription.Target] =
@@ -31,94 +60,121 @@ let binaryTargets: [PackageDescription.Target] =
         )
     }
 
-// MARK: - Reusable Code for a dual Swift + C package
+// MARK: - Reusable Code for a dual Swift + C with binary frameworks package --------------------------------------------------
 
-let spfkVersion: Version = .init(0, 0, 1)
+let githubBase = "https://github.com/ryanfrancesconi"
 
 struct RemoteDependency {
     let package: PackageDescription.Package.Dependency
     let product: PackageDescription.Target.Dependency
 }
 
-let nameC: String = "\(name)C" // C/C++ target
-let nameTests: String = "\(name)Tests" // Test target
-let githubBase = "https://github.com/ryanfrancesconi"
+var localDependencyNames: [String] {
+    localDependencies.compactMap {
+        switch $0.product {
+        case let .productItem(name: productName, package: _, moduleAliases: _, condition: _):
+            productName
+        default:
+            nil
+        }
+    }
+}
 
-let products: [PackageDescription.Product] = [
-    .library(name: name, targets: [name, nameC])
-]
+var swiftTarget: PackageDescription.Target {
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        let names = localDependencyNames.filter { $0 != "SPFKTesting" }
 
-let packageDependencies: [PackageDescription.Package.Dependency] = {
-    let value: [PackageDescription.Package.Dependency] =
-        dependencyNames.map {
-            .package(url: "\(githubBase)/\($0)", from: spfkVersion)
+        var value: [PackageDescription.Target.Dependency] = names.map {
+            .byNameItem(name: "\($0)", condition: nil)
         }
 
-    return value + remoteDependencies.map(\.package)
-}()
+        if let nameC {
+            value.append(.target(name: nameC))
+        }
 
-var swiftTargetDependencies: [PackageDescription.Target.Dependency] {
-    let names = dependencyNames.filter { $0 != "SPFKTesting" }
+        value.append(contentsOf: remoteDependencies.map(\.product))
 
-    var value: [PackageDescription.Target.Dependency] = names.map {
-        .byNameItem(name: "\($0)", condition: nil)
+        return value
     }
 
-    value.append(.target(name: nameC))
-    value.append(contentsOf: remoteDependencies.map(\.product))
-
-    return value
+    return .target(
+        name: name,
+        dependencies: targetDependencies,
+        resources: resources
+    )
 }
 
-let swiftTarget: PackageDescription.Target = .target(
-    name: name,
-    dependencies: swiftTargetDependencies,
-    resources: nil
-)
+var testTarget: PackageDescription.Target {
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        var array: [PackageDescription.Target.Dependency] = [
+            .byNameItem(name: name, condition: nil)
+        ]
 
-var testTargetDependencies: [PackageDescription.Target.Dependency] {
-    var array: [PackageDescription.Target.Dependency] = [
-        .byNameItem(name: name, condition: nil),
-        .byNameItem(name: nameC, condition: nil)
-    ]
+        if let nameC {
+            array.append(.byNameItem(name: nameC, condition: nil))
+        }
 
-    if dependencyNames.contains("SPFKTesting") {
-        array.append(.byNameItem(name: "SPFKTesting", condition: nil))
+        if localDependencyNames.contains("SPFKTesting") {
+            array.append(.byNameItem(name: "SPFKTesting", condition: nil))
+        }
+
+        return array
     }
 
-    return array
+    let nameTests: String = "\(name)Tests" // Test target
+
+    return .testTarget(
+        name: nameTests,
+        dependencies: targetDependencies,
+        resources: testResources,
+        swiftSettings: [
+            .swiftLanguageMode(.v5),
+            .unsafeFlags(["-strict-concurrency=complete"]),
+        ],
+    )
 }
 
-let testTarget: PackageDescription.Target = .testTarget(
-    name: nameTests,
-    dependencies: testTargetDependencies,
-    resources: [.process("Resources")]
-)
+var cTarget: PackageDescription.Target? {
+    guard let nameC else { return nil }
 
-let cTarget: PackageDescription.Target = .target(
-    name: nameC,
-    dependencies: cTargetDependencies,
-    publicHeadersPath: "include",
-    cSettings: [
-        .headerSearchPath("include_private")
-    ],
-    cxxSettings: [
-        // Xcode resolves relative to the target root
-        .headerSearchPath("include_private"),
-        .headerSearchPath("Adobe"),
-        .headerSearchPath("Adobe/client-glue"),
-        .headerSearchPath("Adobe/XMPCommon"),
-        .headerSearchPath("Adobe/XMPCore"),
-        .headerSearchPath("Adobe/XMPCommon/Interfaces"),
-        .headerSearchPath("Adobe/XMPCommon/Utilities"),
-        .headerSearchPath("Adobe/XMPCommon/Interfaces/BaseInterfaces"),
-        .headerSearchPath("Adobe/XMPCore/Interfaces")
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        var value: [PackageDescription.Target.Dependency] = dependencyNamesC.map {
+            .byNameItem(name: "\($0)", condition: nil)
+        }
+
+        value.append(contentsOf: remoteDependenciesC.map(\.product))
+
+        return value
+    }
+
+    return .target(
+        name: nameC,
+        dependencies: targetDependencies + cTargetBinaryDependencies,
+        publicHeadersPath: "include",
+        cSettings: cSettings,
+        cxxSettings: cxxSettings
+    )
+}
+
+var targets: [PackageDescription.Target] {
+    [swiftTarget, cTarget, testTarget].compactMap(\.self)
+}
+
+var packageDependencies: [PackageDescription.Package.Dependency] {
+    localDependencies.map(\.package) +
+        remoteDependencies.map(\.package) +
+        remoteDependenciesC.map(\.package)
+}
+
+var products: [PackageDescription.Product] {
+    let targets: [String] = [name, nameC].compactMap(\.self)
+
+    return [
+        .library(name: name, targets: targets)
     ]
-)
+}
 
-let targets: [PackageDescription.Target] = [
-    swiftTarget, cTarget, testTarget
-]
+// This is required to be at the bottom
 
 let package = Package(
     name: name,
