@@ -7,7 +7,7 @@ let package = Package(
     name: "spfk-metadata-xmp",
     defaultLocalization: "en",
     platforms: [
-        .macOS(.v12),
+        .macOS(.v12)
     ],
     products: [
         .library(
@@ -16,7 +16,7 @@ let package = Package(
                 "SPFKMetadataXMP",
                 "SPFKMetadataXMPC",
             ]
-        ),
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", branch: "development"),
@@ -54,7 +54,7 @@ let package = Package(
                 .headerSearchPath("Adobe/XMPCommon/Interfaces"),
                 .headerSearchPath("Adobe/XMPCommon/Utilities"),
                 .headerSearchPath("Adobe/XMPCommon/Interfaces/BaseInterfaces"),
-                .headerSearchPath("Adobe/XMPCore/Interfaces")
+                .headerSearchPath("Adobe/XMPCore/Interfaces"),
             ]
         ),
 
@@ -62,7 +62,7 @@ let package = Package(
             name: "XMPCore",
             path: "Frameworks/XMPCore.xcframework"
         ),
-        
+
         .binaryTarget(
             name: "XMPFiles",
             path: "Frameworks/XMPFiles.xcframework"
