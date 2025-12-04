@@ -73,7 +73,6 @@ let package = Package(
                 "SPFKMetadataXMP",
                 "SPFKMetadataXMPC",
                 .product(name: "SPFKTesting", package: "spfk-testing"),
-
             ],
             resources: [.process("Resources")],
             swiftSettings: [
