@@ -13,7 +13,7 @@ class FileTests: BinTestCase {
     let xmp = XMP.shared
 
     deinit {
-        Log.debug("* { FileTests }")
+        Log.debug("- { \(self) }")
     }
 
     @Test func parseMP3() async throws {
