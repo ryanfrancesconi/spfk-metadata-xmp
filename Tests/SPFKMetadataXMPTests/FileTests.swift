@@ -3,8 +3,8 @@ import Foundation
 import SPFKMetadataXMP
 import SPFKTesting
 import SPFKUtils
-import Testing
 import SwiftTimecode
+import Testing
 
 /// XMP will translate existing metadata into XMP and return it as xml
 /// see id3.xml, wave.xml
@@ -68,11 +68,13 @@ class FileTests: BinTestCase {
 
     /// tests calling C++ API with multiple threads
     @Test func concurrentRead() async throws {
-        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)"); defer { benchmark.stop() }
+        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")
+        defer { benchmark.stop() }
 
         let urls = TestBundleResources.shared.formats + TestBundleResources.shared.audioCases
 
-        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) { taskGroup in
+        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+            taskGroup in
             for url in urls {
                 taskGroup.addTask {
                     try await XMPMetadata(url: url)
@@ -94,7 +96,8 @@ class FileTests: BinTestCase {
     }
 
     @Test func concurrentWrite() async throws {
-        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)"); defer { benchmark.stop() }
+        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")
+        defer { benchmark.stop() }
 
         // xmp will write these formats
         let formats: [URL] = [
@@ -114,7 +117,8 @@ class FileTests: BinTestCase {
         // capture a local actor reference (avoids capturing self in the sending closure)
         let xmp = self.xmp
 
-        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) { taskGroup in
+        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+            taskGroup in
             for url in urls {
                 // bind per-iteration values so the closure captures immutable Sendable values
                 let urlCopy = url
