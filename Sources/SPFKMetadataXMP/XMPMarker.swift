@@ -7,8 +7,8 @@ import SwiftTimecode
 public struct XMPMarker: Equatable, CustomStringConvertible, Sendable {
     // copy and paste the output into a test to instantiate this marker value
     public var description: String {
-        return "XMPMarker(name: \"\(name)\", comment: \"\(comments)\", " +
-            "startFrame: \(startFrame), durationInFrames: \(durationInFrames), frameRate: .\(frameRate.rawValue))"
+        return "XMPMarker(name: \"\(name)\", comment: \"\(comments)\", "
+            + "startFrame: \(startFrame), durationInFrames: \(durationInFrames), frameRate: .\(frameRate.rawValue))"
     }
 
     public var name: String

@@ -30,16 +30,16 @@ extension XMPMetadata {
         /// Return a TimecodeFrameRate based on the value
         public var frameRate: TimecodeFrameRate {
             switch self {
-            case .fps23_976:    return .fps23_976
-            case .fps24:        return .fps24
-            case .fps25:        return .fps25
-            case .fps29_97:     return .fps29_97
-            case .fps29_97d:    return .fps29_97d
-            case .fps30:        return .fps30
-            case .fps50:        return .fps50
-            case .fps59_94:     return .fps59_94
-            case .fps59_94d:    return .fps59_94d
-            case .fps60:        return .fps60
+            case .fps23_976:    .fps23_976
+            case .fps24:        .fps24
+            case .fps25:        .fps25
+            case .fps29_97:     .fps29_97
+            case .fps29_97d:    .fps29_97d
+            case .fps30:        .fps30
+            case .fps50:        .fps50
+            case .fps59_94:     .fps59_94
+            case .fps59_94d:    .fps59_94d
+            case .fps60:        .fps60
             }
         }
     }

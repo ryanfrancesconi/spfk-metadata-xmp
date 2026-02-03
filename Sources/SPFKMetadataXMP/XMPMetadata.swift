@@ -3,26 +3,21 @@
 @preconcurrency import AEXML
 import CoreMedia
 import Foundation
-import SwiftExtensions
 import SPFKTime
 import SPFKUtils
+import SwiftExtensions
 import SwiftTimecode
 
 /// A subset of XMP metadata focused on markers and timecode.
-/// 
+///
 /// This is currently a parser only.
 public struct XMPMetadata: Equatable, Sendable {
     public static func == (lhs: XMPMetadata, rhs: XMPMetadata) -> Bool {
-        lhs.frameRate == rhs.frameRate &&
-            lhs.markers == rhs.markers &&
-            lhs.nominalFrameRate == rhs.nominalFrameRate &&
-            lhs.audioSampleRate == rhs.audioSampleRate &&
-            lhs.audioChannelType == rhs.audioChannelType &&
-            lhs.videoFrameSize == rhs.videoFrameSize &&
-            lhs.videoFieldOrder == rhs.videoFieldOrder &&
-            lhs.startTimecodeResolved == rhs.startTimecodeResolved &&
-            lhs.trackName == rhs.trackName &&
-            lhs.trackType == rhs.trackType
+        lhs.frameRate == rhs.frameRate && lhs.markers == rhs.markers && lhs.nominalFrameRate == rhs.nominalFrameRate
+            && lhs.audioSampleRate == rhs.audioSampleRate && lhs.audioChannelType == rhs.audioChannelType
+            && lhs.videoFrameSize == rhs.videoFrameSize && lhs.videoFieldOrder == rhs.videoFieldOrder
+            && lhs.startTimecodeResolved == rhs.startTimecodeResolved && lhs.trackName == rhs.trackName
+            && lhs.trackType == rhs.trackType
     }
 
     public private(set) var document: AEXMLDocument
@@ -88,12 +83,12 @@ public struct XMPMetadata: Equatable, Sendable {
 
     /**
      the timecode of the first frame of video in the file, as obtained from the device control.
-
+    
      <xmpDM:startTimecode rdf:parseType="Resource">
          <xmpDM:timeFormat>25Timecode</xmpDM:timeFormat>
          <xmpDM:timeValue>00:00:00:00</xmpDM:timeValue>
      </xmpDM:startTimecode>
-
+    
      23976Timecode
      24Timecode,
      25Timecode,
@@ -109,7 +104,7 @@ public struct XMPMetadata: Equatable, Sendable {
 
     /**
      A timecode set by the user. When specified, it is used instead of the startTimecode.
-
+    
      <xmpDM:altTimecode rdf:parseType="Resource">
          <xmpDM:timeValue>00:00:00:00</xmpDM:timeValue>
          <xmpDM:timeFormat>25Timecode</xmpDM:timeFormat>
@@ -169,13 +164,15 @@ public struct XMPMetadata: Equatable, Sendable {
 
         // start timecode
         if let element = desc[.startTimecode],
-           let value = parseTimecode(element: element) {
+            let value = parseTimecode(element: element)
+        {
             startTimecode = value
         }
 
         // A timecode set by the user. When specified, it is used instead of the startTimecode.
         if let element = desc[.altTimecode],
-           let value = parseTimecode(element: element) {
+            let value = parseTimecode(element: element)
+        {
             altTimecode = value
         }
 
@@ -190,7 +187,8 @@ public struct XMPMetadata: Equatable, Sendable {
 
         // there can be more than one track
         if let track = trackList.first,
-           let list = track[.bag]?[.li] {
+            let list = track[.bag]?[.li]
+        {
             trackType = list[.trackType]?.value
             trackName = list[.trackName]?.value
         }
@@ -231,8 +229,9 @@ public struct XMPMetadata: Equatable, Sendable {
     private func parseDuration(element: AEXMLElement) -> TimeInterval? {
         // Look at this mess
         guard let frameCount = element[.value]?.value?.double,
-              let scale = element[.scale]?.value,
-              let frameDuration = CMTimeString.parse(string: scale)?.seconds else {
+            let scale = element[.scale]?.value,
+            let frameDuration = CMTimeString.parse(string: scale)?.seconds
+        else {
             return nil
         }
 
@@ -241,8 +240,9 @@ public struct XMPMetadata: Equatable, Sendable {
 
     private func parseTimecode(element: AEXMLElement) -> Timecode? {
         guard let value = element[.timeFormat]?.value,
-              let timeFormat = FrameRate(rawValue: value),
-              let timeValue: String = element[.timeValue]?.value else {
+            let timeFormat = FrameRate(rawValue: value),
+            let timeValue: String = element[.timeValue]?.value
+        else {
             return nil
         }
 
