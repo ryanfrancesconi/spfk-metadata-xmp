@@ -51,8 +51,8 @@ string XMPUtil::getXMP(string filePath) {
 
         // If the file is open then read the metadata
         if (!ok) {
-            cout << "Error: Failed to open " << filePath << endl;
-            return nullptr;
+            cout << "XMPUtil Error: Failed to open " << filePath << endl;
+            return "";
         }
 
         cout << status << endl;
@@ -69,8 +69,8 @@ string XMPUtil::getXMP(string filePath) {
 
         myFile.CloseFile();
     } catch (XMP_Error & e) {
-        cout << "ERROR: " << e.GetErrMsg() << endl;
-        return nullptr;
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return "";
     }
 
     return buffer;
@@ -128,7 +128,7 @@ bool XMPUtil::writeXMP(string xmlString, string filePath) {
 
         //
     } catch (XMP_Error & e) {
-        cout << "ERROR: " << e.GetErrMsg() << endl;
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
         return false;
     }
 
