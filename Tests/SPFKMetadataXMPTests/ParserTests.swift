@@ -2,12 +2,12 @@ import Foundation
 @testable import SPFKMetadataXMP
 import SPFKTesting
 import SPFKUtils
-import Testing
 import SwiftTimecode
+import Testing
 
 class ParserTests {
     @Test func parseSample1() throws {
-        let xmp = try XMPMetadata(xml: xml(named: "sample1.xml"))
+        let xmp = try XMPMetadata(xml: sample(named: "sample1.xml"))
 
         let altTimecode = try #require(xmp.altTimecode)
         let testTimecode = try Timecode(.components(Timecode.Components(h: 1, f: 1)), at: .fps59_94d)
@@ -31,12 +31,12 @@ class ParserTests {
     }
 
     @Test func parseSample2() throws {
-        let xmp = try XMPMetadata(xml: try xml(named: "sample2.xml"))
+        let xmp = try XMPMetadata(xml: sample(named: "sample2.xml"))
         #expect(xmp.duration == 3.52)
     }
 
     @Test func parseSample4() throws {
-        let xmp = try XMPMetadata(xml: try xml(named: "sample4.xml"))
+        let xmp = try XMPMetadata(xml: sample(named: "sample4.xml"))
         let markers = try #require(xmp.markers)
 
         #expect(markers.count == 7)
@@ -59,7 +59,7 @@ class ParserTests {
     }
 
     @Test func parseSample8() throws {
-        let xmp = try XMPMetadata(xml: try xml(named: "sample8.xml"))
+        let xmp = try XMPMetadata(xml: sample(named: "sample8.xml"))
 
         let markers = try #require(xmp.markers)
 
