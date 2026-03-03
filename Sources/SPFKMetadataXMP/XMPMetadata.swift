@@ -32,7 +32,7 @@ public struct XMPMetadata: Equatable, Sendable {
     public var title: String?
 
     public var frameRate: TimecodeFrameRate? {
-        startTimecode?.frameRate ?? estimatedFrameRate
+        startTimecodeResolved?.frameRate ?? estimatedFrameRate
     }
 
     public private(set) var markers: [XMPMarker]?

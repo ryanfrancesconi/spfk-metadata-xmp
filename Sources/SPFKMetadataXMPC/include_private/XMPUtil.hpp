@@ -4,10 +4,9 @@
 #define XMPUtil_H
 
 #include <iostream>
+#include <string>
 
 #include "XMPLifecycleCXX.hpp"
-
-using namespace std;
 
 class XMPUtil {
 private:
@@ -17,17 +16,17 @@ private:
     /// thereby indicating this is the last input buffer.
     ///
     /// - Parameter string: string to parse
-    static SXMPMeta createXMPFromRDF(string string);
+    static SXMPMeta createXMPFromRDF(const std::string& rdfString);
 
 public:
-    static string getXMP(string filePath);
+    static std::string getXMP(const std::string& filePath);
 
     /// Write the xml string into the file
     ///
     /// - Parameters:
     ///   - xmlString: xml
     ///   - filePath: path to the file
-    static bool writeXMP(string xmlString, string filePath);
+    static bool writeXMP(const std::string& xmlString, const std::string& filePath);
 };
 
 #endif // !XMPUtil_H

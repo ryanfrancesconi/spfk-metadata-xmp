@@ -8,7 +8,7 @@ public struct XMPMarker: Equatable, CustomStringConvertible, Sendable {
     // copy and paste the output into a test to instantiate this marker value
     public var description: String {
         return "XMPMarker(name: \"\(name)\", comment: \"\(comments)\", "
-            + "startFrame: \(startFrame), durationInFrames: \(durationInFrames), frameRate: .\(frameRate.rawValue))"
+            + "startFrame: \(startFrame), durationInFrames: \(durationInFrames), frameRate: \(frameRate.stringValueVerbose))"
     }
 
     public var name: String
@@ -19,9 +19,9 @@ public struct XMPMarker: Equatable, CustomStringConvertible, Sendable {
     public var time: TimeInterval
     public var duration: TimeInterval
 
-    public lazy var startTimecode: Timecode? = {
+    public var startTimecode: Timecode? {
         try? Timecode(.frames(startFrame), at: frameRate, base: .max100SubFrames)
-    }()
+    }
 
     public init(
         name: String = "",

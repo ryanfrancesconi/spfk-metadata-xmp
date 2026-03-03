@@ -37,4 +37,5 @@ void XMPLifecycleCXX::terminate() {
 
     SXMPFiles::Terminate();
     SXMPMeta::Terminate();
+    _isInitialized = false;
 }

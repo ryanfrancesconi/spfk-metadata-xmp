@@ -118,9 +118,8 @@ class FileTests: BinTestCase {
         let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")
         defer { benchmark.stop() }
 
-        // xmp will write these formats
+        // xmp will write these formats (AAC raw container does not support XMP)
         let formats: [URL] = [
-            TestBundleResources.shared.tabla_aac,
             TestBundleResources.shared.tabla_aif,
             TestBundleResources.shared.tabla_m4a,
             TestBundleResources.shared.tabla_mp3,

@@ -5,27 +5,26 @@
 
 using namespace std;
 
-SXMPMeta XMPUtil::createXMPFromRDF(string string) {
-    const char *cstring = string.c_str();
-
+SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
     SXMPMeta meta;
 
     // Loop over the string and create the XMP object
     // 10 characters at a time
     int i;
+    int len = (int)rdfString.size();
 
-    for (i = 0; i < (long)strlen(cstring) - 10; i += 10) {
-        meta.ParseFromBuffer(&string[i], 10, kXMP_ParseMoreBuffers);
+    for (i = 0; i < len - 10; i += 10) {
+        meta.ParseFromBuffer(&rdfString[i], 10, kXMP_ParseMoreBuffers);
     }
 
     // The last call has no kXMP_ParseMoreBuffers options, signifying
     // this is the last input buffer
-    meta.ParseFromBuffer(&cstring[i], (XMP_StringLen)strlen(cstring) - i);
+    meta.ParseFromBuffer(&rdfString[i], (XMP_StringLen)(len - i));
 
     return meta;
 }
 
-string XMPUtil::getXMP(string filePath) {
+string XMPUtil::getXMP(const string& filePath) {
     XMPLifecycleCXX::initialize();
 
     string buffer;
@@ -76,7 +75,7 @@ string XMPUtil::getXMP(string filePath) {
     return buffer;
 }
 
-bool XMPUtil::writeXMP(string xmlString, string filePath) {
+bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
 
     try {
@@ -117,16 +116,18 @@ bool XMPUtil::writeXMP(string xmlString, string filePath) {
         meta.SerializeToBuffer(&metaBuffer, 0, 0, "", "", 0);
 
         // Check we can put the XMP packet back into the file
-        if (myFile.CanPutXMP(meta)) {
-            // If so then update the file with the modified XMP
-            myFile.PutXMP(meta);
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
         }
+
+        // Update the file with the modified XMP
+        myFile.PutXMP(meta);
 
         // Close the SXMPFile.  This *must* be called.  The XMP is not
         // actually written and the disk file is not closed until this call is made.
         myFile.CloseFile();
-
-        //
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
         return false;
