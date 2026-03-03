@@ -115,3 +115,4 @@ Frameworks/
 - macOS 12+
 - Swift 6.2+
 - C++20 (for the XMP SDK bridge layer)
+
