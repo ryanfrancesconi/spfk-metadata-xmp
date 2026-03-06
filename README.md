@@ -112,7 +112,10 @@ Frameworks/
 
 ## Requirements
 
-- macOS 12+
-- Swift 6.2+
+- **Platforms:** macOS 13+
+- **Swift:** 6.2+
 - C++20 (for the XMP SDK bridge layer)
 
+## About
+
+Spongefork (SPFK) is the personal software projects of [Ryan Francesconi](https://github.com/ryanfrancesconi). Dedicated to creative sound manipulation, his first application, Spongefork, was released in 1999 for macOS 8. From 2016 to 2025 he was the lead macOS developer at [Audio Design Desk](https://add.app).
