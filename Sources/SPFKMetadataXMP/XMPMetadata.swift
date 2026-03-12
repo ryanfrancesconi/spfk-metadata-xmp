@@ -122,11 +122,12 @@ public struct XMPMetadata: Equatable, Sendable {
     public private(set) var trackName: String?
     public private(set) var trackType: String?
 
-    /// Create a XMPMetadata struct by passing it a URL to a file
-    /// - Parameter path: the file to open
-    public init(url: URL) async throws {
-        let xmlString = try await XMP.shared.parse(url: url)
-
+    /// Create a XMPMetadata struct by passing it a URL to a file.
+    ///
+    /// Thread-safe — multiple instances can be created concurrently.
+    /// - Parameter url: the file to open
+    public init(url: URL) throws {
+        let xmlString = try XMP.shared.parse(url: url)
         try self.init(xml: xmlString)
     }
 

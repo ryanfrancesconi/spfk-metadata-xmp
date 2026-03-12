@@ -54,7 +54,7 @@ string XMPUtil::getXMP(const string& filePath) {
             return "";
         }
 
-        cout << status << endl;
+        // cout << status << endl;
 
         // cout << filename << " is opened successfully" << endl;
 

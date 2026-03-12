@@ -3,11 +3,16 @@
 #include <iostream>
 #include "XMPLifecycleCXX.hpp"
 
+std::mutex XMPLifecycleCXX::_mutex;
+
 bool XMPLifecycleCXX::isInitialized() {
+    std::lock_guard<std::mutex> lock(_mutex);
     return _isInitialized;
 }
 
 bool XMPLifecycleCXX::initialize() {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     if (_isInitialized) {
         return true;
     }
@@ -31,6 +36,8 @@ bool XMPLifecycleCXX::initialize() {
 }
 
 void XMPLifecycleCXX::terminate() {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     if (!_isInitialized) {
         return;
     }

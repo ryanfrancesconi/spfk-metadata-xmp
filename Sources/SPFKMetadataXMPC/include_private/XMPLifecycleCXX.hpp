@@ -4,6 +4,7 @@
 #define XMPLifecycle_H
 
 #include <iostream>
+#include <mutex>
 
 /// One of MAC_ENV, WIN_ENV, UNIX_ENV or IOS_ENV must be defined by the client
 /// Also definied in XMPEnvironment.h
@@ -24,6 +25,7 @@
 class XMPLifecycleCXX {
 private:
     inline static bool _isInitialized = false;
+    static std::mutex _mutex;
 
 public:
     static bool isInitialized();
