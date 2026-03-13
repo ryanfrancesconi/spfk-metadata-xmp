@@ -17,7 +17,7 @@ let package = Package(
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "0.0.3"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-time", from: "0.0.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "0.0.8"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "0.0.5"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "0.0.9"),
     ],
     targets: [
         .target(
