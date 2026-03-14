@@ -1,4 +1,5 @@
 import Foundation
+import SPFKBase
 @testable import SPFKMetadataXMP
 import SPFKTesting
 import SPFKUtils

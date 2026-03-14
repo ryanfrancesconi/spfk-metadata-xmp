@@ -1,5 +1,6 @@
 import AEXML
 import Foundation
+import SPFKBase
 import SPFKTesting
 import Testing
 
