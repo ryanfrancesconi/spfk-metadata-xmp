@@ -7,20 +7,7 @@ using namespace std;
 
 SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
     SXMPMeta meta;
-
-    // Loop over the string and create the XMP object
-    // 10 characters at a time
-    int i;
-    int len = (int)rdfString.size();
-
-    for (i = 0; i < len - 10; i += 10) {
-        meta.ParseFromBuffer(&rdfString[i], 10, kXMP_ParseMoreBuffers);
-    }
-
-    // The last call has no kXMP_ParseMoreBuffers options, signifying
-    // this is the last input buffer
-    meta.ParseFromBuffer(&rdfString[i], (XMP_StringLen)(len - i));
-
+    meta.ParseFromBuffer(rdfString.c_str(), (XMP_StringLen)rdfString.size());
     return meta;
 }
 

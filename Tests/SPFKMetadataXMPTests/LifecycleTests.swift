@@ -2,9 +2,9 @@ import SPFKMetadataXMP
 import Testing
 
 struct LifecycleTests {
-    @Test func canInitialize() async throws {
+    @Test func canInitialize() throws {
         let xmp = XMP.shared
-        #expect(await xmp.isInitialized)
-        await xmp.terminate()
+        #expect(xmp.isInitialized)
+        xmp.terminate()
     }
 }
