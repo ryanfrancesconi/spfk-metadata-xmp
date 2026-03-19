@@ -21,12 +21,20 @@ private:
 public:
     static std::string getXMP(const std::string& filePath);
 
-    /// Write the xml string into the file
+    /// Write the xml string into the file (XMP chunk only, no reconciliation).
     ///
     /// - Parameters:
     ///   - xmlString: xml
     ///   - filePath: path to the file
     static bool writeXMP(const std::string& xmlString, const std::string& filePath);
+
+    /// Write XMP and allow Adobe SDK reconciliation to update native chunks
+    /// (BEXT, iXML). Used for explicit "Sync XMP → iXML" operations.
+    ///
+    /// - Parameters:
+    ///   - xmlString: xml
+    ///   - filePath: path to the file
+    static bool writeXMPReconciled(const std::string& xmlString, const std::string& filePath);
 };
 
 #endif // !XMPUtil_H

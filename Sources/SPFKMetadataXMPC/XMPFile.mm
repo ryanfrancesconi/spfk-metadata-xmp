@@ -30,4 +30,9 @@
     return XMPUtil::writeXMP(xmlString.UTF8String, toPath.UTF8String);
 }
 
++ (bool)writeReconciled:(NSString *)xmlString
+                 toPath:(NSString *)toPath {
+    return XMPUtil::writeXMPReconciled(xmlString.UTF8String, toPath.UTF8String);
+}
+
 @end

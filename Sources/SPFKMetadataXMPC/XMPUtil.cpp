@@ -30,8 +30,8 @@ string XMPUtil::getXMP(const string& filePath) {
     string buffer;
 
     try {
-        // Options to open the file with - read only and use a file handler
-        XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler;
+        // Read only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
+        XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         SXMPFiles myFile;
         string status = "";
@@ -44,7 +44,7 @@ string XMPUtil::getXMP(const string& filePath) {
             status += "Trying packet scanning.\n";
 
             // Now try using packet scanning
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
+            opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -79,8 +79,8 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
 
     try {
-        // Options to open the file with - open for editing and use a smart handler
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
+        // Write only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         bool ok;
         SXMPFiles myFile;
@@ -95,7 +95,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
             status += "Trying packet scanning.\n";
 
             // Now try using packet scanning
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -135,3 +135,47 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
 
     return true;
 }
+
+bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath) {
+    XMPLifecycleCXX::initialize();
+
+    try {
+        // Write XMP WITH reconciliation — allows Adobe SDK to update native BEXT/iXML chunks
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
+
+        bool ok;
+        SXMPFiles myFile;
+
+        ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            cout << "Failed to open file" << endl;
+            return false;
+        }
+
+        SXMPMeta meta = XMPUtil::createXMPFromRDF(xmlString);
+
+        string metaBuffer;
+        meta.SerializeToBuffer(&metaBuffer, 0, 0, "", "", 0);
+
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
+        }
+
+        myFile.PutXMP(meta);
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return false;
+    }
+
+    return true;
+}
+

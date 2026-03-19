@@ -86,6 +86,43 @@ class FileTests: BinTestCase {
         #expect(xmpMetadata.title == "Stonehenge")
     }
 
+    // MARK: - writeReconciled
+
+    @Test func writeReconciledWritesXMP() async throws {
+        let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
+        let string = try sample(named: "sample1.xml")
+
+        try xmp.writeReconciled(string: string, to: url)
+
+        // Verify XMP was written by reading it back
+        let xmpMetadata = try XMPMetadata(url: url)
+        Log.debug(xmpMetadata.document.xml)
+
+        #expect(try AEXMLDocument(fromString: string).xml == xmpMetadata.document.xml)
+    }
+
+    @Test func writeReconciledAndWriteBothProduceValidXMP() async throws {
+        // writeReconciled allows SDK reconciliation (updates native BEXT/iXML chunks)
+        // while write() uses kXMPFiles_OpenOnlyXMP (no reconciliation).
+        // Both should successfully write the XMP data itself.
+        let source = TestBundleResources.shared.cowbell_wav
+        let string = try sample(named: "sample1.xml")
+
+        let reconciled = bin.appendingPathComponent("reconciled.wav")
+        let xmpOnly = bin.appendingPathComponent("xmponly.wav")
+        try FileManager.default.copyItem(at: source, to: reconciled)
+        try FileManager.default.copyItem(at: source, to: xmpOnly)
+
+        try xmp.writeReconciled(string: string, to: reconciled)
+        try xmp.write(string: string, to: xmpOnly)
+
+        // Both should have valid XMP
+        let meta1 = try XMPMetadata(url: reconciled)
+        let meta2 = try XMPMetadata(url: xmpOnly)
+
+        #expect(meta1.document.xml == meta2.document.xml)
+    }
+
     /// tests calling C++ API with multiple threads
     @Test func concurrentRead() async throws {
         let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")

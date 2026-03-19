@@ -43,4 +43,14 @@ public actor XMP {
             throw NSError(description: "Failed to write XMP string to file: \(url.path)")
         }
     }
+
+    /// Write XMP with Adobe SDK reconciliation enabled.
+    ///
+    /// This allows the SDK to sync `bext:` and `iXML:` namespace properties
+    /// back to native RIFF chunks. Used for explicit "Sync XMP → iXML" operations.
+    public nonisolated func writeReconciled(string: String, to url: URL) throws {
+        guard XMPFile.writeReconciled(string, toPath: url.path) else {
+            throw NSError(description: "Failed to write reconciled XMP to file: \(url.path)")
+        }
+    }
 }
