@@ -9,7 +9,7 @@ import Testing
 
 /// XMP will translate existing metadata into XMP and return it as xml
 /// see id3.xml, wave.xml
-// @Suite(.serialized)
+@Suite(.serialized)
 class FileTests: BinTestCase {
     let xmp = XMP.shared
 
@@ -379,6 +379,79 @@ class FileTests: BinTestCase {
         }
 
         #expect(readCount == totalReads, "Reads: \(readCount) of \(totalReads)")
+        #expect(writeCount == totalWrites, "Writes: \(writeCount) of \(totalWrites)")
+    }
+
+    /// Stresses copyXMP(from:to:) — the method that holds _xmpCopyLock across both
+    /// parse and write as a single atomic unit. Concurrent tasks call copyXMP to unique
+    /// destinations while concurrent readers simultaneously parse the same source.
+    /// This exercises the contention scenario the lock was designed to prevent:
+    /// a reader's parse slipping between another caller's parse+write pair.
+    @Test func concurrentCopyXMPStress() async throws {
+        let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")
+        defer { benchmark.stop() }
+
+        let source = TestBundleResources.shared.mp3_xmp
+
+        let formats: [URL] = [
+            TestBundleResources.shared.tabla_aif,
+            TestBundleResources.shared.tabla_mp3,
+            TestBundleResources.shared.tabla_wav,
+        ]
+
+        let copiesPerFormat = 10
+        let totalWrites = formats.count * copiesPerFormat
+        let xmp = xmp
+
+        var writeURLs = [URL]()
+        writeURLs.reserveCapacity(totalWrites)
+
+        for format in formats {
+            let ext = format.pathExtension
+            for i in 0 ..< copiesPerFormat {
+                let dest = bin.appendingPathComponent("copy_xmp_\(i).\(ext)")
+                try FileManager.default.copyItem(at: format, to: dest)
+                writeURLs.append(dest)
+            }
+        }
+
+        let (readCount, writeCount) = try await withThrowingTaskGroup(
+            of: (isWrite: Bool, success: Bool).self,
+            returning: (reads: Int, writes: Int).self
+        ) { group in
+            // Concurrent copyXMP calls — each writes to a unique destination
+            for url in writeURLs {
+                let urlCopy = url
+                group.addTask {
+                    try xmp.copyXMP(from: source, to: urlCopy)
+                    _ = try XMPMetadata(url: urlCopy)
+                    return (isWrite: true, success: true)
+                }
+            }
+
+            // Concurrent reads racing against the writes on the same source
+            for _ in 0 ..< totalWrites {
+                group.addTask {
+                    _ = try? XMPMetadata(url: source)
+                    return (isWrite: false, success: true)
+                }
+            }
+
+            var reads = 0
+            var writes = 0
+
+            for try await result in group {
+                if result.isWrite {
+                    if result.success { writes += 1 }
+                } else {
+                    reads += 1
+                }
+            }
+
+            return (reads, writes)
+        }
+
+        #expect(readCount == totalWrites, "Reads: \(readCount) of \(totalWrites)")
         #expect(writeCount == totalWrites, "Writes: \(writeCount) of \(totalWrites)")
     }
 }

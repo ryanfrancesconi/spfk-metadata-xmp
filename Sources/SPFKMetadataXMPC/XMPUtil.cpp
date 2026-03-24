@@ -5,6 +5,18 @@
 
 using namespace std;
 
+// The Adobe XMP SDK's format handlers use internal global state (including cached
+// XMPFiles_IO objects in format-check routines like MP3_CheckFormat) that is not
+// safe under concurrent file operations. This mutex prevents two threads from
+// executing any SXMPFiles open/read/write/close sequence simultaneously.
+//
+// NOTE: This mutex alone is insufficient for combined parse+write operations.
+// Another thread's getXMP can run between a caller's getXMP and writeXMP calls,
+// leaving stale XMPFiles_IO state that causes the next OpenFile to assert.
+// The Swift-level _xmpCopyLock in XMP.swift closes that window by serializing
+// the entire parse+write sequence as an atomic unit.
+static std::mutex xmpOperationMutex;
+
 SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
     SXMPMeta meta;
     meta.ParseFromBuffer(rdfString.c_str(), (XMP_StringLen)rdfString.size());
@@ -13,6 +25,7 @@ SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
 
 string XMPUtil::getXMP(const string& filePath) {
     XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(xmpOperationMutex);
 
     string buffer;
 
@@ -64,6 +77,7 @@ string XMPUtil::getXMP(const string& filePath) {
 
 bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(xmpOperationMutex);
 
     try {
         // Write only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
@@ -125,6 +139,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
 
 bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(xmpOperationMutex);
 
     try {
         // Write XMP WITH reconciliation — allows Adobe SDK to update native BEXT/iXML chunks
