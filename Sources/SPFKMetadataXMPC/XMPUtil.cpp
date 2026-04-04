@@ -58,9 +58,16 @@ string XMPUtil::getXMP(const string& filePath) {
 
         // cout << filename << " is opened successfully" << endl;
 
-        // Create the xmp object and get the xmp data
+        // Create the xmp object and get the xmp data.
+        // GetXMP() returns false when the file has no XMP packet; in that case
+        // meta stays default-constructed and SerializeToBuffer would produce a
+        // minimal XML envelope — not actual metadata.  Return "" so the caller
+        // can distinguish "no XMP" from "has XMP".
         SXMPMeta meta;
-        myFile.GetXMP(&meta);
+        if (!myFile.GetXMP(&meta)) {
+            myFile.CloseFile();
+            return "";
+        }
         meta.SerializeToBuffer(&buffer);
 
         // this will print the raw xml:
