@@ -31,6 +31,12 @@ public:
     static bool isInitialized();
     static bool initialize();
     static void terminate();
+
+    /// The operation mutex that serializes all SXMPFiles open/read/write/close calls.
+    /// Exposed here so terminate() can acquire it before calling SXMPFiles::Terminate(),
+    /// preventing a race where terminate() zeroes format handler pointers while another
+    /// thread is inside OpenFile() dispatching through those same pointers.
+    static std::mutex operationMutex;
 };
 
 #endif // !XMPLifecycle_H

@@ -4,6 +4,7 @@
 #include "XMPLifecycleCXX.hpp"
 
 std::mutex XMPLifecycleCXX::_mutex;
+std::mutex XMPLifecycleCXX::operationMutex;
 
 bool XMPLifecycleCXX::isInitialized() {
     std::lock_guard<std::mutex> lock(_mutex);
@@ -36,6 +37,11 @@ bool XMPLifecycleCXX::initialize() {
 }
 
 void XMPLifecycleCXX::terminate() {
+    // Acquire the operation mutex first so we cannot race with an in-progress
+    // getXMP/writeXMP call that is already inside OpenFile().  Without this,
+    // SXMPFiles::Terminate() would zero the format-handler function pointers
+    // while another thread is dispatching through them, causing a null-pointer crash.
+    std::lock_guard<std::mutex> opLock(operationMutex);
     std::lock_guard<std::mutex> lock(_mutex);
 
     if (!_isInitialized) {
