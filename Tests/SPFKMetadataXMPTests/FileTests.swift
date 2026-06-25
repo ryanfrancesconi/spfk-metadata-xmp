@@ -26,7 +26,7 @@ class FileTests: BinTestCase {
     }
 
     @Test func writeWave_XMP() async throws {
-        deleteBinOnExit = false
+        deleteBinOnExit = true
         let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
 
         let orig = try? XMPMetadata(url: url).document.xml
@@ -64,7 +64,7 @@ class FileTests: BinTestCase {
 
     /// Resources/wave.xml
     @Test func parseBEXT() async throws {
-        deleteBinOnExit = false
+        deleteBinOnExit = true
 
         let url = TestBundleResources.shared.wav_bext_v2
         let xmpMetadata = try XMPMetadata(url: url)
