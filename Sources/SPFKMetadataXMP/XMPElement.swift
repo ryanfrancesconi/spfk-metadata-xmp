@@ -74,6 +74,15 @@ public enum XMPElement: String, Sendable {
 
     /// DC
     case title = "dc:title"
+
+    /// XMP Dynamic Media — editable production/camera fields, flat children of `rdf:Description`.
+    /// https://www.adobe.io/xmp/docs/XMPNamespaces/xmpDM/
+    case scene = "xmpDM:scene"
+    case shotDate = "xmpDM:shotDate"
+    case shotLocation = "xmpDM:shotLocation"
+    case logComment = "xmpDM:logComment"
+    case cameraAngle = "xmpDM:cameraAngle"
+    case cameraModel = "xmpDM:cameraModel"
 }
 
 extension AEXMLElement {

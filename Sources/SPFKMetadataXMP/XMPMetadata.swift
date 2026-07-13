@@ -18,7 +18,9 @@ public struct XMPMetadata: Equatable, Sendable {
             && lhs.audioSampleRate == rhs.audioSampleRate && lhs.audioChannelType == rhs.audioChannelType
             && lhs.videoFrameSize == rhs.videoFrameSize && lhs.videoFieldOrder == rhs.videoFieldOrder
             && lhs.startTimecodeResolved == rhs.startTimecodeResolved && lhs.trackName == rhs.trackName
-            && lhs.trackType == rhs.trackType
+            && lhs.trackType == rhs.trackType && lhs.scene == rhs.scene && lhs.cameraAngle == rhs.cameraAngle
+            && lhs.logComment == rhs.logComment && lhs.cameraModel == rhs.cameraModel
+            && lhs.shotDate == rhs.shotDate && lhs.shotLocation == rhs.shotLocation
     }
 
     public private(set) var document: AEXMLDocument
@@ -122,6 +124,29 @@ public struct XMPMetadata: Equatable, Sendable {
     public private(set) var duration: TimeInterval?
     public private(set) var trackName: String?
     public private(set) var trackType: String?
+
+    /// Creates an empty `XMPMetadata` with a minimal valid RDF/XMP document shell.
+    ///
+    /// Used when a file has no existing XMP packet but the user wants to set
+    /// video-metadata fields (``scene``, ``cameraAngle``, etc.) for the first time.
+    /// Declares only the `xmpDM` namespace, since that's the only one these
+    /// editable fields write into.
+    public init() {
+        let doc = AEXMLDocument()
+        let xmpmeta = doc.addChild(name: "x:xmpmeta", attributes: ["xmlns:x": "adobe:ns:meta/"])
+        let rdf = xmpmeta.addChild(
+            name: XMPElement.rdf.rawValue,
+            attributes: ["xmlns:rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"]
+        )
+        rdf.addChild(
+            name: XMPElement.description.rawValue,
+            attributes: [
+                "rdf:about": "",
+                "xmlns:xmpDM": "http://ns.adobe.com/xmp/1.0/DynamicMedia/",
+            ]
+        )
+        self.init(document: doc)
+    }
 
     /// Create a XMPMetadata struct by passing it a URL to a file.
     ///
