@@ -14,10 +14,10 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "1.0.1"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-time", from: "1.0.1"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "1.0.2"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "1.0.1"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "1.2.1"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-time", from: "1.1.2"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "1.6.0"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "1.1.0"),
     ],
     targets: [
         .target(
