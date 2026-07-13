@@ -63,6 +63,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (bool)setProperties:(nonnull NSArray<XMPPropertyWriteEntry *> *)properties
                 toPath:(nonnull NSString *)toPath;
 
+/// Writes the first item of the xmpDM:Tracks bag's trackType/trackName fields, creating
+/// the Tracks bag and its first (struct-typed) item if none exists yet. Pass an empty
+/// string to leave a field unchanged.
++ (bool)setTrackType:(nonnull NSString *)trackType
+            trackName:(nonnull NSString *)trackName
+               toPath:(nonnull NSString *)toPath;
+
 @end
 
 NS_ASSUME_NONNULL_END

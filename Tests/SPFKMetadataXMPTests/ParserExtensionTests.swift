@@ -18,6 +18,7 @@ struct ParserExtensionTests {
         #expect(xmp.audioSampleRate == 48000)
         #expect(xmp.audioChannelType == "Stereo")
         #expect(xmp.videoFieldOrder == "Progressive")
+        #expect(xmp.videoFrameSize == CGSize(width: 1920, height: 1080))
         #expect(xmp.startTimeScale == 25)
         #expect(xmp.startTimeSampleSize == 1)
 

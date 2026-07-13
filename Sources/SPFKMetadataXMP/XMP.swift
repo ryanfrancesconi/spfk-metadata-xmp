@@ -71,6 +71,12 @@ public enum XMP {
             try XMP.setProperties(properties, url: url)
         }
 
+        /// Writes the first `xmpDM:Tracks` item's `trackType`/`trackName`, creating the
+        /// Tracks bag and its first item if none exists yet. Pass `nil` to leave a field unchanged.
+        public func setTrackInfo(trackType: String?, trackName: String?, url: URL) throws {
+            try XMP.setTrackInfo(trackType: trackType, trackName: trackName, url: url)
+        }
+
         /// Copy XMP metadata from one file to another as a single atomic operation.
         ///
         /// Holds `_xmpCopyLock` across both parse and write, preventing other threads
@@ -161,6 +167,16 @@ public enum XMP {
 
         guard XMPFile.setProperties(entries, toPath: url.path) else {
             throw NSError(description: "Failed to set XMP properties on file: \(url.path)")
+        }
+    }
+
+    /// Writes the first `xmpDM:Tracks` item's `trackType`/`trackName`, creating the Tracks
+    /// bag and its first item if none exists yet. Pass `nil` to leave a field unchanged.
+    public static func setTrackInfo(trackType: String?, trackName: String?, url: URL) throws {
+        XMPLifecycle.initialize()
+
+        guard XMPFile.setTrackType(trackType ?? "", trackName: trackName ?? "", toPath: url.path) else {
+            throw NSError(description: "Failed to set XMP track info on file: \(url.path)")
         }
     }
 }

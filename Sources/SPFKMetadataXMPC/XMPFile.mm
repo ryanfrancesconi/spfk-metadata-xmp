@@ -97,4 +97,10 @@
     return XMPUtil::setXMPProperties(toPath.UTF8String, cppProperties);
 }
 
++ (bool)setTrackType:(NSString *)trackType
+            trackName:(NSString *)trackName
+               toPath:(NSString *)toPath {
+    return XMPUtil::setXMPTrackInfo(toPath.UTF8String, trackType.UTF8String, trackName.UTF8String);
+}
+
 @end

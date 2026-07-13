@@ -96,6 +96,17 @@ public:
         const std::string& filePath,
         const std::vector<XMPPropertyWrite>& properties
     );
+
+    /// Writes the first item of the `xmpDM:Tracks` bag's `trackType`/`trackName` fields,
+    /// creating the `Tracks` bag and its first (struct-typed) item if none exists yet —
+    /// mirroring `XMPMetadata`'s read path, which already only ever looks at the first
+    /// track entry found. Pass an empty string to leave a field unchanged (skips that
+    /// SetProperty call rather than writing an empty value over an existing one).
+    static bool setXMPTrackInfo(
+        const std::string& filePath,
+        const std::string& trackType,
+        const std::string& trackName
+    );
 };
 
 #endif // !XMPUtil_H

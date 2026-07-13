@@ -306,6 +306,65 @@ bool XMPUtil::setXMPProperties(
     return true;
 }
 
+bool XMPUtil::setXMPTrackInfo(
+    const string& filePath,
+    const string& trackType,
+    const string& trackName
+) {
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    try {
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+
+        SXMPFiles myFile;
+        bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            return false;
+        }
+
+        SXMPMeta meta;
+        myFile.GetXMP(&meta);
+
+        static const string ns = "http://ns.adobe.com/xmp/1.0/DynamicMedia/";
+
+        // Mirrors XMPMetadata's read path, which only ever looks at the first track
+        // entry — create the Tracks bag's first (struct-typed) item if none exists yet.
+        if (meta.CountArrayItems(ns.c_str(), "Tracks") == 0) {
+            meta.AppendArrayItem(ns.c_str(), "Tracks", kXMP_PropArrayIsUnordered, "", kXMP_PropValueIsStruct);
+        }
+
+        if (!trackType.empty()) {
+            meta.SetProperty(ns.c_str(), "Tracks[1]/xmpDM:trackType", trackType.c_str());
+        }
+
+        if (!trackName.empty()) {
+            meta.SetProperty(ns.c_str(), "Tracks[1]/xmpDM:trackName", trackName.c_str());
+        }
+
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
+        }
+
+        myFile.PutXMP(meta);
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);

@@ -148,4 +148,90 @@ class StructuredPropertyWriteTests: BinTestCase {
             "xmpMM:InstanceID should survive a batch write"
         )
     }
+
+    // MARK: - Phase 3: xmpDM simple-value fields (frame rate)
+
+    /// Confirms frameRate — genuinely a simple top-level value, unlike timecode/trackInfo —
+    /// round-trips through the existing Phase 1 setProperty API with no new capability needed.
+    @Test func setPropertyWritesFrameRate() async throws {
+        deleteBinOnExit = true
+        let url = try await seededFile()
+
+        try xmp.setProperty(namespace: xmpDMNamespace, name: "videoFrameRate", value: "29.970000", url: url)
+
+        let metadata = try XMPMetadata(url: url)
+        #expect(metadata.nominalFrameRate == 29.97)
+    }
+
+    // MARK: - Struct-field compound path (timecode)
+
+    /// Verifies a nested struct field (not a simple value) is writable through the existing
+    /// setProperty API via a compound path, with no new C++/Swift API needed for this case.
+    @Test func setPropertyWritesNestedStructField() async throws {
+        deleteBinOnExit = true
+        let url = try await seededFile() // sample1.xml already has a startTimecode struct
+
+        try xmp.setProperty(
+            namespace: xmpDMNamespace,
+            name: "startTimecode/xmpDM:timeFormat",
+            value: "24Timecode",
+            url: url
+        )
+
+        let xml = try xmp.parse(url: url)
+        #expect(xml.contains("24Timecode"))
+        // Sibling field within the same struct should be untouched.
+        #expect(xml.contains("00;00;00;00"), "startTimecode's timeValue should survive a sibling field write")
+    }
+
+    // MARK: - Track info (array-of-struct)
+
+    @Test func setTrackInfoCreatesTracksBagWhenNoneExists() async throws {
+        deleteBinOnExit = true
+        let url = try await seededFile() // sample1.xml has no xmpDM:Tracks at all
+
+        try xmp.setTrackInfo(trackType: "Video", trackName: "Camera 1", url: url)
+
+        let xml = try xmp.parse(url: url)
+        #expect(xml.contains("Video"))
+        #expect(xml.contains("Camera 1"))
+    }
+
+    @Test func setTrackInfoPreservesUnrelatedContent() async throws {
+        deleteBinOnExit = true
+        let url = try await seededFile()
+
+        try xmp.setTrackInfo(trackType: "Video", trackName: "Camera 1", url: url)
+
+        let after = try xmp.parse(url: url)
+        #expect(after.contains("60000"), "xmpDM:startTimeScale should survive a track-info write")
+    }
+
+    @Test func setTrackInfoUpdatesExistingTrack() async throws {
+        deleteBinOnExit = true
+        let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
+        let string = try sample(named: "sample3.xml") // sample3.xml already has a Tracks bag
+        try xmp.write(string: string, to: url)
+
+        try xmp.setTrackInfo(trackType: "Video", trackName: "Renamed Track", url: url)
+
+        let xml = try xmp.parse(url: url)
+        #expect(xml.contains("Renamed Track"))
+    }
+
+    /// A nil field should leave the existing value untouched, not clear it.
+    @Test func setTrackInfoNilFieldLeavesExistingValueUnchanged() async throws {
+        deleteBinOnExit = true
+        let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
+        let string = try sample(named: "sample3.xml")
+        try xmp.write(string: string, to: url)
+
+        let originalTrackType = try XMPMetadata(xml: string).trackType
+
+        try xmp.setTrackInfo(trackType: nil, trackName: "Renamed Track", url: url)
+
+        let after = try XMPMetadata(url: url)
+        #expect(after.trackName == "Renamed Track")
+        #expect(after.trackType == originalTrackType, "trackType should be unchanged when nil is passed")
+    }
 }

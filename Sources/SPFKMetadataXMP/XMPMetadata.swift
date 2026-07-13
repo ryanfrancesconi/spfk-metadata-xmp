@@ -182,6 +182,13 @@ public struct XMPMetadata: Equatable, Sendable {
         audioChannelType = desc[.audioChannelType]?.value
         videoFieldOrder = desc[.videoFieldOrder]?.value
 
+        if let frameSize = desc[.videoFrameSize],
+            let width = frameSize[.dimensionsWidth]?.value?.double,
+            let height = frameSize[.dimensionsHeight]?.value?.double
+        {
+            videoFrameSize = CGSize(width: width, height: height)
+        }
+
         // tracks location might not be consistent so search for the first occurrence of it
         let trackList = desc.allDescendants { element in
             element.name == XMPElement.tracks.rawValue

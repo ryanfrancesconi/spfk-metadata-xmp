@@ -29,6 +29,11 @@ public enum XMPElement: String, Sendable {
     case videoFrameRate = "xmpDM:videoFrameRate"
     case videoFieldOrder = "xmpDM:videoFieldOrder"
 
+    /// https://www.adobe.io/xmp/docs/XMPNamespaces/XMPDataTypes/Dimensions/
+    case videoFrameSize = "xmpDM:videoFrameSize"
+    case dimensionsWidth = "stDim:w"
+    case dimensionsHeight = "stDim:h"
+
     /// https://www.adobe.io/xmp/docs/XMPNamespaces/XMPDataTypes/Track/
     case tracks = "xmpDM:Tracks"
 
