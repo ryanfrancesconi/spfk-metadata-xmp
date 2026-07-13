@@ -55,6 +55,22 @@ public enum XMP {
             try XMP.writeReconciled(string: string, to: url)
         }
 
+        /// Sets a single simple-value XMP property, preserving all other existing content.
+        public func setProperty(namespace: String, name: String, value: String, url: URL) throws {
+            try XMP.setProperty(namespace: namespace, name: name, value: value, url: url)
+        }
+
+        /// Replaces a whole array-value XMP property (e.g. `dc:subject`/keywords),
+        /// preserving all other existing content.
+        public func setArrayProperty(namespace: String, name: String, values: [String], isOrdered: Bool = false, url: URL) throws {
+            try XMP.setArrayProperty(namespace: namespace, name: name, values: values, isOrdered: isOrdered, url: url)
+        }
+
+        /// Writes multiple properties (simple and/or array) in a single open/read/write/close cycle.
+        public func setProperties(_ properties: [XMPPropertyWrite], url: URL) throws {
+            try XMP.setProperties(properties, url: url)
+        }
+
         /// Copy XMP metadata from one file to another as a single atomic operation.
         ///
         /// Holds `_xmpCopyLock` across both parse and write, preventing other threads
@@ -105,5 +121,64 @@ public enum XMP {
         guard XMPFile.writeReconciled(string, toPath: url.path) else {
             throw NSError(description: "Failed to write reconciled XMP to file: \(url.path)")
         }
+    }
+
+    /// Sets a single simple-value XMP property, preserving all other existing content
+    /// (load-then-mutate-then-put — unlike `write(string:to:)`, which replaces the whole packet).
+    ///
+    /// No additional locking beyond `XMPUtil`'s own internal mutex is needed here: the
+    /// entire load-mutate-put sequence happens within one C++ call, holding the mutex for
+    /// its whole body — the same shape as `writeXMP` itself, not the two-separate-calls
+    /// shape `copyXMP` guards against with `_xmpCopyLock`.
+    public static func setProperty(namespace: String, name: String, value: String, url: URL) throws {
+        XMPLifecycle.initialize()
+
+        guard XMPFile.setProperty(namespace, propName: name, value: value, toPath: url.path) else {
+            throw NSError(description: "Failed to set XMP property \(namespace):\(name) on file: \(url.path)")
+        }
+    }
+
+    /// Replaces a whole array-value XMP property (e.g. `dc:subject`/keywords) with `values`,
+    /// preserving all other existing content. `isOrdered` selects `rdf:Seq` (true) vs.
+    /// `rdf:Bag` (false, the default — correct for `dc:subject`).
+    public static func setArrayProperty(namespace: String, name: String, values: [String], isOrdered: Bool = false, url: URL) throws {
+        XMPLifecycle.initialize()
+
+        guard XMPFile.setArrayProperty(namespace, propName: name, values: values, isOrdered: isOrdered, toPath: url.path) else {
+            throw NSError(description: "Failed to set XMP array property \(namespace):\(name) on file: \(url.path)")
+        }
+    }
+
+    /// Writes multiple properties (simple and/or array) in a single open/read/write/close cycle —
+    /// fewer open/close cycles than repeated `setProperty`/`setArrayProperty` calls, and avoids
+    /// the interleaved-thread stale-state window between separate calls.
+    public static func setProperties(_ properties: [XMPPropertyWrite], url: URL) throws {
+        XMPLifecycle.initialize()
+
+        let entries = properties.map {
+            XMPPropertyWriteEntry(namespace: $0.namespace, propName: $0.name, values: $0.values, isArray: $0.isArray)
+        }
+
+        guard XMPFile.setProperties(entries, toPath: url.path) else {
+            throw NSError(description: "Failed to set XMP properties on file: \(url.path)")
+        }
+    }
+}
+
+/// One property to write in a batch `XMP.setProperties(_:url:)` call.
+public struct XMPPropertyWrite: Sendable {
+    public let namespace: String
+    public let name: String
+    public let values: [String]
+    public let isArray: Bool
+
+    /// A single simple-value property write.
+    public static func simple(namespace: String, name: String, value: String) -> XMPPropertyWrite {
+        XMPPropertyWrite(namespace: namespace, name: name, values: [value], isArray: false)
+    }
+
+    /// A whole-array-replace property write.
+    public static func array(namespace: String, name: String, values: [String]) -> XMPPropertyWrite {
+        XMPPropertyWrite(namespace: namespace, name: name, values: values, isArray: true)
     }
 }

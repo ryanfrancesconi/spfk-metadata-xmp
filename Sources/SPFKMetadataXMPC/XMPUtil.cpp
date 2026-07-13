@@ -145,6 +145,167 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
     return true;
 }
 
+bool XMPUtil::setXMPProperty(
+    const string& filePath,
+    const string& ns,
+    const string& propName,
+    const string& value
+) {
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    try {
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+
+        SXMPFiles myFile;
+        bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            return false;
+        }
+
+        // Load existing XMP first — GetXMP returns false when the file has no XMP
+        // packet yet, which is not an error here; proceed with a default-constructed
+        // (empty) meta so the first property write to a fresh file still succeeds.
+        SXMPMeta meta;
+        myFile.GetXMP(&meta);
+
+        meta.SetProperty(ns.c_str(), propName.c_str(), value.c_str());
+
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
+        }
+
+        myFile.PutXMP(meta);
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool XMPUtil::setXMPArrayProperty(
+    const string& filePath,
+    const string& ns,
+    const string& propName,
+    const vector<string>& values,
+    XMP_OptionBits arrayForm
+) {
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    try {
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+
+        SXMPFiles myFile;
+        bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            return false;
+        }
+
+        SXMPMeta meta;
+        myFile.GetXMP(&meta);
+
+        // Replace semantics: clear any existing items for this property, then
+        // re-add from `values` in order. DeleteProperty is not an error if the
+        // property doesn't already exist.
+        meta.DeleteProperty(ns.c_str(), propName.c_str());
+
+        for (const auto& value : values) {
+            meta.AppendArrayItem(ns.c_str(), propName.c_str(), arrayForm, value.c_str());
+        }
+
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
+        }
+
+        myFile.PutXMP(meta);
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool XMPUtil::setXMPProperties(
+    const string& filePath,
+    const vector<XMPPropertyWrite>& properties
+) {
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    try {
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+
+        SXMPFiles myFile;
+        bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            return false;
+        }
+
+        SXMPMeta meta;
+        myFile.GetXMP(&meta);
+
+        for (const auto& property : properties) {
+            if (property.isArray) {
+                meta.DeleteProperty(property.ns.c_str(), property.propName.c_str());
+                for (const auto& value : property.values) {
+                    meta.AppendArrayItem(
+                        property.ns.c_str(),
+                        property.propName.c_str(),
+                        kXMP_PropArrayIsUnordered,
+                        value.c_str()
+                    );
+                }
+            } else if (!property.values.empty()) {
+                meta.SetProperty(property.ns.c_str(), property.propName.c_str(), property.values[0].c_str());
+            }
+        }
+
+        if (!myFile.CanPutXMP(meta)) {
+            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            myFile.CloseFile();
+            return false;
+        }
+
+        myFile.PutXMP(meta);
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
