@@ -337,8 +337,21 @@ bool XMPUtil::setXMPTrackInfo(
 
         // Mirrors XMPMetadata's read path, which only ever looks at the first track
         // entry — create the Tracks bag's first (struct-typed) item if none exists yet.
+        //
+        // `arrayOptions` must be an explicit array-type flag when creating a brand-new
+        // array — kXMP_NoOptions ("match existing type") only works when the array
+        // already exists; the real toolkit rejects it for a new array with "Explicit
+        // arrayOptions required to create new array" (confirmed at runtime). Since
+        // kXMP_PropArrayIsOrdered is documented as "Implies kXMP_PropValueIsArray"
+        // (XMP_Const.h), kXMP_PropArrayIsUnordered — #defined as kXMP_PropValueIsArray,
+        // the same base bit without the ordered bit layered on — is the correct explicit
+        // "plain bag" request, not an invalid value; that part of the original code was
+        // right. `itemValue` does need to be nullptr, not "" — a non-null empty string
+        // is still "a string value" to the toolkit, which is what the *previous* runtime
+        // error ("Structs and arrays can't have string values") was actually about,
+        // confirmed fixed once this was changed.
         if (meta.CountArrayItems(ns.c_str(), "Tracks") == 0) {
-            meta.AppendArrayItem(ns.c_str(), "Tracks", kXMP_PropArrayIsUnordered, "", kXMP_PropValueIsStruct);
+            meta.AppendArrayItem(ns.c_str(), "Tracks", kXMP_PropArrayIsUnordered, nullptr, kXMP_PropValueIsStruct);
         }
 
         if (!trackType.empty()) {
