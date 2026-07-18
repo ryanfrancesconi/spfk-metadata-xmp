@@ -83,7 +83,7 @@ string XMPUtil::getXMP(const string& filePath) {
     return buffer;
 }
 
-bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
+bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* errorMessage) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
@@ -111,6 +111,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
         // If the file is open then read get the XMP data
         if (!ok) {
             cout << "Failed to open file" << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -127,6 +128,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
         // Check we can put the XMP packet back into the file
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -139,6 +141,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath) {
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 
@@ -149,7 +152,8 @@ bool XMPUtil::setXMPProperty(
     const string& filePath,
     const string& ns,
     const string& propName,
-    const string& value
+    const string& value,
+    string* errorMessage
 ) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
@@ -167,6 +171,7 @@ bool XMPUtil::setXMPProperty(
 
         if (!ok) {
             cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -180,6 +185,7 @@ bool XMPUtil::setXMPProperty(
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -188,6 +194,7 @@ bool XMPUtil::setXMPProperty(
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 
@@ -199,7 +206,8 @@ bool XMPUtil::setXMPArrayProperty(
     const string& ns,
     const string& propName,
     const vector<string>& values,
-    XMP_OptionBits arrayForm
+    XMP_OptionBits arrayForm,
+    string* errorMessage
 ) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
@@ -217,6 +225,7 @@ bool XMPUtil::setXMPArrayProperty(
 
         if (!ok) {
             cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -234,6 +243,7 @@ bool XMPUtil::setXMPArrayProperty(
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -242,6 +252,7 @@ bool XMPUtil::setXMPArrayProperty(
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 
@@ -250,7 +261,8 @@ bool XMPUtil::setXMPArrayProperty(
 
 bool XMPUtil::setXMPProperties(
     const string& filePath,
-    const vector<XMPPropertyWrite>& properties
+    const vector<XMPPropertyWrite>& properties,
+    string* errorMessage
 ) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
@@ -268,6 +280,7 @@ bool XMPUtil::setXMPProperties(
 
         if (!ok) {
             cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -292,6 +305,7 @@ bool XMPUtil::setXMPProperties(
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -300,6 +314,7 @@ bool XMPUtil::setXMPProperties(
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 
@@ -309,7 +324,8 @@ bool XMPUtil::setXMPProperties(
 bool XMPUtil::setXMPTrackInfo(
     const string& filePath,
     const string& trackType,
-    const string& trackName
+    const string& trackName,
+    string* errorMessage
 ) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
@@ -327,6 +343,7 @@ bool XMPUtil::setXMPTrackInfo(
 
         if (!ok) {
             cout << "XMPUtil ERROR: Failed to open " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -364,6 +381,7 @@ bool XMPUtil::setXMPTrackInfo(
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -372,13 +390,14 @@ bool XMPUtil::setXMPTrackInfo(
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 
     return true;
 }
 
-bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath) {
+bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath, string* errorMessage) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
@@ -398,6 +417,7 @@ bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath
 
         if (!ok) {
             cout << "Failed to open file" << endl;
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
 
@@ -408,6 +428,7 @@ bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
+            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
             myFile.CloseFile();
             return false;
         }
@@ -416,6 +437,7 @@ bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath
         myFile.CloseFile();
     } catch (XMP_Error & e) {
         cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
         return false;
     }
 

@@ -64,7 +64,10 @@ extension XMPMetadata {
     }
 
     private func setValue(_ value: String?, for element: XMPElement) {
-        guard let desc = descriptionElement else { return }
+        guard let desc = descriptionElement else {
+            Log.error("Failed to find RDF description; cannot set \(element.rawValue)")
+            return
+        }
 
         guard let value, value.isNotEmpty else {
             desc[element]?.removeFromParent()

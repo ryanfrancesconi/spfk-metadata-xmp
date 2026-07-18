@@ -112,8 +112,10 @@ public enum XMP {
     public static func write(string: String, to url: URL) throws {
         XMPLifecycle.initialize()
 
-        guard XMPFile.write(string, toPath: url.path) else {
-            throw NSError(description: "Failed to write XMP string to file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.write(string, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to write XMP string to file: \(url.path) — \(reason)")
         }
     }
 
@@ -124,8 +126,10 @@ public enum XMP {
     public static func writeReconciled(string: String, to url: URL) throws {
         XMPLifecycle.initialize()
 
-        guard XMPFile.writeReconciled(string, toPath: url.path) else {
-            throw NSError(description: "Failed to write reconciled XMP to file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.writeReconciled(string, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to write reconciled XMP to file: \(url.path) — \(reason)")
         }
     }
 
@@ -139,8 +143,10 @@ public enum XMP {
     public static func setProperty(namespace: String, name: String, value: String, url: URL) throws {
         XMPLifecycle.initialize()
 
-        guard XMPFile.setProperty(namespace, propName: name, value: value, toPath: url.path) else {
-            throw NSError(description: "Failed to set XMP property \(namespace):\(name) on file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.setProperty(namespace, propName: name, value: value, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to set XMP property \(namespace):\(name) on file: \(url.path) — \(reason)")
         }
     }
 
@@ -150,8 +156,10 @@ public enum XMP {
     public static func setArrayProperty(namespace: String, name: String, values: [String], isOrdered: Bool = false, url: URL) throws {
         XMPLifecycle.initialize()
 
-        guard XMPFile.setArrayProperty(namespace, propName: name, values: values, isOrdered: isOrdered, toPath: url.path) else {
-            throw NSError(description: "Failed to set XMP array property \(namespace):\(name) on file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.setArrayProperty(namespace, propName: name, values: values, isOrdered: isOrdered, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to set XMP array property \(namespace):\(name) on file: \(url.path) — \(reason)")
         }
     }
 
@@ -165,8 +173,10 @@ public enum XMP {
             XMPPropertyWriteEntry(namespace: $0.namespace, propName: $0.name, values: $0.values, isArray: $0.isArray)
         }
 
-        guard XMPFile.setProperties(entries, toPath: url.path) else {
-            throw NSError(description: "Failed to set XMP properties on file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.setProperties(entries, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to set XMP properties on file: \(url.path) — \(reason)")
         }
     }
 
@@ -175,8 +185,10 @@ public enum XMP {
     public static func setTrackInfo(trackType: String?, trackName: String?, url: URL) throws {
         XMPLifecycle.initialize()
 
-        guard XMPFile.setTrackType(trackType ?? "", trackName: trackName ?? "", toPath: url.path) else {
-            throw NSError(description: "Failed to set XMP track info on file: \(url.path)")
+        var error: NSError?
+        guard XMPFile.setTrackType(trackType ?? "", trackName: trackName ?? "", toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to set XMP track info on file: \(url.path) — \(reason)")
         }
     }
 }

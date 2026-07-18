@@ -35,18 +35,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// write XMP xml string to file (XMP chunk only, no reconciliation)
 + (bool)write:(nonnull NSString *)xmlString
-       toPath:(nonnull NSString *)toPath;
+       toPath:(nonnull NSString *)toPath
+        error:(NSError * _Nullable * _Nullable)error;
 
 /// write XMP xml string to file WITH reconciliation to native chunks (BEXT, iXML)
 + (bool)writeReconciled:(nonnull NSString *)xmlString
-                 toPath:(nonnull NSString *)toPath;
+                 toPath:(nonnull NSString *)toPath
+                  error:(NSError * _Nullable * _Nullable)error;
 
 /// Set a single simple-value XMP property, preserving all other existing content
 /// (load-then-mutate-then-put, unlike write:toPath: which overwrites the whole packet).
 + (bool)setProperty:(nonnull NSString *)ns
             propName:(nonnull NSString *)propName
                value:(nonnull NSString *)value
-              toPath:(nonnull NSString *)toPath;
+              toPath:(nonnull NSString *)toPath
+               error:(NSError * _Nullable * _Nullable)error;
 
 /// Replace a whole array-value XMP property (e.g. dc:subject) with `values`, preserving
 /// all other existing content. `isOrdered` selects rdf:Seq (true) vs rdf:Bag (false, the
@@ -55,20 +58,23 @@ NS_ASSUME_NONNULL_BEGIN
                  propName:(nonnull NSString *)propName
                    values:(nonnull NSArray<NSString *> *)values
                 isOrdered:(bool)isOrdered
-                   toPath:(nonnull NSString *)toPath;
+                   toPath:(nonnull NSString *)toPath
+                    error:(NSError * _Nullable * _Nullable)error;
 
 /// Write multiple properties (simple and/or array) in a single open/read/[mutations]/
 /// write/close cycle — fewer open/close cycles than repeated setProperty/setArrayProperty
 /// calls, and avoids the interleaved-thread stale-state window between separate calls.
 + (bool)setProperties:(nonnull NSArray<XMPPropertyWriteEntry *> *)properties
-                toPath:(nonnull NSString *)toPath;
+                toPath:(nonnull NSString *)toPath
+                 error:(NSError * _Nullable * _Nullable)error;
 
 /// Writes the first item of the xmpDM:Tracks bag's trackType/trackName fields, creating
 /// the Tracks bag and its first (struct-typed) item if none exists yet. Pass an empty
 /// string to leave a field unchanged.
 + (bool)setTrackType:(nonnull NSString *)trackType
             trackName:(nonnull NSString *)trackName
-               toPath:(nonnull NSString *)toPath;
+               toPath:(nonnull NSString *)toPath
+                error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

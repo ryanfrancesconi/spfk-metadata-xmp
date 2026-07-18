@@ -37,7 +37,10 @@ public:
     /// - Parameters:
     ///   - xmlString: xml
     ///   - filePath: path to the file
-    static bool writeXMP(const std::string& xmlString, const std::string& filePath);
+    ///   - errorMessage: if non-null and the call fails, receives a description of the
+    ///     actual failure (the caught `XMP_Error`'s message, or the specific open/put
+    ///     failure reason) — otherwise left untouched.
+    static bool writeXMP(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
 
     /// Write XMP and allow Adobe SDK reconciliation to update native chunks
     /// (BEXT, iXML). Used for explicit "Sync XMP → iXML" operations.
@@ -45,7 +48,8 @@ public:
     /// - Parameters:
     ///   - xmlString: xml
     ///   - filePath: path to the file
-    static bool writeXMPReconciled(const std::string& xmlString, const std::string& filePath);
+    ///   - errorMessage: see `writeXMP`.
+    static bool writeXMPReconciled(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
 
     /// Sets a single simple-value XMP property, preserving all other existing content.
     /// Loads the existing XMP packet first (load-then-mutate-then-put), unlike `writeXMP`
@@ -56,11 +60,13 @@ public:
     ///   - ns: schema namespace URI
     ///   - propName: property name (may include a registered prefix, e.g. "xmpDM:scene")
     ///   - value: the new property value
+    ///   - errorMessage: see `writeXMP`.
     static bool setXMPProperty(
         const std::string& filePath,
         const std::string& ns,
         const std::string& propName,
-        const std::string& value
+        const std::string& value,
+        std::string* errorMessage = nullptr
     );
 
     /// Replaces a whole array-value XMP property (e.g. `dc:subject`), preserving all other
@@ -74,12 +80,14 @@ public:
     ///   - values: the new full set of array item values, in order
     ///   - arrayForm: one of kXMP_PropArrayIsUnordered, kXMP_PropArrayIsOrdered,
     ///     kXMP_PropArrayIsAlternate (see XMP_Const.h)
+    ///   - errorMessage: see `writeXMP`.
     static bool setXMPArrayProperty(
         const std::string& filePath,
         const std::string& ns,
         const std::string& propName,
         const std::vector<std::string>& values,
-        XMP_OptionBits arrayForm
+        XMP_OptionBits arrayForm,
+        std::string* errorMessage = nullptr
     );
 
     /// Writes multiple properties (simple and/or array) in a single OpenFile/GetXMP/
@@ -92,9 +100,11 @@ public:
     ///   - properties: the properties to write; array items use kXMP_PropArrayIsUnordered
     ///     (bag) form — sufficient for both known consumers (dc:subject and xmpDM fields),
     ///     see XMPPropertyWrite
+    ///   - errorMessage: see `writeXMP`.
     static bool setXMPProperties(
         const std::string& filePath,
-        const std::vector<XMPPropertyWrite>& properties
+        const std::vector<XMPPropertyWrite>& properties,
+        std::string* errorMessage = nullptr
     );
 
     /// Writes the first item of the `xmpDM:Tracks` bag's `trackType`/`trackName` fields,
@@ -102,10 +112,13 @@ public:
     /// mirroring `XMPMetadata`'s read path, which already only ever looks at the first
     /// track entry found. Pass an empty string to leave a field unchanged (skips that
     /// SetProperty call rather than writing an empty value over an existing one).
+    ///
+    /// - Parameter errorMessage: see `writeXMP`.
     static bool setXMPTrackInfo(
         const std::string& filePath,
         const std::string& trackType,
-        const std::string& trackName
+        const std::string& trackName,
+        std::string* errorMessage = nullptr
     );
 };
 
