@@ -5,7 +5,7 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-metadata-xmp%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-metadata-xmp)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-metadata-xmp%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-metadata-xmp)
 
-A Swift package for reading and writing [Adobe XMP](https://www.adobe.com/devnet/xmp.html) metadata embedded in audio and video files on macOS. Built on top of the Adobe XMP SDK (via bundled `XMPCore` and `XMPFiles` binary frameworks) with a Swift-native API layer.
+A Swift package for reading and writing [Adobe XMP](https://developer.adobe.com/xmp/docs/) metadata embedded in audio and video files on macOS. Built on top of the Adobe XMP SDK (via bundled `XMPCore` and `XMPFiles` binary frameworks) with a Swift-native API layer.
 
 ## Overview
 
