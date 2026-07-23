@@ -9,7 +9,7 @@ import Testing
 /// regardless of cause. A nonexistent file path is used as a deterministic failure
 /// trigger (reliably hits the "failed to open" branch in every write function, without
 /// depending on any Adobe XMP SDK-internal error semantics).
-@Suite(.serialized)
+@Suite
 class WriteErrorMessageTests: BinTestCase {
     let xmp = XMP.shared
 

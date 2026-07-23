@@ -8,7 +8,7 @@ import Testing
 /// Verifies `XMP.setProperty`/`setArrayProperty`/`setProperties` use the
 /// load-then-mutate-then-put pattern (preserving unrelated existing content),
 /// unlike `write(string:to:)`'s whole-packet overwrite.
-@Suite(.serialized)
+@Suite
 class StructuredPropertyWriteTests: BinTestCase {
     let xmp = XMP.shared
 

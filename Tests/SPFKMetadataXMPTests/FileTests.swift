@@ -9,7 +9,7 @@ import Testing
 
 /// XMP will translate existing metadata into XMP and return it as xml
 /// see id3.xml, wave.xml
-@Suite(.serialized)
+@Suite
 class FileTests: BinTestCase {
     let xmp = XMP.shared
 
