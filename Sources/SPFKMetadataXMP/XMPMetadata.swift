@@ -21,6 +21,7 @@ public struct XMPMetadata: Equatable, Sendable {
             && lhs.trackType == rhs.trackType && lhs.scene == rhs.scene && lhs.cameraAngle == rhs.cameraAngle
             && lhs.logComment == rhs.logComment && lhs.cameraModel == rhs.cameraModel
             && lhs.shotDate == rhs.shotDate && lhs.shotLocation == rhs.shotLocation
+            && lhs.keywords == rhs.keywords
     }
 
     public private(set) var document: AEXMLDocument
@@ -39,6 +40,16 @@ public struct XMPMetadata: Equatable, Sendable {
     }
 
     public private(set) var markers: [XMPMarker]?
+
+    /**
+     <dc:subject>
+         <rdf:Bag>
+             <rdf:li>mountains</rdf:li>
+             <rdf:li>california</rdf:li>
+         </rdf:Bag>
+     </dc:subject>
+     */
+    public private(set) var keywords: [String] = []
 
     /**
      <xmpDM:videoFrameRate>25.000000</xmpDM:videoFrameRate>
@@ -180,6 +191,10 @@ public struct XMPMetadata: Equatable, Sendable {
         }
 
         title = desc[.title]?[.alt]?[.li]?.value
+
+        if let items = desc[.subject]?[.bag]?[.li]?.all {
+            keywords = items.compactMap(\.value)
+        }
 
         creatorTool = desc[.creatorTool]?.value
         createDate = desc[.createDate]?.value
