@@ -35,6 +35,20 @@
 
 @end
 
+@implementation XMPPropertyReadEntry : NSObject
+
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                  propName:(nonnull NSString *)propName
+                                   isArray:(bool)isArray {
+    self = [super init];
+    _ns = ns;
+    _propName = propName;
+    _isArray = isArray;
+    return self;
+}
+
+@end
+
 @implementation XMPFile : NSObject
 
 - (nullable instancetype)initWithPath:(nonnull NSString *)path {
@@ -150,6 +164,42 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
         *error = XMPFileError(errorMessage);
     }
     return ok;
+}
+
++ (nullable NSArray<NSArray<NSString *> *> *)getProperties:(NSArray<XMPPropertyReadEntry *> *)properties
+                                                   fromPath:(NSString *)fromPath
+                                                      error:(NSError * _Nullable * _Nullable)error {
+    std::vector<XMPUtil::XMPPropertyRead> cppRequests;
+    cppRequests.reserve(properties.count);
+
+    for (XMPPropertyReadEntry *entry in properties) {
+        XMPUtil::XMPPropertyRead request;
+        request.ns = entry.ns.UTF8String;
+        request.propName = entry.propName.UTF8String;
+        request.isArray = entry.isArray;
+        cppRequests.push_back(request);
+    }
+
+    std::vector<std::vector<std::string>> cppResults;
+    std::string errorMessage;
+
+    if (!XMPUtil::getXMPProperties(fromPath.UTF8String, cppRequests, &cppResults, &errorMessage)) {
+        if (error != nullptr) {
+            *error = XMPFileError(errorMessage);
+        }
+        return nil;
+    }
+
+    NSMutableArray<NSArray<NSString *> *> *results = [NSMutableArray arrayWithCapacity:cppResults.size()];
+    for (const auto& values : cppResults) {
+        NSMutableArray<NSString *> *converted = [NSMutableArray arrayWithCapacity:values.size()];
+        for (const auto& value : values) {
+            [converted addObject:[NSString stringWithUTF8String:value.c_str()]];
+        }
+        [results addObject:converted];
+    }
+
+    return results;
 }
 
 + (bool)setTrackType:(NSString *)trackType

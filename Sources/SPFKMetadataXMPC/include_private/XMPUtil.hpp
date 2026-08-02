@@ -44,6 +44,31 @@ private:
 public:
     static std::string getXMP(const std::string& filePath);
 
+    /// One property to read in a batch `getXMPProperties` call.
+    struct XMPPropertyRead {
+        std::string ns;
+        std::string propName;
+        /// Read every item of an `rdf:Bag`/`rdf:Seq` rather than a single value.
+        bool isArray;
+    };
+
+    /// Reads several properties in one open/read/close cycle.
+    ///
+    /// Results are index-aligned with `requests`: a scalar yields zero or one value, an array
+    /// yields one entry per item, and a property that is absent yields an empty vector -- absence
+    /// is not an error, it is the ordinary state of most fields on most files.
+    ///
+    /// Scalars go through `GetLocalizedText` first so a language alternative (`dc:title`,
+    /// `dc:description`, `dc:rights`) returns its `x-default` text rather than nothing;
+    /// `GetProperty` is the fallback for plain values. Asking for the wrong one of those two is
+    /// otherwise silent -- a lang-alt read with `GetProperty` simply comes back empty.
+    static bool getXMPProperties(
+        const std::string& filePath,
+        const std::vector<XMPPropertyRead>& requests,
+        std::vector<std::vector<std::string>>* results,
+        std::string* errorMessage
+    );
+
     /// Write the xml string into the file (XMP chunk only, no reconciliation).
     ///
     /// - Parameters:

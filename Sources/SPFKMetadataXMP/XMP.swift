@@ -182,6 +182,32 @@ public enum XMP {
         }
     }
 
+    /// Reads several properties in one open/read/close cycle.
+    ///
+    /// Returns values index-aligned with `requests`: a scalar yields zero or one value, an array
+    /// yields one entry per item, and an absent property yields an empty array. **Absence is not
+    /// an error** -- it is the ordinary state of most fields on most files, and a file with no XMP
+    /// packet at all simply reports every field empty.
+    ///
+    /// Scalars resolve a language alternative (`dc:title`, `dc:description`, `dc:rights`) to its
+    /// `x-default` text automatically, so a caller does not need to know which fields the toolkit
+    /// has reconciled into one.
+    public static func getProperties(_ requests: [XMPPropertyRead], url: URL) throws -> [[String]] {
+        XMPLifecycle.initialize()
+
+        let entries = requests.map {
+            XMPPropertyReadEntry(namespace: $0.namespace, propName: $0.name, isArray: $0.isArray)
+        }
+
+        // Imported as `throws`: the ObjC method returns a nullable array with an NSError** out
+        // param, so Swift folds the error into the throw and drops the parameter.
+        do {
+            return try XMPFile.getProperties(entries, fromPath: url.path)
+        } catch {
+            throw NSError(description: "Failed to read XMP properties from file: \(url.path) — \(error.localizedDescription)")
+        }
+    }
+
     /// Writes the first `xmpDM:Tracks` item's `trackType`/`trackName`, creating the Tracks
     /// bag and its first item if none exists yet. Pass `nil` to leave a field unchanged.
     public static func setTrackInfo(trackType: String?, trackName: String?, url: URL) throws {
@@ -192,6 +218,21 @@ public enum XMP {
             let reason = error?.localizedDescription ?? "unknown reason"
             throw NSError(description: "Failed to set XMP track info on file: \(url.path) — \(reason)")
         }
+    }
+}
+
+/// One property to read in a batch `XMP.getProperties(_:url:)` call.
+public struct XMPPropertyRead: Sendable {
+    public let namespace: String
+    public let name: String
+
+    /// Read every item of an `rdf:Bag`/`rdf:Seq` rather than a single value.
+    public let isArray: Bool
+
+    public init(namespace: String, name: String, isArray: Bool = false) {
+        self.namespace = namespace
+        self.name = name
+        self.isArray = isArray
     }
 }
 

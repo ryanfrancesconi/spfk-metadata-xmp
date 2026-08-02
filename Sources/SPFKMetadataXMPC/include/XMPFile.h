@@ -37,6 +37,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+/// One property to read in a batch `getProperties:fromPath:error:` call.
+@interface XMPPropertyReadEntry : NSObject
+
+@property (nonatomic, strong, readonly) NSString *ns;
+@property (nonatomic, strong, readonly) NSString *propName;
+@property (nonatomic, readonly) bool isArray;
+
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                  propName:(nonnull NSString *)propName
+                                   isArray:(bool)isArray;
+
+@end
+
 @interface XMPFile : NSObject
 
 @property (nonatomic, strong, nullable) NSString *xmpString;
@@ -79,6 +92,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (bool)setProperties:(nonnull NSArray<XMPPropertyWriteEntry *> *)properties
                 toPath:(nonnull NSString *)toPath
                  error:(NSError * _Nullable * _Nullable)error;
+
+/// Reads several properties in one open/read/close cycle. The returned array is index-aligned
+/// with `properties`: a scalar yields zero or one value, an array yields one entry per item, and
+/// an absent property yields an empty array — absence is the ordinary state of most fields.
++ (nullable NSArray<NSArray<NSString *> *> *)getProperties:(nonnull NSArray<XMPPropertyReadEntry *> *)properties
+                                                   fromPath:(nonnull NSString *)fromPath
+                                                      error:(NSError * _Nullable * _Nullable)error;
 
 /// Writes the first item of the xmpDM:Tracks bag's trackType/trackName fields, creating
 /// the Tracks bag and its first (struct-typed) item if none exists yet. Pass an empty

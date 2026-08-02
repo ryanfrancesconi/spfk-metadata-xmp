@@ -148,6 +148,102 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
     return true;
 }
 
+bool XMPUtil::getXMPProperties(
+    const string& filePath,
+    const std::vector<XMPPropertyRead>& requests,
+    std::vector<std::vector<std::string>>* results,
+    string* errorMessage
+) {
+    if (results == nullptr) return false;
+    results->clear();
+    results->resize(requests.size());
+
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    try {
+        // Read-only open: no update handler needed, and it must not fail on a file we would not
+        // be able to write.
+        XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler;
+
+        SXMPFiles myFile;
+        bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+
+        if (!ok) {
+            opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUsePacketScanning;
+            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
+        }
+
+        if (!ok) {
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
+            return false;
+        }
+
+        SXMPMeta meta;
+
+        // No XMP packet at all is not an error -- every field is simply absent.
+        if (!myFile.GetXMP(&meta)) {
+            myFile.CloseFile();
+            return true;
+        }
+
+        for (size_t i = 0; i < requests.size(); ++i) {
+            const auto& request = requests[i];
+            auto& out = (*results)[i];
+
+            // Per-property isolation: one field in an odd shape must not fail the whole read.
+            // The toolkit throws rather than returning false for several mismatches -- asking
+            // GetLocalizedText for a plain scalar raises "Localized text array is not alt-text".
+            try {
+                if (request.isArray) {
+                    const XMP_Index count = meta.CountArrayItems(request.ns.c_str(), request.propName.c_str());
+                    for (XMP_Index item = 1; item <= count; ++item) {
+                        string value;
+                        if (meta.GetArrayItem(request.ns.c_str(), request.propName.c_str(), item, &value, nullptr)) {
+                            out.push_back(value);
+                        }
+                    }
+                    continue;
+                }
+
+                string value;
+                XMP_OptionBits options = 0;
+
+                // Ask what shape the property actually is rather than guessing. A caller cannot
+                // know which scalars the toolkit has reconciled into a language alternative, and
+                // choosing the wrong accessor either throws or silently returns nothing.
+                if (!meta.GetProperty(request.ns.c_str(), request.propName.c_str(), &value, &options)) {
+                    continue;
+                }
+
+                if (XMP_PropIsArray(options) && XMP_ArrayIsAltText(options)) {
+                    string localized;
+                    string actualLang;
+                    if (meta.GetLocalizedText(
+                            request.ns.c_str(), request.propName.c_str(), "", "x-default",
+                            &actualLang, &localized, nullptr
+                        )) {
+                        out.push_back(localized);
+                    }
+                } else if (!XMP_PropIsArray(options)) {
+                    out.push_back(value);
+                }
+            } catch (XMP_Error & e) {
+                cout << "XMPUtil: skipping " << request.ns << ":" << request.propName
+                     << " — " << e.GetErrMsg() << endl;
+            }
+        }
+
+        myFile.CloseFile();
+    } catch (XMP_Error & e) {
+        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
+        return false;
+    }
+
+    return true;
+}
+
 bool XMPUtil::setXMPProperty(
     const string& filePath,
     const string& ns,
