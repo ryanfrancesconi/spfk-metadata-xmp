@@ -15,6 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "1.2.2"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-metadata-image", from: "0.0.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-time", from: "1.1.3"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "1.6.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "1.1.0"),
@@ -25,6 +26,7 @@ let package = Package(
             dependencies: [
                 .targetItem(name: "SPFKMetadataXMPC", condition: nil),
                 .product(name: "SPFKBase", package: "spfk-base"),
+                .product(name: "SPFKMetadataImage", package: "spfk-metadata-image"),
                 .product(name: "SPFKTime", package: "spfk-time"),
                 .product(name: "SPFKUtils", package: "spfk-utils"),
             ]
