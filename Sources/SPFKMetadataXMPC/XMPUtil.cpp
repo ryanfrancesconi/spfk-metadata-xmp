@@ -288,7 +288,11 @@ bool XMPUtil::setXMPProperties(
         myFile.GetXMP(&meta);
 
         for (const auto& property : properties) {
-            if (property.isArray) {
+            if (property.isRemoval) {
+                // Deleting a property that is not present is a no-op, not an error -- clearing an
+                // already-empty field is the ordinary case.
+                meta.DeleteProperty(property.ns.c_str(), property.propName.c_str());
+            } else if (property.isArray) {
                 meta.DeleteProperty(property.ns.c_str(), property.propName.c_str());
                 for (const auto& value : property.values) {
                     meta.AppendArrayItem(

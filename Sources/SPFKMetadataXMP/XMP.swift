@@ -163,14 +163,16 @@ public enum XMP {
         }
     }
 
-    /// Writes multiple properties (simple and/or array) in a single open/read/write/close cycle —
+    /// Writes multiple properties (simple, array, and/or removals) in a single open/read/write/close cycle —
     /// fewer open/close cycles than repeated `setProperty`/`setArrayProperty` calls, and avoids
     /// the interleaved-thread stale-state window between separate calls.
     public static func setProperties(_ properties: [XMPPropertyWrite], url: URL) throws {
         XMPLifecycle.initialize()
 
-        let entries = properties.map {
-            XMPPropertyWriteEntry(namespace: $0.namespace, propName: $0.name, values: $0.values, isArray: $0.isArray)
+        let entries = properties.map { property in
+            property.isRemoval
+                ? XMPPropertyWriteEntry(removalOfNamespace: property.namespace, propName: property.name)
+                : XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, values: property.values, isArray: property.isArray)
         }
 
         var error: NSError?
@@ -193,12 +195,23 @@ public enum XMP {
     }
 }
 
-/// One property to write in a batch `XMP.setProperties(_:url:)` call.
+/// One property to write -- or remove -- in a batch `XMP.setProperties(_:url:)` call.
 public struct XMPPropertyWrite: Sendable {
     public let namespace: String
     public let name: String
     public let values: [String]
     public let isArray: Bool
+
+    /// Removes the property instead of writing it. Takes precedence over `values`/`isArray`.
+    public let isRemoval: Bool
+
+    init(namespace: String, name: String, values: [String], isArray: Bool, isRemoval: Bool = false) {
+        self.namespace = namespace
+        self.name = name
+        self.values = values
+        self.isArray = isArray
+        self.isRemoval = isRemoval
+    }
 
     /// A single simple-value property write.
     public static func simple(namespace: String, name: String, value: String) -> XMPPropertyWrite {
@@ -208,5 +221,19 @@ public struct XMPPropertyWrite: Sendable {
     /// A whole-array-replace property write.
     public static func array(namespace: String, name: String, values: [String]) -> XMPPropertyWrite {
         XMPPropertyWrite(namespace: namespace, name: name, values: values, isArray: true)
+    }
+
+    /// Removes a property entirely.
+    ///
+    /// **Not the same as writing an empty value**, which is why this exists: `simple(value: "")`
+    /// stores a literal empty value, and on a property the toolkit has reconciled into a language
+    /// alternative -- `dc:title`, `dc:description`, `dc:rights` -- it fails outright with
+    /// "Composite nodes can't have values". Verified against a real iPhone `.mov` (2026-08-02).
+    ///
+    /// Deletes the whole subtree, so a language alternative clears in every language rather than
+    /// leaving entries the user cannot see or edit. Removing a property that is not present is a
+    /// no-op, not an error -- clearing an already-empty field is the ordinary case.
+    public static func removal(namespace: String, name: String) -> XMPPropertyWrite {
+        XMPPropertyWrite(namespace: namespace, name: name, values: [], isArray: false, isRemoval: true)
     }
 }
