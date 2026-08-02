@@ -12,7 +12,7 @@ A Swift package for reading and writing [Adobe XMP](https://developer.adobe.com/
 SPFKMetadataXMP provides two main components:
 
 - **`XMP`** — A thread-safe `actor` singleton for reading and writing raw XMP XML strings to/from media files. Manages the Adobe XMP SDK lifecycle. The `parse` and `write` methods are `nonisolated`, enabling true concurrent file operations without actor serialization.
-- **`XMPMetadata`** — A `Sendable` struct that parses XMP XML into strongly-typed properties focused on timecode, markers, and media metadata.
+- **`XMPDynamicMedia`** — A `Sendable` struct that parses XMP XML into strongly-typed properties focused on timecode, markers, and media metadata.
 
 ### Supported File Formats
 
@@ -32,24 +32,24 @@ let xmlString = try XMP.shared.parse(url: fileURL)
 try XMP.shared.write(string: xmlString, to: fileURL)
 
 // Concurrent reads are safe — each call gets its own C++ objects
-try await withThrowingTaskGroup(of: XMPMetadata.self) { group in
+try await withThrowingTaskGroup(of: XMPDynamicMedia.self) { group in
     for url in urls {
-        group.addTask { try XMPMetadata(url: url) }
+        group.addTask { try XMPDynamicMedia(url: url) }
     }
     // ...
 }
 ```
 
-### XMPMetadata
+### XMPDynamicMedia
 
 Parses XMP XML into structured properties. Can be initialized from a file URL, an XML string, or an `AEXMLDocument`.
 
 ```swift
 // From a file (synchronous, thread-safe)
-let metadata = try XMPMetadata(url: fileURL)
+let metadata = try XMPDynamicMedia(url: fileURL)
 
 // From an XML string
-let metadata = try XMPMetadata(xml: xmlString)
+let metadata = try XMPDynamicMedia(xml: xmlString)
 
 // Access parsed properties
 metadata.title              // dc:title
@@ -99,7 +99,7 @@ The package is designed for concurrent use across multiple files:
 
 - **SDK initialization** (`SXMPMeta::Initialize`, `SXMPFiles::Initialize`) is protected by a `std::mutex` in the C++ layer, ensuring safe one-time setup even under concurrent access.
 - **`parse()` and `write()` are `nonisolated`** on the `XMP` actor. Each call creates stack-local `SXMPFiles` and `SXMPMeta` C++ objects with no shared mutable state, so multiple files can be read or written in parallel.
-- **`XMPMetadata` is `Sendable`** — all properties are value types, immutable after initialization. Instances can be safely passed across concurrency domains.
+- **`XMPDynamicMedia` is `Sendable`** — all properties are value types, immutable after initialization. Instances can be safely passed across concurrency domains.
 - **Same-file writes** are not internally serialized. The caller is responsible for not writing to the same file from multiple threads concurrently.
 - **`terminate()` and `isInitialized`** remain actor-isolated to prevent teardown during active operations.
 
@@ -107,11 +107,12 @@ The package is designed for concurrent use across multiple files:
 
 ```
 SPFKMetadataXMP (Swift)
-  |-- XMP.swift              Actor: SDK lifecycle + nonisolated file I/O
-  |-- XMPMetadata.swift      XMP XML parser -> structured metadata
-  |-- XMPMarker.swift        Marker data type with time calculations
-  |-- XMPElement.swift       XMP namespace element enum + AEXML subscript
-  |-- FrameRate.swift        XMP timecode format -> TimecodeFrameRate mapping
+  |-- XMP.swift                 Actor: SDK lifecycle + nonisolated file I/O
+  |-- XMPDynamicMedia.swift     xmpDM schema parser -> structured metadata
+  |-- VideoXMP.swift            Descriptive XMP read/write for QuickTime
+  |-- XMPMarker.swift           Marker data type with time calculations
+  |-- XMPElement.swift          XMP namespace element enum + AEXML subscript
+  |-- FrameRate.swift           XMP timecode format -> TimecodeFrameRate mapping
 
 SPFKMetadataXMPC (Objective-C++ / C++)
   |-- XMPFile.mm             ObjC++ bridge to XMPUtil C++ functions

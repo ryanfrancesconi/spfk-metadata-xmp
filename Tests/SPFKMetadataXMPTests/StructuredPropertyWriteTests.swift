@@ -159,7 +159,7 @@ class StructuredPropertyWriteTests: BinTestCase {
 
         try xmp.setProperty(namespace: xmpDMNamespace, name: "videoFrameRate", value: "29.970000", url: url)
 
-        let metadata = try XMPMetadata(url: url)
+        let metadata = try XMPDynamicMedia(url: url)
         #expect(metadata.nominalFrameRate == 29.97)
     }
 
@@ -226,11 +226,11 @@ class StructuredPropertyWriteTests: BinTestCase {
         let string = try sample(named: "sample3.xml")
         try xmp.write(string: string, to: url)
 
-        let originalTrackType = try XMPMetadata(xml: string).trackType
+        let originalTrackType = try XMPDynamicMedia(xml: string).trackType
 
         try xmp.setTrackInfo(trackType: nil, trackName: "Renamed Track", url: url)
 
-        let after = try XMPMetadata(url: url)
+        let after = try XMPDynamicMedia(url: url)
         #expect(after.trackName == "Renamed Track")
         #expect(after.trackType == originalTrackType, "trackType should be unchanged when nil is passed")
     }

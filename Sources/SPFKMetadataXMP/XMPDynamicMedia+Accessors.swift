@@ -6,7 +6,7 @@ import SPFKBase
 
 // MARK: - Editable xmpDM fields
 
-extension XMPMetadata {
+extension XMPDynamicMedia {
     /// Scene identifier, e.g. "INT. KITCHEN - DAY".
     public var scene: String? {
         get { value(for: .scene) }

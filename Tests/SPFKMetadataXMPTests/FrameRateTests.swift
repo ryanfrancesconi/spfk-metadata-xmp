@@ -7,7 +7,7 @@ import Testing
 struct FrameRateTests {
     @Test("all raw values map to valid TimecodeFrameRate")
     func allCasesMapToFrameRate() {
-        let cases: [(XMPMetadata.FrameRate, TimecodeFrameRate)] = [
+        let cases: [(XMPDynamicMedia.FrameRate, TimecodeFrameRate)] = [
             (.fps23_976, .fps23_976),
             (.fps24, .fps24),
             (.fps25, .fps25),
@@ -27,21 +27,21 @@ struct FrameRateTests {
 
     @Test("raw values match XMP timecode format strings")
     func rawValues() {
-        #expect(XMPMetadata.FrameRate.fps23_976.rawValue == "23976Timecode")
-        #expect(XMPMetadata.FrameRate.fps24.rawValue == "24Timecode")
-        #expect(XMPMetadata.FrameRate.fps25.rawValue == "25Timecode")
-        #expect(XMPMetadata.FrameRate.fps29_97.rawValue == "2997NonDropTimecode")
-        #expect(XMPMetadata.FrameRate.fps29_97d.rawValue == "2997DropTimecode")
-        #expect(XMPMetadata.FrameRate.fps30.rawValue == "30Timecode")
-        #expect(XMPMetadata.FrameRate.fps50.rawValue == "50Timecode")
-        #expect(XMPMetadata.FrameRate.fps59_94.rawValue == "5994NonDropTimecode")
-        #expect(XMPMetadata.FrameRate.fps59_94d.rawValue == "5994DropTimecode")
-        #expect(XMPMetadata.FrameRate.fps60.rawValue == "60Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps23_976.rawValue == "23976Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps24.rawValue == "24Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps25.rawValue == "25Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps29_97.rawValue == "2997NonDropTimecode")
+        #expect(XMPDynamicMedia.FrameRate.fps29_97d.rawValue == "2997DropTimecode")
+        #expect(XMPDynamicMedia.FrameRate.fps30.rawValue == "30Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps50.rawValue == "50Timecode")
+        #expect(XMPDynamicMedia.FrameRate.fps59_94.rawValue == "5994NonDropTimecode")
+        #expect(XMPDynamicMedia.FrameRate.fps59_94d.rawValue == "5994DropTimecode")
+        #expect(XMPDynamicMedia.FrameRate.fps60.rawValue == "60Timecode")
     }
 
     @Test("init from invalid raw value returns nil")
     func invalidRawValue() {
-        #expect(XMPMetadata.FrameRate(rawValue: "120Timecode") == nil)
-        #expect(XMPMetadata.FrameRate(rawValue: "") == nil)
+        #expect(XMPDynamicMedia.FrameRate(rawValue: "120Timecode") == nil)
+        #expect(XMPDynamicMedia.FrameRate(rawValue: "") == nil)
     }
 }

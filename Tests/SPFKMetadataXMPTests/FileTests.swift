@@ -19,7 +19,7 @@ class FileTests: BinTestCase {
 
     @Test func parseMP3() async throws {
         let url = TestBundleResources.shared.mp3_id3
-        let xmp = try XMPMetadata(url: url)
+        let xmp = try XMPDynamicMedia(url: url)
         Log.debug(xmp.document.xml)
 
         #expect(xmp.title == "Stonehenge")
@@ -29,7 +29,7 @@ class FileTests: BinTestCase {
         deleteBinOnExit = true
         let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
 
-        let orig = try? XMPMetadata(url: url).document.xml
+        let orig = try? XMPDynamicMedia(url: url).document.xml
         Log.debug(orig)
 
         let string = try sample(named: "sample1.xml")
@@ -38,7 +38,7 @@ class FileTests: BinTestCase {
 
         try await wait(sec: 1)
 
-        let xmp2 = try XMPMetadata(url: url)
+        let xmp2 = try XMPDynamicMedia(url: url)
         Log.debug(xmp2.document.xml)
 
         #expect(try AEXMLDocument(fromString: string).xml == xmp2.document.xml)
@@ -47,7 +47,7 @@ class FileTests: BinTestCase {
     @Test func writeID3_XMP() async throws {
         let url = try copyToBin(url: TestBundleResources.shared.mp3_no_metadata)
 
-        let xmpMetadata = try? XMPMetadata(url: url)
+        let xmpMetadata = try? XMPDynamicMedia(url: url)
         #expect(xmpMetadata == nil)
 
         // read in an xml definition from this file
@@ -56,7 +56,7 @@ class FileTests: BinTestCase {
         // write to the new file
         try xmp.write(string: newXML, to: url)
 
-        let xmp2 = try XMPMetadata(url: url)
+        let xmp2 = try XMPDynamicMedia(url: url)
         Log.debug(xmp2.document.xml)
 
         #expect(xmp2.title == "Stonehenge")
@@ -67,7 +67,7 @@ class FileTests: BinTestCase {
         deleteBinOnExit = true
 
         let url = TestBundleResources.shared.wav_bext_v2
-        let xmpMetadata = try XMPMetadata(url: url)
+        let xmpMetadata = try XMPDynamicMedia(url: url)
 
         Log.debug(xmpMetadata.document.xml)
 
@@ -83,7 +83,7 @@ class FileTests: BinTestCase {
         try xmp.writeReconciled(string: string, to: url)
 
         // Verify XMP was written by reading it back
-        let xmpMetadata = try XMPMetadata(url: url)
+        let xmpMetadata = try XMPDynamicMedia(url: url)
         Log.debug(xmpMetadata.document.xml)
 
         #expect(try AEXMLDocument(fromString: string).xml == xmpMetadata.document.xml)
@@ -105,8 +105,8 @@ class FileTests: BinTestCase {
         try xmp.write(string: string, to: xmpOnly)
 
         // Both should have valid XMP
-        let meta1 = try XMPMetadata(url: reconciled)
-        let meta2 = try XMPMetadata(url: xmpOnly)
+        let meta1 = try XMPDynamicMedia(url: reconciled)
+        let meta2 = try XMPDynamicMedia(url: xmpOnly)
 
         #expect(meta1.document.xml == meta2.document.xml)
     }
@@ -118,15 +118,15 @@ class FileTests: BinTestCase {
 
         let urls = TestBundleResources.shared.formats + TestBundleResources.shared.audioCases
 
-        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+        let result = try await withThrowingTaskGroup(of: XMPDynamicMedia?.self, returning: [XMPDynamicMedia].self) {
             taskGroup in
             for url in urls {
                 taskGroup.addTask {
-                    try? XMPMetadata(url: url)
+                    try? XMPDynamicMedia(url: url)
                 }
             }
 
-            var mutableResults = [XMPMetadata]()
+            var mutableResults = [XMPDynamicMedia]()
 
             for try await result in taskGroup {
                 if let result {
@@ -161,7 +161,7 @@ class FileTests: BinTestCase {
         // capture a local reference (avoids capturing self in the sending closure)
         let xmp = xmp
 
-        let result = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+        let result = try await withThrowingTaskGroup(of: XMPDynamicMedia?.self, returning: [XMPDynamicMedia].self) {
             taskGroup in
             for url in urls {
                 let urlCopy = url
@@ -169,11 +169,11 @@ class FileTests: BinTestCase {
 
                 taskGroup.addTask {
                     try xmp.write(string: xmlCopy, to: urlCopy)
-                    return try XMPMetadata(url: urlCopy)
+                    return try XMPDynamicMedia(url: urlCopy)
                 }
             }
 
-            var mutableResults = [XMPMetadata]()
+            var mutableResults = [XMPDynamicMedia]()
 
             for try await result in taskGroup {
                 if let result {
@@ -209,13 +209,13 @@ class FileTests: BinTestCase {
             urls.append(sourceURLs[i % sourceURLs.count])
         }
 
-        let results = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+        let results = try await withThrowingTaskGroup(of: XMPDynamicMedia?.self, returning: [XMPDynamicMedia].self) {
             group in
             for url in urls {
-                group.addTask { try? XMPMetadata(url: url) }
+                group.addTask { try? XMPDynamicMedia(url: url) }
             }
 
-            var out = [XMPMetadata]()
+            var out = [XMPDynamicMedia]()
             out.reserveCapacity(totalCount)
 
             for try await result in group {
@@ -263,7 +263,7 @@ class FileTests: BinTestCase {
             }
         }
 
-        let results = try await withThrowingTaskGroup(of: XMPMetadata?.self, returning: [XMPMetadata].self) {
+        let results = try await withThrowingTaskGroup(of: XMPDynamicMedia?.self, returning: [XMPDynamicMedia].self) {
             group in
             for url in urls {
                 let urlCopy = url
@@ -271,11 +271,11 @@ class FileTests: BinTestCase {
 
                 group.addTask {
                     try xmp.write(string: xmlCopy, to: urlCopy)
-                    return try XMPMetadata(url: urlCopy)
+                    return try XMPDynamicMedia(url: urlCopy)
                 }
             }
 
-            var out = [XMPMetadata]()
+            var out = [XMPDynamicMedia]()
             out.reserveCapacity(totalCount)
 
             for try await result in group {
@@ -336,7 +336,7 @@ class FileTests: BinTestCase {
             for i in 0 ..< totalReads {
                 let url = readURLs[i % readURLs.count]
                 group.addTask {
-                    _ = try? XMPMetadata(url: url)
+                    _ = try? XMPDynamicMedia(url: url)
                     return (isWrite: false, success: true)
                 }
             }
@@ -347,7 +347,7 @@ class FileTests: BinTestCase {
                 let xmlCopy = newXML
                 group.addTask {
                     try xmp.write(string: xmlCopy, to: urlCopy)
-                    let meta = try XMPMetadata(url: urlCopy)
+                    let meta = try XMPDynamicMedia(url: urlCopy)
                     return (isWrite: true, success: meta.title == "Stonehenge")
                 }
             }
@@ -412,7 +412,7 @@ class FileTests: BinTestCase {
                 let urlCopy = url
                 group.addTask {
                     try xmp.copyXMP(from: source, to: urlCopy)
-                    _ = try XMPMetadata(url: urlCopy)
+                    _ = try XMPDynamicMedia(url: urlCopy)
                     return (isWrite: true, success: true)
                 }
             }
@@ -420,7 +420,7 @@ class FileTests: BinTestCase {
             // Concurrent reads racing against the writes on the same source
             for _ in 0 ..< totalWrites {
                 group.addTask {
-                    _ = try? XMPMetadata(url: source)
+                    _ = try? XMPDynamicMedia(url: source)
                     return (isWrite: false, success: true)
                 }
             }

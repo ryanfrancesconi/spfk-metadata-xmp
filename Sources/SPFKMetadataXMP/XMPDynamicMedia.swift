@@ -9,11 +9,19 @@ import SPFKUtils
 import SwiftExtensions
 import SwiftTimecode
 
-/// A subset of XMP metadata focused on markers and timecode.
+/// Adobe's XMP Dynamic Media schema (`xmpDM`) -- markers, timecode, tracks, and the frame/sample
+/// rates that give them meaning, plus a few `dc:`/`xmp:` fields that travel alongside.
 ///
-/// This is currently a parser only.
-public struct XMPMetadata: Equatable, Sendable {
-    public static func == (lhs: XMPMetadata, rhs: XMPMetadata) -> Bool {
+/// Parses what this codebase actually consumes rather than the whole schema, and writes only the
+/// editable fields in ``XMPDynamicMedia+Accessors``.
+///
+/// **Not the general XMP entry point**, despite once being named as though it were: descriptive
+/// Dublin Core / IPTC metadata -- title, keywords, creator, rating, location -- is ``XMPMetadata``
+/// in `spfk-metadata-image`, reached through `ImageXMP` or `VideoXMP`. This type is the technical,
+/// time-based half of XMP; that one is the descriptive half. They share a namespace vocabulary and
+/// nothing else.
+public struct XMPDynamicMedia: Equatable, Sendable {
+    public static func == (lhs: XMPDynamicMedia, rhs: XMPDynamicMedia) -> Bool {
         lhs.frameRate == rhs.frameRate && lhs.markers == rhs.markers && lhs.nominalFrameRate == rhs.nominalFrameRate
             && lhs.audioSampleRate == rhs.audioSampleRate && lhs.audioChannelType == rhs.audioChannelType
             && lhs.videoFrameSize == rhs.videoFrameSize && lhs.videoFieldOrder == rhs.videoFieldOrder
@@ -136,7 +144,7 @@ public struct XMPMetadata: Equatable, Sendable {
     public private(set) var trackName: String?
     public private(set) var trackType: String?
 
-    /// Creates an empty `XMPMetadata` with a minimal valid RDF/XMP document shell.
+    /// Creates an empty `XMPDynamicMedia` with a minimal valid RDF/XMP document shell.
     ///
     /// Used when a file has no existing XMP packet but the user wants to set
     /// video-metadata fields (``scene``, ``cameraAngle``, etc.) for the first time.
@@ -159,7 +167,7 @@ public struct XMPMetadata: Equatable, Sendable {
         self.init(document: doc)
     }
 
-    /// Create a XMPMetadata struct by passing it a URL to a file.
+    /// Create a XMPDynamicMedia struct by passing it a URL to a file.
     ///
     /// Thread-safe — multiple instances can be created concurrently.
     /// - Parameter url: the file to open
@@ -168,7 +176,7 @@ public struct XMPMetadata: Equatable, Sendable {
         try self.init(xml: xmlString)
     }
 
-    /// Create a XMPMetadata struct by passing it a XMP xml string
+    /// Create a XMPDynamicMedia struct by passing it a XMP xml string
     /// - Parameter xml: a valid xml string
     public init(xml: String) throws {
         let doc = try AEXMLDocument(xml: xml)
@@ -177,7 +185,7 @@ public struct XMPMetadata: Equatable, Sendable {
 
     /// All Inits resolve here.
     ///
-    /// Create a XMPMetadata struct by passing it a valid AEXMLDocument. This isn't an exhaustive parse, but
+    /// Create a XMPDynamicMedia struct by passing it a valid AEXMLDocument. This isn't an exhaustive parse, but
     /// currently only containing items of interest to us.
     ///
     /// - Parameter doc: an `AEXMLDocument`

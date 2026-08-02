@@ -3,13 +3,13 @@ import Foundation
 import SwiftTimecode
 import Testing
 
-@Suite("XMPMetadata Parser - Additional Samples")
+@Suite("XMPDynamicMedia Parser - Additional Samples")
 struct ParserExtensionTests {
     // MARK: - sample3: 25fps, 4 markers, Premiere Pro, videoFrameSize, duration
 
     @Test("sample3 parses Premiere Pro 25fps with markers")
     func parseSample3() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample3.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample3.xml"))
 
         #expect(xmp.creatorTool == "Adobe Premiere Pro 2022.0 (Macintosh)")
         #expect(xmp.createDate == "2021-12-04T22:13:58Z")
@@ -40,7 +40,7 @@ struct ParserExtensionTests {
 
     @Test("sample5 parses Media Encoder with markers")
     func parseSample5() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample5.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample5.xml"))
 
         #expect(xmp.creatorTool == "Adobe Adobe Media Encoder 2022.0 (Macintosh)")
         #expect(xmp.nominalFrameRate == 25.0)
@@ -57,7 +57,7 @@ struct ParserExtensionTests {
 
     @Test("sample6 parses minimal 23.976 metadata")
     func parseSample6() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample6.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample6.xml"))
 
         // sample6 has altTimecode with 23976Timecode
         #expect(xmp.altTimecode?.stringValue() == "00:00:00:00")
@@ -77,7 +77,7 @@ struct ParserExtensionTests {
 
     @Test("sample7 parses 23.976fps with 16 markers and offset timecode")
     func parseSample7() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample7.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample7.xml"))
 
         #expect(xmp.creatorTool == "Adobe Premiere Pro 2022.0 (Macintosh)")
         #expect(xmp.frameRate == .fps23_976)
@@ -97,7 +97,7 @@ struct ParserExtensionTests {
 
     @Test("sample9 parses 29.97 non-drop with markers")
     func parseSample9() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample9.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample9.xml"))
 
         #expect(xmp.frameRate == .fps29_97)
         #expect(xmp.audioSampleRate == 48000)
@@ -114,7 +114,7 @@ struct ParserExtensionTests {
 
     @Test("sample10 parses BWF audio metadata with high timecode")
     func parseSample10() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample10.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample10.xml"))
 
         #expect(xmp.audioSampleRate == 48000)
 

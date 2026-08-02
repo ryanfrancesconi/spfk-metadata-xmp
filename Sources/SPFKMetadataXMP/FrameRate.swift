@@ -4,7 +4,7 @@ import SwiftTimecode
 
 // swiftformat:disable consecutiveSpaces
 
-extension XMPMetadata {
+extension XMPDynamicMedia {
     /**
      https://www.adobe.io/xmp/docs/XMPNamespaces/XMPDataTypes/Timecode/
 

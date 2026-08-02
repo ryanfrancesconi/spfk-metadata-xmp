@@ -4,14 +4,14 @@ import Foundation
 import SwiftTimecode
 import Testing
 
-@Suite("XMPMetadata Edge Cases")
+@Suite("XMPDynamicMedia Edge Cases")
 struct XMPMetadataEdgeCaseTests {
     // MARK: - Invalid / minimal XML
 
     @Test("invalid XML throws")
     func invalidXML() {
         #expect(throws: (any Error).self) {
-            _ = try XMPMetadata(xml: "not valid xml at all")
+            _ = try XMPDynamicMedia(xml: "not valid xml at all")
         }
     }
 
@@ -25,7 +25,7 @@ struct XMPMetadataEdgeCaseTests {
             </rdf:RDF>
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
 
         #expect(xmp.title == nil)
         #expect(xmp.creatorTool == nil)
@@ -48,7 +48,7 @@ struct XMPMetadataEdgeCaseTests {
         <x:xmpmeta xmlns:x="adobe:ns:meta/">
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
 
         #expect(xmp.title == nil)
         #expect(xmp.frameRate == nil)
@@ -59,7 +59,7 @@ struct XMPMetadataEdgeCaseTests {
 
     @Test("startTimecodeResolved prefers altTimecode over startTimecode")
     func resolvedPrefersAlt() throws {
-        let xmp = try XMPMetadata(xml: sample(named: "sample1.xml"))
+        let xmp = try XMPDynamicMedia(xml: sample(named: "sample1.xml"))
 
         // sample1 has different alt and start timecodes
         #expect(xmp.altTimecode != nil)
@@ -83,7 +83,7 @@ struct XMPMetadataEdgeCaseTests {
             </rdf:RDF>
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
 
         #expect(xmp.altTimecode == nil)
         #expect(xmp.startTimecode?.stringValue() == "01:00:00:00")
@@ -94,16 +94,16 @@ struct XMPMetadataEdgeCaseTests {
 
     @Test("Equatable compares key properties")
     func equatable() throws {
-        let xmp1 = try XMPMetadata(xml: sample(named: "sample3.xml"))
-        let xmp2 = try XMPMetadata(xml: sample(named: "sample3.xml"))
+        let xmp1 = try XMPDynamicMedia(xml: sample(named: "sample3.xml"))
+        let xmp2 = try XMPDynamicMedia(xml: sample(named: "sample3.xml"))
 
         #expect(xmp1 == xmp2)
     }
 
     @Test("Equatable detects different content")
     func equalableDifferent() throws {
-        let xmp1 = try XMPMetadata(xml: sample(named: "sample3.xml"))
-        let xmp2 = try XMPMetadata(xml: sample(named: "sample7.xml"))
+        let xmp1 = try XMPDynamicMedia(xml: sample(named: "sample3.xml"))
+        let xmp2 = try XMPDynamicMedia(xml: sample(named: "sample7.xml"))
 
         #expect(xmp1 != xmp2)
     }
@@ -122,7 +122,7 @@ struct XMPMetadataEdgeCaseTests {
             </rdf:RDF>
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
 
         #expect(xmp.startTimecode == nil)
         #expect(xmp.nominalFrameRate == 25.0)
@@ -157,7 +157,7 @@ struct XMPMetadataEdgeCaseTests {
             </rdf:RDF>
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
 
         #expect(xmp.frameRate == nil)
         // Markers should be empty since parseMarkers returns nil without frameRate
@@ -182,7 +182,7 @@ struct XMPMetadataEdgeCaseTests {
             </rdf:RDF>
         </x:xmpmeta>
         """
-        let xmp = try XMPMetadata(xml: xml)
+        let xmp = try XMPDynamicMedia(xml: xml)
         #expect(xmp.title == "My Title")
     }
 }
