@@ -104,31 +104,24 @@ The package is designed for concurrent use across multiple files:
 
 ## Architecture
 
-```
-SPFKMetadataXMP (Swift)
-  |-- XMP.swift                 Actor: SDK lifecycle + nonisolated file I/O
-  |-- XMPDynamicMedia.swift     xmpDM schema parser -> structured metadata
-  |-- VideoXMP.swift            Descriptive XMP read/write for QuickTime
-  |-- XMPMarker.swift           Marker data type with time calculations
-  |-- XMPElement.swift          XMP namespace element enum + AEXML subscript
-  |-- FrameRate.swift           XMP timecode format -> TimecodeFrameRate mapping
+Four tiers, because the Adobe SDK is C++ and none of it can be reached from Swift directly.
 
-SPFKMetadataXMPC (Objective-C++ / C++)
-  |-- XMPFile.mm             ObjC++ bridge to XMPUtil C++ functions
-  |-- XMPLifecycle.mm        ObjC++ bridge to SDK init/terminate
-  |-- XMPLifecycleCXX.cpp    Mutex-protected C++ SDK lifecycle
-  |-- XMPUtil.cpp            C++ XMP read/write (stack-local SXMPFiles/SXMPMeta)
+`SPFKMetadataXMP` is the Swift surface — the `XMP` actor plus the value types it returns
+(`XMPDynamicMedia`, `VideoXMP`, `XMPMarker`, `XMPElement`, `FrameRate`).
 
-Frameworks/
-  |-- XMPCore.xcframework    Adobe XMP Core SDK binary
-  |-- XMPFiles.xcframework   Adobe XMP Files SDK binary
-```
+`SPFKMetadataXMPC` is the ObjC++ bridge. It exists in two halves on purpose: `.mm` files that
+Swift can see, and a `.cpp` layer that Swift cannot, holding the mutex-protected SDK lifecycle and
+the stack-local `SXMPFiles`/`SXMPMeta` work. Keeping the C++ out of any Swift-visible header is
+what lets consumers avoid `.interoperabilityMode(.Cxx)`.
+
+`XMPCore.xcframework` and `XMPFiles.xcframework` are the vendored Adobe SDK binaries.
 
 ## Dependencies
 
 | Package | Purpose |
 |---------|---------|
 | [spfk-base](https://github.com/ryanfrancesconi/spfk-base) | Foundation extensions, logging, error utilities |
+| [spfk-metadata-image](https://github.com/ryanfrancesconi/spfk-metadata-image) | Image metadata types shared with the TagLib path |
 | [spfk-time](https://github.com/ryanfrancesconi/spfk-time) | CMTime utilities, SwiftTimecode re-export |
 | [spfk-utils](https://github.com/ryanfrancesconi/spfk-utils) | AEXML XML parsing, string extensions |
 | [spfk-testing](https://github.com/ryanfrancesconi/spfk-testing) | Test infrastructure (test target only) |
