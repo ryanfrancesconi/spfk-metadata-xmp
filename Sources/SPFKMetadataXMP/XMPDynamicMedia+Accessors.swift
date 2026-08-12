@@ -60,7 +60,7 @@ extension XMPDynamicMedia {
     }
 
     private func value(for element: XMPElement) -> String? {
-        descriptionElement?[element]?.value
+        descriptionElement?.value(for: element)
     }
 
     private func setValue(_ value: String?, for element: XMPElement) {

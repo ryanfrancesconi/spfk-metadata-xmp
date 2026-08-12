@@ -204,11 +204,11 @@ public struct XMPDynamicMedia: Equatable, Sendable {
             keywords = items.compactMap(\.value)
         }
 
-        creatorTool = desc[.creatorTool]?.value
-        createDate = desc[.createDate]?.value
+        creatorTool = desc.value(for: .creatorTool)
+        createDate = desc.value(for: .createDate)
 
         // nominal frame rate as a Float
-        if let value = desc[.videoFrameRate]?.value?.float {
+        if let value = desc.value(for: .videoFrameRate)?.float {
             nominalFrameRate = value
         }
 
@@ -226,13 +226,13 @@ public struct XMPDynamicMedia: Equatable, Sendable {
             altTimecode = value
         }
 
-        audioSampleRate = desc[.audioSampleRate]?.value?.double
-        audioChannelType = desc[.audioChannelType]?.value
-        videoFieldOrder = desc[.videoFieldOrder]?.value
+        audioSampleRate = desc.value(for: .audioSampleRate)?.double
+        audioChannelType = desc.value(for: .audioChannelType)
+        videoFieldOrder = desc.value(for: .videoFieldOrder)
 
         if let frameSize = desc[.videoFrameSize],
-            let width = frameSize[.dimensionsWidth]?.value?.double,
-            let height = frameSize[.dimensionsHeight]?.value?.double
+            let width = frameSize.value(for: .dimensionsWidth)?.double,
+            let height = frameSize.value(for: .dimensionsHeight)?.double
         {
             videoFrameSize = CGSize(width: width, height: height)
         }
@@ -246,8 +246,8 @@ public struct XMPDynamicMedia: Equatable, Sendable {
         if let track = trackList.first,
             let list = track[.bag]?[.li]
         {
-            trackType = list[.trackType]?.value
-            trackName = list[.trackName]?.value
+            trackType = list.value(for: .trackType)
+            trackName = list.value(for: .trackName)
         }
 
         // Marker can appear in more than one place
@@ -264,11 +264,11 @@ public struct XMPDynamicMedia: Equatable, Sendable {
 
         markers = allMarkers
 
-        if let value = desc[.startTimeScale]?.value?.int32 {
+        if let value = desc.value(for: .startTimeScale)?.int32 {
             startTimeScale = CMTimeScale(value)
         }
 
-        if let value = desc[.startTimeSampleSize]?.value?.int32 {
+        if let value = desc.value(for: .startTimeSampleSize)?.int32 {
             startTimeSampleSize = CMTimeValue(value)
         }
 
@@ -285,8 +285,8 @@ public struct XMPDynamicMedia: Equatable, Sendable {
      */
     private func parseDuration(element: AEXMLElement) -> TimeInterval? {
         // Look at this mess
-        guard let frameCount = element[.value]?.value?.double,
-            let scale = element[.scale]?.value,
+        guard let frameCount = element.value(for: .value)?.double,
+            let scale = element.value(for: .scale),
             let frameDuration = CMTimeString.parse(string: scale)?.seconds
         else {
             return nil
@@ -296,9 +296,9 @@ public struct XMPDynamicMedia: Equatable, Sendable {
     }
 
     private func parseTimecode(element: AEXMLElement) -> Timecode? {
-        guard let value = element[.timeFormat]?.value,
+        guard let value = element.value(for: .timeFormat),
             let timeFormat = FrameRate(rawValue: value),
-            let timeValue: String = element[.timeValue]?.value
+            let timeValue = element.value(for: .timeValue)
         else {
             return nil
         }
@@ -335,11 +335,11 @@ public struct XMPDynamicMedia: Equatable, Sendable {
         var out = [XMPMarker]()
 
         for element in elements {
-            guard let mFrame = element[.startTime]?.value?.int else { continue }
+            guard let mFrame = element.value(for: .startTime)?.int else { continue }
 
-            let mName = element[.name]?.value ?? ""
-            let mDuration = element[.duration]?.value?.int ?? 0
-            let mComment = element[.comment]?.value ?? ""
+            let mName = element.value(for: .name) ?? ""
+            let mDuration = element.value(for: .duration)?.int ?? 0
+            let mComment = element.value(for: .comment) ?? ""
 
             let marker = XMPMarker(
                 name: mName,

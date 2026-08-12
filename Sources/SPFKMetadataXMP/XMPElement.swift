@@ -96,4 +96,15 @@ extension AEXMLElement {
         guard value.error == nil else { return nil }
         return value
     }
+
+    /// The value of `key` on this element, whether it was serialized as a child element or as an
+    /// attribute of the same qualified name.
+    ///
+    /// RDF permits both spellings for a simple property and writers disagree: Premiere emits
+    /// `<xmpDM:timeValue>01:00:00:00</xmpDM:timeValue>`, QuickTime-authored files emit
+    /// `xmpDM:timeValue="01;00;00;01"` on the enclosing element. Reading only children silently
+    /// drops the whole attribute form.
+    public func value(for key: XMPElement) -> String? {
+        self[key]?.value ?? attributes[key.rawValue]
+    }
 }
