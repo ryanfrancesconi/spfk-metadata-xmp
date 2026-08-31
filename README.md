@@ -8,10 +8,11 @@ A Swift package for reading and writing [Adobe XMP](https://developer.adobe.com/
 
 ## Overview
 
-SPFKMetadataXMP provides two main components:
+Three main pieces:
 
-- **`XMP`** — A thread-safe `actor` singleton for reading and writing raw XMP XML strings to/from media files. Manages the Adobe XMP SDK lifecycle. The `parse` and `write` methods are `nonisolated`, enabling true concurrent file operations without actor serialization.
-- **`XMPDynamicMedia`** — A `Sendable` struct that parses XMP XML into strongly-typed properties focused on timecode, markers, and media metadata.
+- **`XMP`** — A thread-safe `actor` singleton for reading and writing raw XMP XML strings, and for reading and writing individual properties in a batch. Manages the Adobe XMP SDK lifecycle; its file I/O is `nonisolated`, so concurrent file operations do not serialize on the actor.
+- **`XMPDynamicMedia`** — A `Sendable` struct parsing XMP XML into strongly-typed properties focused on timecode, markers and media metadata.
+- **`VideoXMP`** — Reading, writing and clearing the descriptive fields of a QuickTime container.
 
 ### Supported File Formats
 
@@ -21,68 +22,37 @@ The XMP SDK supports reading and writing metadata for common media containers in
 
 ### XMP
 
-Singleton actor that wraps the Adobe XMP C++ SDK. Handles SDK initialization via mutex-protected C++ lifecycle management. File I/O methods are `nonisolated` — they bypass the actor's serial executor because the underlying C++ calls use stack-local `SXMPFiles` / `SXMPMeta` instances with no shared state.
-
-```swift
-// Read XMP from a file (synchronous, nonisolated)
-let xmlString = try XMP.shared.parse(url: fileURL)
-
-// Write XMP to a file (synchronous, nonisolated)
-try XMP.shared.write(string: xmlString, to: fileURL)
-
-// Concurrent reads are safe — each call gets its own C++ objects
-try await withThrowingTaskGroup(of: XMPDynamicMedia.self) { group in
-    for url in urls {
-        group.addTask { try XMPDynamicMedia(url: url) }
-    }
-    // ...
-}
-```
+Singleton actor wrapping the Adobe XMP C++ SDK, handling SDK initialization through mutex-protected
+C++ lifecycle management. `parse`, `write` and the batch property calls are `nonisolated` — they
+bypass the actor's serial executor because the underlying C++ uses stack-local `SXMPFiles` /
+`SXMPMeta` instances with no shared state, so several files can be read or written in parallel.
 
 ### XMPDynamicMedia
 
-Parses XMP XML into structured properties. Can be initialized from a file URL, an XML string, or an `AEXMLDocument`.
-
-```swift
-// From a file (synchronous, thread-safe)
-let metadata = try XMPDynamicMedia(url: fileURL)
-
-// From an XML string
-let metadata = try XMPDynamicMedia(xml: xmlString)
-
-// Access parsed properties
-metadata.title              // dc:title
-metadata.frameRate          // TimecodeFrameRate (from timecode or nominal rate)
-metadata.startTimecodeResolved  // Timecode (prefers altTimecode over startTimecode)
-metadata.markers            // [XMPMarker]
-metadata.duration           // TimeInterval
-metadata.audioSampleRate    // Double
-metadata.audioChannelType   // String (e.g. "Stereo")
-metadata.videoFieldOrder    // String (e.g. "Progressive")
-metadata.nominalFrameRate   // Float (e.g. 25.0)
-metadata.creatorTool        // String (e.g. "Adobe Premiere Pro 2022.0")
-metadata.createDate         // String
-metadata.startTimeScale     // CMTimeScale
-metadata.startTimeSampleSize // CMTimeValue
-```
+Parses XMP XML into structured properties — title, frame rate, resolved start timecode, markers,
+duration, sample rate, channel and field configuration, creator tool and create date. Initializable
+from a file URL, an XML string, or a parsed document.
 
 ### XMPMarker
 
-Represents a single marker from the XMP `xmpDM:Tracks` data, with frame-based and time-based positioning.
+One marker from the XMP `xmpDM:Tracks` data, carrying both frame-based and time-based positioning
+and converting between them from its frame rate.
 
-```swift
-let marker = XMPMarker(
-    name: "Hit",
-    comment: "impact sound",
-    startFrame: 48,
-    durationInFrames: 5,
-    frameRate: .fps25
-)
+### VideoXMP
 
-marker.time           // 1.92 (seconds)
-marker.duration       // 0.2 (seconds)
-marker.startTimecode  // Timecode value
-```
+The video half: fourteen fields written into a QuickTime container through the toolkit, verified
+against a real 4K iPhone `.mov` — all of them write, read back and clear, with the file's QuickTime
+user data, duration and track count preserved, in single-digit milliseconds. The toolkit appends an
+XMP atom rather than rewriting the container.
+
+It lives here rather than in a product package so ShadowTag inherits it: video capability is the one
+direction that flows TorchTag → ShadowTag. ShadowTag writes video metadata through TagLib today,
+which reaches 4 of these 14 fields and cannot express keywords at all.
+
+### XMPPropertyRead / XMPPropertyWrite
+
+One property to read, or to write or remove, in a batch call — so a caller touching several fields
+opens the file once instead of once per field.
 
 ### FrameRate
 
@@ -128,11 +98,13 @@ what lets consumers avoid `.interoperabilityMode(.Cxx)`.
 
 ## Future API Opportunities
 
-The Adobe XMP SDK exposes ~300+ methods across `TXMPMeta`, `TXMPFiles`, `TXMPIterator`, and `TXMPUtils`. This package currently uses a small subset (open/read/write/serialize). Below are capabilities worth exploring.
+The Adobe XMP SDK exposes ~300+ methods across `TXMPMeta`, `TXMPFiles`, `TXMPIterator`, and `TXMPUtils`. This package currently uses a small subset — open, read, write, serialize, and per-property get and set. Below are capabilities worth exploring.
 
-### Direct Property Access
+### Typed and localized property access
 
-`GetProperty` / `SetProperty` with type-specific variants (`_Bool`, `_Int`, `_Float`, `_Date`, `_Int64`). Would allow reading or modifying individual XMP fields without full XML round-tripping. Also `GetLocalizedText` / `SetLocalizedText` for locale-aware `dc:title` handling.
+The batch property calls cover string properties. The type-specific variants (`_Bool`, `_Int`,
+`_Float`, `_Date`, `_Int64`) and `GetLocalizedText` / `SetLocalizedText` for locale-aware `dc:title`
+handling are not wrapped yet.
 
 ### Property Iterator
 
