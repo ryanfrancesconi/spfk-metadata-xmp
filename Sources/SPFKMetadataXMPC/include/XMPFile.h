@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSString *propName;
 @property (nonatomic, strong, readonly) NSArray<NSString *> *values;
 @property (nonatomic, readonly) bool isArray;
+@property (nonatomic, readonly) bool isLocalized;
 
 @property (nonatomic, readonly) bool isRemoval;
 
@@ -25,12 +26,16 @@ NS_ASSUME_NONNULL_BEGIN
                                     values:(nonnull NSArray<NSString *> *)values
                                    isArray:(bool)isArray;
 
+/// Writes `value` as the `x-default` entry of an `rdf:Alt` language alternative, keeping the
+/// other languages' entries.
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                  propName:(nonnull NSString *)propName
+                            localizedValue:(nonnull NSString *)value;
+
 /// Removes the property entirely rather than writing a value.
 ///
-/// An empty value is not a removal: writing `""` stores a literal empty value, and on a
-/// property the toolkit has reconciled into a language alternative (`dc:title`,
-/// `dc:description`, `dc:rights`) it fails outright with "Composite nodes can't have values".
-/// This deletes the whole subtree, so a lang-alt clears in every language rather than leaving
+/// An empty value is not a removal: writing `""` stores a literal empty value. This deletes the
+/// whole subtree, so a language alternative clears in every language rather than leaving
 /// entries the user cannot see or edit.
 - (nonnull instancetype)initWithRemovalOfNamespace:(nonnull NSString *)ns
                                            propName:(nonnull NSString *)propName;

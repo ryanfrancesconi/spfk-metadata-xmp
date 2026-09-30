@@ -12,10 +12,8 @@ import SPFKMetadataImage
 /// ``XMPField`` set, which is what keeps a video and an image from supporting different
 /// fields.
 ///
-/// Verified against a real 4K iPhone `.mov` (2026-08-02): all fourteen fields write, read back and
-/// clear, with the file's QuickTime user data -- GPS, make, model, capture date -- duration and
-/// track count all preserved, in single-digit milliseconds. The toolkit appends an XMP atom rather
-/// than rewriting the container.
+/// Writing keeps the file's QuickTime user data -- GPS, make, model, capture date -- duration and
+/// track count. The toolkit appends an XMP atom rather than rewriting the container.
 public enum VideoXMP {
     /// Reads every modeled field in one open/read/close cycle.
     ///
@@ -53,8 +51,12 @@ public enum VideoXMP {
                 return .removal(namespace: field.namespace, name: field.localName)
             }
 
-            return field.isArray
-                ? .array(namespace: field.namespace, name: field.localName, values: values)
+            if field.isArray {
+                return .array(namespace: field.namespace, name: field.localName, values: values)
+            }
+
+            return field.isLanguageAlternative
+                ? .localized(namespace: field.namespace, name: field.localName, value: values[0])
                 : .simple(namespace: field.namespace, name: field.localName, value: values[0])
         }
 

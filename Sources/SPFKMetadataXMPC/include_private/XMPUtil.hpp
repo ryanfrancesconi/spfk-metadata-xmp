@@ -10,8 +10,8 @@
 #include "XMPLifecycleCXX.hpp"
 
 /// Describes one property to write in a batch `setXMPProperties` call.
-/// `isRemoval` deletes the property; otherwise `isArray` selects between `SetProperty`
-/// (single value, `values[0]` used) and the array replace path (`DeleteProperty` +
+/// `isRemoval` deletes the property; otherwise `isArray` selects between a single value
+/// (`values[0]`, see `setScalarProperty`) and the array replace path (`DeleteProperty` +
 /// `AppendArrayItem` per value).
 struct XMPPropertyWrite {
     std::string ns;
@@ -19,13 +19,13 @@ struct XMPPropertyWrite {
     std::vector<std::string> values;
     bool isArray;
 
+    /// Writes the single value as the `x-default` entry of an `rdf:Alt` language alternative.
+    bool isLocalized = false;
+
     /// Removes the property outright rather than writing a value, via `DeleteProperty`.
     ///
-    /// Necessary because an empty value is not a removal: `SetProperty` with `""` writes a
-    /// literal empty value, and on a property the toolkit has reconciled into a language
-    /// alternative (`dc:title`, `dc:description`, `dc:rights`) it throws outright --
-    /// "Composite nodes can't have values". `DeleteProperty` takes the whole subtree, so a
-    /// lang-alt is cleared in every language rather than leaving entries the user cannot see.
+    /// An empty value is not a removal: it stores a literal empty value. `DeleteProperty` takes
+    /// the whole subtree, so a language alternative is cleared in every language.
     ///
     /// Takes precedence over `values`/`isArray` when set, so a caller cannot ask for both.
     bool isRemoval = false;
@@ -37,6 +37,20 @@ private:
     ///
     /// - Parameter string: string to parse
     static SXMPMeta createXMPFromRDF(const std::string& rdfString);
+
+    /// Writes one value, as a language alternative's `x-default` entry when `isLocalized` is set
+    /// or the existing node already is an `rdf:Alt`, and as a simple value otherwise.
+    ///
+    /// `SetProperty` throws on an `rdf:Alt` ("Composite nodes can't have values"), and
+    /// `SetLocalizedText` throws on an existing simple value, which is deleted first. Other
+    /// languages keep their entries unless they held the old `x-default` text, which is updated too.
+    static void setScalarProperty(
+        SXMPMeta& meta,
+        const std::string& ns,
+        const std::string& propName,
+        const std::string& value,
+        bool isLocalized
+    );
 
 public:
     static std::string getXMP(const std::string& filePath);

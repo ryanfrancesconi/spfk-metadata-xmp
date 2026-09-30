@@ -172,9 +172,13 @@ public enum XMP {
         XMPLifecycle.initialize()
 
         let entries = properties.map { property in
-            property.isRemoval
-                ? XMPPropertyWriteEntry(removalOfNamespace: property.namespace, propName: property.name)
-                : XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, values: property.values, isArray: property.isArray)
+            if property.isRemoval {
+                XMPPropertyWriteEntry(removalOfNamespace: property.namespace, propName: property.name)
+            } else if property.isLocalized, let value = property.values.first {
+                XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, localizedValue: value)
+            } else {
+                XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, values: property.values, isArray: property.isArray)
+            }
         }
 
         var error: NSError?
@@ -245,20 +249,32 @@ public struct XMPPropertyWrite: Sendable {
     public let values: [String]
     public let isArray: Bool
 
+    /// Writes the single value as the `x-default` entry of an `rdf:Alt` language alternative.
+    public let isLocalized: Bool
+
     /// Removes the property instead of writing it. Takes precedence over `values`/`isArray`.
     public let isRemoval: Bool
 
-    init(namespace: String, name: String, values: [String], isArray: Bool, isRemoval: Bool = false) {
+    init(namespace: String, name: String, values: [String], isArray: Bool, isLocalized: Bool = false, isRemoval: Bool = false) {
         self.namespace = namespace
         self.name = name
         self.values = values
         self.isArray = isArray
+        self.isLocalized = isLocalized
         self.isRemoval = isRemoval
     }
 
-    /// A single simple-value property write.
+    /// A single simple-value property write. A property the file already holds as a language
+    /// alternative is written as one.
     public static func simple(namespace: String, name: String, value: String) -> XMPPropertyWrite {
         XMPPropertyWrite(namespace: namespace, name: name, values: [value], isArray: false)
+    }
+
+    /// A language-alternative write: `value` becomes the `x-default` entry, and entries in other
+    /// languages are kept. For `dc:title`, `dc:description`, `dc:rights` and the other `rdf:Alt`
+    /// properties.
+    public static func localized(namespace: String, name: String, value: String) -> XMPPropertyWrite {
+        XMPPropertyWrite(namespace: namespace, name: name, values: [value], isArray: false, isLocalized: true)
     }
 
     /// A whole-array-replace property write.
@@ -268,10 +284,7 @@ public struct XMPPropertyWrite: Sendable {
 
     /// Removes a property entirely.
     ///
-    /// **Not the same as writing an empty value**, which is why this exists: `simple(value: "")`
-    /// stores a literal empty value, and on a property the toolkit has reconciled into a language
-    /// alternative -- `dc:title`, `dc:description`, `dc:rights` -- it fails outright with
-    /// "Composite nodes can't have values". Verified against a real iPhone `.mov` (2026-08-02).
+    /// **Not the same as writing an empty value**, which stores a literal empty value.
     ///
     /// Deletes the whole subtree, so a language alternative clears in every language rather than
     /// leaving entries the user cannot see or edit. Removing a property that is not present is a

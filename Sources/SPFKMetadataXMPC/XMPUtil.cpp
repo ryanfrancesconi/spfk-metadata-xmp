@@ -270,7 +270,7 @@ bool XMPUtil::setXMPProperty(
         SXMPMeta meta;
         myFile.GetXMP(&meta);
 
-        meta.SetProperty(ns.c_str(), propName.c_str(), value.c_str());
+        XMPUtil::setScalarProperty(meta, ns, propName, value, false);
 
         if (!myFile.CanPutXMP(meta)) {
             cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
@@ -392,7 +392,7 @@ bool XMPUtil::setXMPProperties(
                     );
                 }
             } else if (!property.values.empty()) {
-                meta.SetProperty(property.ns.c_str(), property.propName.c_str(), property.values[0].c_str());
+                XMPUtil::setScalarProperty(meta, property.ns, property.propName, property.values[0], property.isLocalized);
             }
         }
 

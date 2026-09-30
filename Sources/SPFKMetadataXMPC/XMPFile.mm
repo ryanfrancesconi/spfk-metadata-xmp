@@ -18,6 +18,20 @@
     _propName = propName;
     _values = values;
     _isArray = isArray;
+    _isLocalized = false;
+    _isRemoval = false;
+    return self;
+}
+
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                  propName:(nonnull NSString *)propName
+                            localizedValue:(nonnull NSString *)value {
+    self = [super init];
+    _ns = ns;
+    _propName = propName;
+    _values = @[value];
+    _isArray = false;
+    _isLocalized = true;
     _isRemoval = false;
     return self;
 }
@@ -29,6 +43,7 @@
     _propName = propName;
     _values = @[];
     _isArray = false;
+    _isLocalized = false;
     _isRemoval = true;
     return self;
 }
@@ -154,6 +169,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
         write.propName = entry.propName.UTF8String;
         write.values = cppValues;
         write.isArray = entry.isArray;
+        write.isLocalized = entry.isLocalized;
         write.isRemoval = entry.isRemoval;
         cppProperties.push_back(write);
     }
