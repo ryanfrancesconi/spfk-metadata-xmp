@@ -25,7 +25,7 @@ class StructuredPropertyWriteTests: BinTestCase {
         return url
     }
 
-    // MARK: - Phase 1: simple-value write
+    // MARK: - Simple-value write
 
     @Test func setPropertyRoundTrips() async throws {
         deleteBinOnExit = true
@@ -68,7 +68,7 @@ class StructuredPropertyWriteTests: BinTestCase {
         #expect(xml.contains("interior-day"))
     }
 
-    // MARK: - Phase 2: array-value write
+    // MARK: - Array-value write
 
     @Test func setArrayPropertyRoundTrips() async throws {
         deleteBinOnExit = true
@@ -107,7 +107,7 @@ class StructuredPropertyWriteTests: BinTestCase {
         #expect(!xml.contains("three"))
     }
 
-    // MARK: - Phase 3: batch write
+    // MARK: - Batch write
 
     @Test func setPropertiesBatchAppliesAllValues() async throws {
         deleteBinOnExit = true
@@ -149,10 +149,10 @@ class StructuredPropertyWriteTests: BinTestCase {
         )
     }
 
-    // MARK: - Phase 3: xmpDM simple-value fields (frame rate)
+    // MARK: - xmpDM simple-value fields (frame rate)
 
     /// Confirms frameRate — genuinely a simple top-level value, unlike timecode/trackInfo —
-    /// round-trips through the existing Phase 1 setProperty API with no new capability needed.
+    /// round-trips through the simple-value setProperty API.
     @Test func setPropertyWritesFrameRate() async throws {
         deleteBinOnExit = true
         let url = try await seededFile()

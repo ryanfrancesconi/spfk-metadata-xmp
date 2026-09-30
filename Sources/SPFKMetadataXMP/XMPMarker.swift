@@ -5,7 +5,7 @@ import SwiftTimecode
 
 /// https://developer.adobe.com/xmp/docs/XMPNamespaces/XMPDataTypes/Marker/
 public struct XMPMarker: Equatable, CustomStringConvertible, Sendable {
-    // copy and paste the output into a test to instantiate this marker value
+    // Formatted as Swift initializer source, so a logged marker can be pasted into a test.
     public var description: String {
         return "XMPMarker(name: \"\(name)\", comment: \"\(comments)\", "
             + "startFrame: \(startFrame), durationInFrames: \(durationInFrames), frameRate: \(frameRate.stringValueVerbose))"

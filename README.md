@@ -23,15 +23,12 @@ The XMP SDK supports reading and writing metadata for common media containers in
 rather than a `Bool` because the two negatives are different answers. `.verified` means a write and
 read-back has been run against a real file of that format; `.unsupported` means no shipped handler
 covers it at all — Matroska, which is why `.mkv` tags go through TagLib instead; `.unknown` means
-nobody has established either. Callers treat `.unknown` differently by domain: TorchTag offers an
-unverified video container and refuses an unverified still, because ImageIO's writable set already
-covers every common still format and nothing covers video that way.
+nobody has established either.
 
 The list is static because there is nothing to ask. Unlike ImageIO's
-`CGImageDestinationCopyTypeIdentifiers()`, the SDK exposes no queryable handler list — establishing
-which handlers ship at all took reading the framework's symbol table. Recognizing a format is also
-not writing it: the binary's extension table lists `heic`/`heif`, and that handler can neither write
-XMP into a HEIC nor read back what ImageIO wrote there.
+`CGImageDestinationCopyTypeIdentifiers()`, the SDK exposes no queryable handler list. Recognizing a
+format is also not writing it: the binary's extension table lists `heic`/`heif`, and that handler
+can neither write XMP into a HEIC nor read back what ImageIO wrote there.
 
 ## Key Types
 
@@ -59,10 +56,6 @@ The video half: fourteen fields written into a QuickTime container through the t
 against a real 4K iPhone `.mov` — all of them write, read back and clear, with the file's QuickTime
 user data, duration and track count preserved, in single-digit milliseconds. The toolkit appends an
 XMP atom rather than rewriting the container.
-
-It lives here rather than in a product package so ShadowTag inherits it: video capability is the one
-direction that flows TorchTag → ShadowTag. ShadowTag writes video metadata through TagLib today,
-which reaches 4 of these 14 fields and cannot express keywords at all.
 
 ### XMPPropertyRead / XMPPropertyWrite
 

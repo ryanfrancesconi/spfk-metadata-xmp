@@ -10,17 +10,12 @@ import SPFKMetadataImage
 /// `ImageXMP` is ImageIO-based (`CGImageSource`) and will not open a `.mov` at all, while this
 /// goes through the Adobe toolkit in `spfk-metadata-xmp`. Both address the same
 /// ``XMPField`` set, which is what keeps a video and an image from supporting different
-/// fields -- the drift the workspace CLAUDE.md warns about for format-capability lists.
+/// fields.
 ///
 /// Verified against a real 4K iPhone `.mov` (2026-08-02): all fourteen fields write, read back and
 /// clear, with the file's QuickTime user data -- GPS, make, model, capture date -- duration and
 /// track count all preserved, in single-digit milliseconds. The toolkit appends an XMP atom rather
 /// than rewriting the container.
-///
-/// Lives here rather than in a product package so ShadowTag inherits it: video capability is the
-/// one direction that flows TorchTag → ShadowTag, per the workspace CLAUDE.md. ShadowTag writes
-/// video metadata through TagLib today, which reaches 4 of these 14 fields and cannot express
-/// keywords at all.
 public enum VideoXMP {
     /// Reads every modeled field in one open/read/close cycle.
     ///

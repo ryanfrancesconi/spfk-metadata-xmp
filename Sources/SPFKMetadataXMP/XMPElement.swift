@@ -75,9 +75,7 @@ public enum XMPElement: String, Sendable {
     /// DC
     case title = "dc:title"
 
-    /// Keywords, an `rdf:Bag` (unordered) of `rdf:li` values -- verified against real source
-    /// (`spfk-metadata-xmp`'s own `XMP.swift`, the vendored `XMPFile.h` header, and `XMPUtil.hpp`)
-    /// as the correct XMP property for keywords, matching Lightroom/Bridge/Photos' own usage.
+    /// Keywords, an `rdf:Bag` (unordered) of `rdf:li` values -- the property Lightroom, Bridge and Photos use.
     case subject = "dc:subject"
 
     /// XMP Dynamic Media — editable production/camera fields, flat children of `rdf:Description`.

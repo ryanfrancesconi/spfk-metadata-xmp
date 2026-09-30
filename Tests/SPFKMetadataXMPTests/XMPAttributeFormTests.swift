@@ -57,9 +57,8 @@ final class XMPAttributeFormTests {
         #expect(start.stringValue() == "01:00:00;01")
     }
 
-    /// The two carriers can name different positions, and the spec says the user-set one wins. The
-    /// attribute-form file this was measured against relies on it: its `startTimecode` is
-    /// `00;00;00;00` while the position it actually starts at sits in `altTimecode`.
+    /// The two carriers can name different positions, and the spec says the user-set one wins. A
+    /// file can state `startTimecode` `00;00;00;00` while the position it starts at sits in `altTimecode`.
     @Test func altTimecodeWinsInAttributeForm() throws {
         let xmp = try XMPDynamicMedia(xml: document(body: """
         >

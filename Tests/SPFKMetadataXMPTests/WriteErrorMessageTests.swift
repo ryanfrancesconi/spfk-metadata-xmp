@@ -5,8 +5,7 @@ import SPFKTesting
 import Testing
 
 /// Verifies write failures surface a real, failure-specific reason in the thrown error's
-/// description — not the fixed generic string every write function used to produce
-/// regardless of cause. A nonexistent file path is used as a deterministic failure
+/// description. A nonexistent file path is used as a deterministic failure
 /// trigger (reliably hits the "failed to open" branch in every write function, without
 /// depending on any Adobe XMP SDK-internal error semantics).
 @Suite
@@ -37,8 +36,7 @@ class WriteErrorMessageTests: BinTestCase {
     }
 
     /// Covers the load-then-mutate-then-put path (`setXMPProperty` in `XMPUtil.cpp`) —
-    /// a structurally distinct function from `writeXMP`, so this confirms the fix was
-    /// applied uniformly, not just to the blind-overwrite functions.
+    /// a structurally distinct function from `writeXMP`, so its reason is checked separately.
     @Test func setPropertyOnNonexistentFileIncludesRealFailureReason() async throws {
         deleteBinOnExit = true
         let url = nonexistentURL()

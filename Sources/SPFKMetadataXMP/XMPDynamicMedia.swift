@@ -15,7 +15,7 @@ import SwiftTimecode
 /// Parses what this codebase actually consumes rather than the whole schema, and writes only the
 /// editable fields in ``XMPDynamicMedia+Accessors``.
 ///
-/// **Not the general XMP entry point**, despite once being named as though it were: descriptive
+/// **Not the general XMP entry point**: descriptive
 /// Dublin Core / IPTC metadata -- title, keywords, creator, rating, location -- is ``XMPMetadata``
 /// in `spfk-metadata-image`, reached through `ImageXMP` or `VideoXMP`. This type is the technical,
 /// time-based half of XMP; that one is the descriptive half. They share a namespace vocabulary and
@@ -284,7 +284,6 @@ public struct XMPDynamicMedia: Equatable, Sendable {
      </xmpDM:duration>
      */
     private func parseDuration(element: AEXMLElement) -> TimeInterval? {
-        // Look at this mess
         guard let frameCount = element.value(for: .value)?.double,
             let scale = element.value(for: .scale),
             let frameDuration = CMTimeString.parse(string: scale)?.seconds
