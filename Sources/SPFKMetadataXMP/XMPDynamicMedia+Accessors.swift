@@ -69,6 +69,10 @@ extension XMPDynamicMedia {
             return
         }
 
+        // The getter also reads the attribute form, which would otherwise shadow a clear or
+        // survive as a second copy beside the child.
+        desc.attributes[element.rawValue] = nil
+
         guard let value, value.isNotEmpty else {
             desc[element]?.removeFromParent()
             return

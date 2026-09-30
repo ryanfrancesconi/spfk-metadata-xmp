@@ -75,4 +75,41 @@ struct XMPMetadataAccessorTests {
         let reparsed = try XMPDynamicMedia(xml: metadata.xml)
         #expect(reparsed.scene == nil)
     }
+
+    // MARK: - A field stored as an attribute
+
+    private static let attributeFormPacket = """
+    <x:xmpmeta xmlns:x="adobe:ns:meta/">
+     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about="" xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/" xmpDM:scene="A"/>
+     </rdf:RDF>
+    </x:xmpmeta>
+    """
+
+    /// Element and attribute forms, each counted once.
+    private static func sceneOccurrences(in xml: String) -> Int {
+        (xml.components(separatedBy: "<xmpDM:scene").count - 1) + (xml.components(separatedBy: "xmpDM:scene=").count - 1)
+    }
+
+    @Test("clearing a field stored as an attribute removes it")
+    func clearingAnAttributeFormFieldRemovesIt() throws {
+        var metadata = try XMPDynamicMedia(xml: Self.attributeFormPacket)
+        try #require(metadata.scene == "A")
+
+        metadata.scene = nil
+
+        #expect(metadata.scene == nil)
+        #expect(Self.sceneOccurrences(in: metadata.xml) == 0)
+    }
+
+    @Test("editing a field stored as an attribute leaves one copy")
+    func editingAnAttributeFormFieldLeavesOneCopy() throws {
+        var metadata = try XMPDynamicMedia(xml: Self.attributeFormPacket)
+        try #require(metadata.scene == "A")
+
+        metadata.scene = "B"
+
+        #expect(metadata.scene == "B")
+        #expect(Self.sceneOccurrences(in: metadata.xml) == 1, "\(metadata.xml)")
+    }
 }
