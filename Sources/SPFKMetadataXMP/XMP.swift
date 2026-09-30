@@ -4,29 +4,11 @@ import Foundation
 import SPFKBase
 import SPFKMetadataXMPC
 
-/// Process-wide lock that serializes combined parse+write sequences.
-///
-/// The Adobe XMP SDK's format handlers use global `XMPFiles_IO` state that
-/// persists across `OpenFile`/`CloseFile` cycles. A per-operation C++ mutex
-/// (in `XMPUtil.cpp`) prevents truly concurrent SDK calls, but it releases
-/// between parse and write. If a second thread's parse slips in between,
-/// the SDK is left with stale `currLength` from that thread's file — causing
-/// the next `OpenFile` to fail the `currLength == Host_IO::Length()` assertion.
-///
-/// Holding this lock for the entire parse+write sequence prevents any other
-/// thread from running any XMP operation in between, eliminating the stale-state window.
-private let _xmpCopyLock = NSLock()
-
 /// Thread-safe XMP file parsing and writing.
 ///
-/// Two-level locking:
-/// - C++ mutex (`XMPLifecycleCXX::operationMutex` in `XMPLifecycleCXX.cpp`): prevents
-///   simultaneous SDK calls.
-/// - Swift lock (`_xmpCopyLock`): ensures parse+write pairs are atomic end-to-end.
-///
-/// Use ``XMP/Accessor/copyXMP(from:to:)`` (via `XMP.shared.copyXMP`) for the common
-/// copy-metadata use case. Call `parse`/`write` separately only when you do not need
-/// atomicity across both operations.
+/// Every call into the toolkit holds one C++ mutex (`XMPLifecycleCXX::operationMutex`) for its
+/// whole body, so no two SDK operations run at once. Two separate calls, such as a parse followed
+/// by a write, are not atomic together.
 public enum XMP {
     /// Singleton-like access point. Kept for API compatibility with existing
     /// `XMP.shared.parse(...)` call sites — `shared` is an `Accessor` instance forwarding to the
@@ -72,21 +54,6 @@ public enum XMP {
         /// Tracks bag and its first item if none exists yet. Pass `nil` to leave a field unchanged.
         public func setTrackInfo(trackType: String?, trackName: String?, url: URL) throws {
             try XMP.setTrackInfo(trackType: trackType, trackName: trackName, url: url)
-        }
-
-        /// Copy XMP metadata from one file to another as a single atomic operation.
-        ///
-        /// Holds `_xmpCopyLock` across both parse and write, preventing other threads
-        /// from interleaving their own XMP operations in between. Safe to call
-        /// concurrently from multiple threads (e.g., batch audio conversion).
-        ///
-        /// Throws if the source file contains no XMP or if the write fails.
-        public func copyXMP(from input: URL, to output: URL) throws {
-            _xmpCopyLock.lock()
-            defer { _xmpCopyLock.unlock() }
-
-            let xmpString = try XMP.parse(url: input)
-            try XMP.write(string: xmpString, to: output)
         }
     }
 
@@ -174,10 +141,7 @@ public enum XMP {
     /// Sets a single simple-value XMP property, preserving all other existing content
     /// (load-then-mutate-then-put — unlike `write(string:to:)`, which replaces the whole packet).
     ///
-    /// No additional locking beyond `XMPUtil`'s own internal mutex is needed here: the
-    /// entire load-mutate-put sequence happens within one C++ call, holding the mutex for
-    /// its whole body — the same shape as `writeXMP` itself, not the two-separate-calls
-    /// shape `copyXMP` guards against with `_xmpCopyLock`.
+    /// The whole load-mutate-put sequence happens within one C++ call, under the toolkit mutex.
     public static func setProperty(namespace: String, name: String, value: String, url: URL) throws {
         XMPLifecycle.initialize()
 

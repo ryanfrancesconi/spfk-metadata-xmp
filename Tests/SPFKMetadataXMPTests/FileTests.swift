@@ -342,12 +342,9 @@ class FileTests: BinTestCase {
         #expect(writeCount == totalWrites, "Writes: \(writeCount) of \(totalWrites)")
     }
 
-    /// Stresses copyXMP(from:to:) — the method that holds _xmpCopyLock across both
-    /// parse and write as a single atomic unit. Concurrent tasks call copyXMP to unique
-    /// destinations while concurrent readers simultaneously parse the same source.
-    /// This exercises the contention scenario the lock was designed to prevent:
-    /// a reader's parse slipping between another caller's parse+write pair.
-    @Test func concurrentCopyXMPStress() async throws {
+    /// Concurrent tasks parse one source and write its packet to unique destinations while
+    /// concurrent readers parse the same source, so readers slip between each parse and write.
+    @Test func concurrentParseThenWriteStress() async throws {
         let benchmark = Benchmark(label: "\((#file as NSString).lastPathComponent):\(#function)")
         defer { benchmark.stop() }
 
@@ -361,7 +358,6 @@ class FileTests: BinTestCase {
 
         let copiesPerFormat = 10
         let totalWrites = formats.count * copiesPerFormat
-        let xmp = xmp
 
         var writeURLs = [URL]()
         writeURLs.reserveCapacity(totalWrites)
@@ -379,11 +375,12 @@ class FileTests: BinTestCase {
             of: (isWrite: Bool, success: Bool).self,
             returning: (reads: Int, writes: Int).self
         ) { group in
-            // Concurrent copyXMP calls — each writes to a unique destination
+            // Concurrent parse-then-write pairs, each to a unique destination
             for url in writeURLs {
                 let urlCopy = url
                 group.addTask {
-                    try xmp.copyXMP(from: source, to: urlCopy)
+                    let xmpString = try XMP.parse(url: source)
+                    try XMP.write(string: xmpString, to: urlCopy)
                     _ = try XMPDynamicMedia(url: urlCopy)
                     return (isWrite: true, success: true)
                 }

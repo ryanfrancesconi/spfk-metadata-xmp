@@ -11,12 +11,6 @@ using namespace std;
 // two threads from executing any SXMPFiles open/read/write/close sequence
 // simultaneously, and also prevents terminate() from zeroing format-handler
 // function pointers while an OpenFile() dispatch is in progress.
-//
-// NOTE: This mutex alone is insufficient for combined parse+write operations.
-// Another thread's getXMP can run between a caller's getXMP and writeXMP calls,
-// leaving stale XMPFiles_IO state that causes the next OpenFile to assert.
-// The Swift-level _xmpCopyLock in XMP.swift closes that window by serializing
-// the entire parse+write sequence as an atomic unit.
 
 SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
     SXMPMeta meta;
