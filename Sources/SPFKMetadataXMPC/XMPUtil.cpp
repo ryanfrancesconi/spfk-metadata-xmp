@@ -31,7 +31,7 @@ bool XMPUtil::getXMP(const string& filePath, string* xml, bool* hasPacket, strin
     *hasPacket = false;
 
     try {
-        // Read only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
+        // OnlyXMP is honored by the MPEG-4 handler alone; WAV, AIFF and MP3 import native metadata.
         XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         SXMPFiles myFile;
@@ -78,7 +78,8 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
     }
 
     try {
-        // Write only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
+        // OnlyXMP is honored by the MPEG-4 handler alone; WAV, AIFF, MP3 and TIFF export the packet
+        // into the native metadata it mirrors.
         XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         bool ok;
@@ -465,54 +466,3 @@ bool XMPUtil::setXMPTrackInfo(
 
     return true;
 }
-
-bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath, string* errorMessage) {
-    XMPLifecycleCXX::initialize();
-    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
-
-    SXMPMeta meta;
-    if (!XMPUtil::parsePacket(xmlString, &meta, errorMessage)) {
-        return false;
-    }
-
-    try {
-        // Write XMP WITH reconciliation — allows Adobe SDK to update native BEXT/iXML chunks
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
-
-        bool ok;
-        SXMPFiles myFile;
-
-        ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
-
-        if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
-            ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
-        }
-
-        if (!ok) {
-            cout << "Failed to open file" << endl;
-            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
-            return false;
-        }
-
-        string metaBuffer;
-        meta.SerializeToBuffer(&metaBuffer, 0, 0, "", "", 0);
-
-        if (!myFile.CanPutXMP(meta)) {
-            cout << "XMPUtil ERROR: Cannot put XMP into " << filePath << endl;
-            if (errorMessage != nullptr) *errorMessage = "Cannot put XMP into file: " + filePath;
-            myFile.CloseFile();
-            return false;
-        }
-
-        myFile.PutXMP(meta);
-        myFile.CloseFile();
-    } catch (XMP_Error & e) {
-        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
-        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
-        return false;
-    }
-
-    return true;
-}
-

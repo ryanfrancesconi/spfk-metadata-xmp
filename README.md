@@ -19,6 +19,14 @@ Three main pieces:
 
 The XMP SDK supports reading and writing metadata for common media containers including AIF, M4A, MP3, MP4, and WAV. Raw AAC containers are read-only (no XMP write support).
 
+### Native metadata
+
+Only the MPEG-4 handler keeps XMP apart from the file's other metadata. On WAV, AIFF, MP3 and TIFF
+the toolkit imports the native metadata the packet mirrors on every read — BEXT, INFO and iXML,
+ID3 frames, TIFF tags — and exports the packet back into it on every write, so writing a packet
+whole also rewrites or deletes those fields. On a WAV it adds the chunks it exports to, an iXML and
+a `_PMX` chunk among them, and no option prevents that.
+
 `XMP.writeSupport(for:)` answers what is actually known about a given file, and is three-valued
 rather than a `Bool` because the two negatives are different answers. `.verified` means a write and
 read-back has been run against a real file of that format; `.unsupported` means no shipped handler

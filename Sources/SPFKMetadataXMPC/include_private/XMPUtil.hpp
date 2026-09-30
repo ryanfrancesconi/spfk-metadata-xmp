@@ -90,7 +90,10 @@ public:
         std::string* errorMessage
     );
 
-    /// Write the xml string into the file (XMP chunk only, no reconciliation).
+    /// Replaces the file's packet with the xml string.
+    ///
+    /// On WAV, AIFF, MP3 and TIFF the toolkit also rewrites the native metadata the packet
+    /// mirrors (BEXT, INFO, iXML, ID3, TIFF tags), deleting what the packet lacks.
     ///
     /// - Parameters:
     ///   - xmlString: xml
@@ -99,15 +102,6 @@ public:
     ///     actual failure (the caught `XMP_Error`'s message, or the specific open/put
     ///     failure reason) — otherwise left untouched.
     static bool writeXMP(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
-
-    /// Write XMP and allow Adobe SDK reconciliation to update native chunks
-    /// (BEXT, iXML). Used for explicit "Sync XMP → iXML" operations.
-    ///
-    /// - Parameters:
-    ///   - xmlString: xml
-    ///   - filePath: path to the file
-    ///   - errorMessage: see `writeXMP`.
-    static bool writeXMPReconciled(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
 
     /// Sets a single simple-value XMP property, preserving all other existing content.
     /// Loads the existing XMP packet first (load-then-mutate-then-put), unlike `writeXMP`

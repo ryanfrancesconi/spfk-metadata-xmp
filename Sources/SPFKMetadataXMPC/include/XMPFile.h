@@ -73,15 +73,11 @@ typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
 + (nullable NSString *)xmpStringAtPath:(nonnull NSString *)path
                                  error:(NSError * _Nullable * _Nullable)error;
 
-/// write XMP xml string to file (XMP chunk only, no reconciliation)
+/// Replaces the file's XMP packet with `xmlString`. On WAV, AIFF, MP3 and TIFF the toolkit also
+/// rewrites the native metadata the packet mirrors.
 + (bool)write:(nonnull NSString *)xmlString
        toPath:(nonnull NSString *)toPath
         error:(NSError * _Nullable * _Nullable)error;
-
-/// write XMP xml string to file WITH reconciliation to native chunks (BEXT, iXML)
-+ (bool)writeReconciled:(nonnull NSString *)xmlString
-                 toPath:(nonnull NSString *)toPath
-                  error:(NSError * _Nullable * _Nullable)error;
 
 /// Set a single simple-value XMP property, preserving all other existing content
 /// (load-then-mutate-then-put, unlike write:toPath: which overwrites the whole packet).

@@ -52,11 +52,6 @@ public enum XMP {
             try XMP.write(string: string, to: url)
         }
 
-        /// Write XMP with Adobe SDK reconciliation enabled.
-        public func writeReconciled(string: String, to url: URL) throws {
-            try XMP.writeReconciled(string: string, to: url)
-        }
-
         /// Sets a single simple-value XMP property, preserving all other existing content.
         public func setProperty(namespace: String, name: String, value: String, url: URL) throws {
             try XMP.setProperty(namespace: namespace, name: name, value: value, url: url)
@@ -113,7 +108,11 @@ public enum XMP {
         }
     }
 
-    /// Write an XMP XML string to a file.
+    /// Replaces the file's XMP packet with an XML string.
+    ///
+    /// On WAV, AIFF, MP3 and TIFF the toolkit also rewrites the native metadata the packet
+    /// mirrors -- BEXT, INFO, iXML, ID3, TIFF tags -- so a packet lacking those properties
+    /// removes them from the file. Throws for a packet holding no XMP properties.
     ///
     /// The caller is responsible for not writing to the same file from multiple threads.
     public static func write(string: String, to url: URL) throws {
@@ -123,20 +122,6 @@ public enum XMP {
         guard XMPFile.write(string, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
             throw NSError(description: "Failed to write XMP string to file: \(url.path) — \(reason)")
-        }
-    }
-
-    /// Write XMP with Adobe SDK reconciliation enabled.
-    ///
-    /// This allows the SDK to sync `bext:` and `iXML:` namespace properties
-    /// back to native RIFF chunks. Used for explicit "Sync XMP → iXML" operations.
-    public static func writeReconciled(string: String, to url: URL) throws {
-        XMPLifecycle.initialize()
-
-        var error: NSError?
-        guard XMPFile.writeReconciled(string, toPath: url.path, error: &error) else {
-            let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to write reconciled XMP to file: \(url.path) — \(reason)")
         }
     }
 

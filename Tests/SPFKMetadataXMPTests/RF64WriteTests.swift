@@ -205,15 +205,4 @@ final class RF64WriteTests: BinTestCase {
         #expect(audioByteCount(of: url) == 192_000)
         #expect(try XMP.parse(url: url).contains("probe"))
     }
-
-    /// Reconciliation syncs XMP back into native RIFF chunks, so it is the write most likely to
-    /// rewrite the container's size fields.
-    @Test func writeReconciledKeepsTheAudioAndReadsBack() throws {
-        let url = try makeRF64File(named: "reconciled.wav")
-
-        try XMP.writeReconciled(string: packet, to: url)
-
-        #expect(audioByteCount(of: url) == 192_000)
-        #expect(try XMP.parse(url: url).contains("probe"))
-    }
 }

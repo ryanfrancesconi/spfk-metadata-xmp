@@ -66,40 +66,21 @@ class FileTests: BinTestCase {
         #expect(xmpMetadata.title == "Stonehenge")
     }
 
-    // MARK: - writeReconciled
+    // MARK: - Native metadata
 
-    @Test func writeReconciledWritesXMP() async throws {
-        let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
-        let string = try sample(named: "sample1.xml")
+    /// On a WAV the toolkit exports the packet into the native chunks it mirrors, so a packet
+    /// written whole without `bext:` properties removes them from the BEXT chunk too.
+    @Test func aWholePacketWriteRewritesTheBEXTItMirrors() async throws {
+        deleteBinOnExit = true
+        let url = try copyToBin(url: TestBundleResources.shared.wav_bext_v2)
+        let bextDescription = XMPPropertyRead(namespace: "http://ns.adobe.com/bwf/bext/1.0/", name: "description")
 
-        try xmp.writeReconciled(string: string, to: url)
+        let before = try XMP.getProperties([bextDescription], url: url)[0]
+        try #require(before.first?.isNotEmpty == true)
 
-        // Verify XMP was written by reading it back
-        let xmpMetadata = try XMPDynamicMedia(url: url)
+        try xmp.write(string: try sample(named: "sample1.xml"), to: url)
 
-        #expect(try AEXMLDocument(fromString: string).xml == xmpMetadata.document.xml)
-    }
-
-    @Test func writeReconciledAndWriteBothProduceValidXMP() async throws {
-        // writeReconciled allows SDK reconciliation (updates native BEXT/iXML chunks)
-        // while write() uses kXMPFiles_OpenOnlyXMP (no reconciliation).
-        // Both should successfully write the XMP data itself.
-        let source = TestBundleResources.shared.cowbell_wav
-        let string = try sample(named: "sample1.xml")
-
-        let reconciled = bin.appendingPathComponent("reconciled.wav")
-        let xmpOnly = bin.appendingPathComponent("xmponly.wav")
-        try FileManager.default.copyItem(at: source, to: reconciled)
-        try FileManager.default.copyItem(at: source, to: xmpOnly)
-
-        try xmp.writeReconciled(string: string, to: reconciled)
-        try xmp.write(string: string, to: xmpOnly)
-
-        // Both should have valid XMP
-        let meta1 = try XMPDynamicMedia(url: reconciled)
-        let meta2 = try XMPDynamicMedia(url: xmpOnly)
-
-        #expect(meta1.document.xml == meta2.document.xml)
+        #expect(try XMP.getProperties([bextDescription], url: url)[0].isEmpty)
     }
 
     /// tests calling C++ API with multiple threads
