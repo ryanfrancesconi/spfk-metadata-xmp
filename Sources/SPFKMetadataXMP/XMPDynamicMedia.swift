@@ -262,7 +262,8 @@ public struct XMPDynamicMedia: Equatable, Sendable {
         var allMarkers = [XMPMarker]()
         for list in markerList {
             if let elements = list[.seq]?[.li]?.all {
-                allMarkers += parseMarkers(elements: elements) ?? []
+                let trackRate = list.parent?.value(for: .trackFrameRate).flatMap(Self.parseTrackRate)
+                allMarkers += parseMarkers(elements: elements, trackRate: trackRate) ?? []
             }
         }
 
@@ -329,8 +330,18 @@ public struct XMPDynamicMedia: Equatable, Sendable {
          </xmpDM:cuePointParams>
      </rdf:li>
      */
-    private func parseMarkers(elements: [AEXMLElement]) -> [XMPMarker]? {
-        guard let frameRate else {
+    /// Markers count in their track's rate when the track states one, else in the file's frame rate.
+    private func parseMarkers(elements: [AEXMLElement], trackRate: (numerator: Int, denominator: Int)?) -> [XMPMarker]? {
+        let unitsPerSecond: Double
+        let timecodeRate: TimecodeFrameRate?
+
+        if let trackRate {
+            unitsPerSecond = Double(trackRate.numerator) / Double(trackRate.denominator)
+            timecodeRate = TimecodeFrameRate(rate: Fraction(trackRate.numerator, trackRate.denominator))
+        } else if let frameRate {
+            unitsPerSecond = 1 / frameRate.frameDurationInSeconds
+            timecodeRate = frameRate
+        } else {
             Log.error("didn't find a frame rate in xmp data, so unable to setup timing for markers")
             return nil
         }
@@ -347,14 +358,34 @@ public struct XMPDynamicMedia: Equatable, Sendable {
             let marker = XMPMarker(
                 name: mName,
                 comment: mComment,
-                startFrame: mFrame,
-                durationInFrames: mDuration,
-                frameRate: frameRate
+                time: Double(mFrame) / unitsPerSecond,
+                duration: Double(mDuration) / unitsPerSecond,
+                startFrame: timecodeRate == nil ? nil : mFrame,
+                durationInFrames: timecodeRate == nil ? nil : mDuration,
+                frameRate: timecodeRate
             )
 
             out.append(marker)
         }
 
         return out
+    }
+
+    /// `f25` → 25/1, `f30000s1001` → 30000/1001.
+    static func parseTrackRate(_ string: String) -> (numerator: Int, denominator: Int)? {
+        guard string.hasPrefix("f") else { return nil }
+        let parts = string.dropFirst().split(separator: "s", omittingEmptySubsequences: false)
+
+        guard let numerator = parts.first.flatMap({ Int($0) }), numerator > 0 else { return nil }
+
+        switch parts.count {
+        case 1:
+            return (numerator, 1)
+        case 2:
+            guard let denominator = Int(parts[1]), denominator > 0 else { return nil }
+            return (numerator, denominator)
+        default:
+            return nil
+        }
     }
 }

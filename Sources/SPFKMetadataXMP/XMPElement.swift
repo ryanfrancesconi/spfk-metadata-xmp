@@ -39,6 +39,8 @@ public enum XMPElement: String, Sendable {
 
     /// https://developer.adobe.com/xmp/docs/XMPNamespaces/XMPDataTypes/Marker/
     case markers = "xmpDM:markers"
+    /// A track's time unit: `f<rate>` or `f<numerator>s<denominator>` per second.
+    case trackFrameRate = "xmpDM:frameRate"
     case trackType = "xmpDM:trackType"
     case trackName = "xmpDM:trackName"
 
