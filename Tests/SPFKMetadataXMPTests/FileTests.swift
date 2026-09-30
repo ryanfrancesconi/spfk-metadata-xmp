@@ -20,7 +20,6 @@ class FileTests: BinTestCase {
     @Test func parseMP3() async throws {
         let url = TestBundleResources.shared.mp3_id3
         let xmp = try XMPDynamicMedia(url: url)
-        Log.debug(xmp.document.xml)
 
         #expect(xmp.title == "Stonehenge")
     }
@@ -29,9 +28,6 @@ class FileTests: BinTestCase {
         deleteBinOnExit = true
         let url = try copyToBin(url: TestBundleResources.shared.cowbell_wav)
 
-        let orig = try? XMPDynamicMedia(url: url).document.xml
-        Log.debug(orig)
-
         let string = try sample(named: "sample1.xml")
 
         try xmp.write(string: string, to: url)
@@ -39,7 +35,6 @@ class FileTests: BinTestCase {
         try await wait(sec: 1)
 
         let xmp2 = try XMPDynamicMedia(url: url)
-        Log.debug(xmp2.document.xml)
 
         #expect(try AEXMLDocument(fromString: string).xml == xmp2.document.xml)
     }
@@ -57,7 +52,6 @@ class FileTests: BinTestCase {
         try xmp.write(string: newXML, to: url)
 
         let xmp2 = try XMPDynamicMedia(url: url)
-        Log.debug(xmp2.document.xml)
 
         #expect(xmp2.title == "Stonehenge")
     }
@@ -68,8 +62,6 @@ class FileTests: BinTestCase {
 
         let url = TestBundleResources.shared.wav_bext_v2
         let xmpMetadata = try XMPDynamicMedia(url: url)
-
-        Log.debug(xmpMetadata.document.xml)
 
         #expect(xmpMetadata.title == "Stonehenge")
     }
@@ -84,7 +76,6 @@ class FileTests: BinTestCase {
 
         // Verify XMP was written by reading it back
         let xmpMetadata = try XMPDynamicMedia(url: url)
-        Log.debug(xmpMetadata.document.xml)
 
         #expect(try AEXMLDocument(fromString: string).xml == xmpMetadata.document.xml)
     }
