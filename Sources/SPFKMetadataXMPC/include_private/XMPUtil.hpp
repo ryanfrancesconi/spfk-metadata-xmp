@@ -38,6 +38,12 @@ private:
     /// - Parameter string: string to parse
     static SXMPMeta createXMPFromRDF(const std::string& rdfString);
 
+    /// Parses `xmlString` into `meta`, failing when it holds no properties.
+    ///
+    /// The toolkit's parser accepts empty or non-XMP text without an error and returns an empty
+    /// tree, which written whole would erase the file's packet.
+    static bool parsePacket(const std::string& xmlString, SXMPMeta* meta, std::string* errorMessage);
+
     /// Writes one value, as a language alternative's `x-default` entry when `isLocalized` is set
     /// or the existing node already is an `rdf:Alt`, and as a simple value otherwise.
     ///

@@ -80,6 +80,11 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
+    SXMPMeta meta;
+    if (!XMPUtil::parsePacket(xmlString, &meta, errorMessage)) {
+        return false;
+    }
+
     try {
         // Write only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
         XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
@@ -90,12 +95,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
         // First we try and open the file
         ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
-        string status = "";
-
         if (!ok) {
-            status += "No smart handler available for " + filePath + "\n";
-            status += "Trying packet scanning.\n";
-
             // Now try using packet scanning
             opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
@@ -107,11 +107,6 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
             if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
-
-        cout << status << endl;
-        cout << filePath << " is opened successfully" << endl;
-
-        SXMPMeta meta = XMPUtil::createXMPFromRDF(xmlString);
 
         // Serialize the packet and write the buffer to a file
         // Let the padding be computed and use the default linefeed and indents without limits
@@ -482,6 +477,11 @@ bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
+    SXMPMeta meta;
+    if (!XMPUtil::parsePacket(xmlString, &meta, errorMessage)) {
+        return false;
+    }
+
     try {
         // Write XMP WITH reconciliation — allows Adobe SDK to update native BEXT/iXML chunks
         XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
@@ -501,8 +501,6 @@ bool XMPUtil::writeXMPReconciled(const string& xmlString, const string& filePath
             if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
             return false;
         }
-
-        SXMPMeta meta = XMPUtil::createXMPFromRDF(xmlString);
 
         string metaBuffer;
         meta.SerializeToBuffer(&metaBuffer, 0, 0, "", "", 0);
