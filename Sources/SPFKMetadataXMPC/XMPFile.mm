@@ -66,21 +66,6 @@
 
 @implementation XMPFile : NSObject
 
-- (nullable instancetype)initWithPath:(nonnull NSString *)path {
-    self = [super init];
-
-    std::string xml = XMPUtil::getXMP(path.UTF8String);
-
-    if (xml.length() == 0) {
-        return NULL;
-    }
-
-    _xmpString = [NSString stringWithCString:xml.c_str()
-                                    encoding:NSUTF8StringEncoding];
-
-    return self;
-}
-
 /// Builds an `NSError` from a C++ failure message, or `nil` if the message is empty
 /// (defensive — every failure path in `XMPUtil.cpp` populates it, but an empty message
 /// shouldn't produce a blank-description error).
@@ -90,8 +75,39 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     }
     NSString *description = [NSString stringWithUTF8String:message.c_str()];
     return [NSError errorWithDomain:@"XMPFile"
-                                code:1
+                                code:XMPFileErrorCodeFailed
                             userInfo:@{NSLocalizedDescriptionKey: description}];
+}
+
++ (nullable NSString *)xmpStringAtPath:(NSString *)path
+                                 error:(NSError * _Nullable * _Nullable)error {
+    std::string xml;
+    bool hasPacket = false;
+    std::string errorMessage;
+
+    if (!XMPUtil::getXMP(path.UTF8String, &xml, &hasPacket, &errorMessage)) {
+        if (error != nullptr) {
+            *error = XMPFileError(errorMessage.empty() ? "Failed to read XMP" : errorMessage);
+        }
+        return nil;
+    }
+
+    if (!hasPacket) {
+        if (error != nullptr) {
+            *error = [NSError errorWithDomain:@"XMPFile"
+                                         code:XMPFileErrorCodeNoPacket
+                                     userInfo:@{NSLocalizedDescriptionKey: @"The file holds no XMP"}];
+        }
+        return nil;
+    }
+
+    NSString *string = [NSString stringWithUTF8String:xml.c_str()];
+
+    if (string == nil && error != nullptr) {
+        *error = XMPFileError("The XMP packet is not valid UTF-8");
+    }
+
+    return string;
 }
 
 + (bool)write:(NSString *)xmlString

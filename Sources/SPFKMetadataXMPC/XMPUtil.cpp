@@ -24,56 +24,48 @@ SXMPMeta XMPUtil::createXMPFromRDF(const string& rdfString) {
     return meta;
 }
 
-string XMPUtil::getXMP(const string& filePath) {
+bool XMPUtil::getXMP(const string& filePath, string* xml, bool* hasPacket, string* errorMessage) {
     XMPLifecycleCXX::initialize();
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
-    string buffer;
+    *hasPacket = false;
 
     try {
         // Read only XMP — skip reconciliation with legacy metadata (BEXT, iXML, etc.)
         XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         SXMPFiles myFile;
-        string status = "";
 
         // First we try and open the file
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            status += "No smart handler available for " + filePath + "\n";
-            status += "Trying packet scanning.\n";
-
             // Now try using packet scanning
             opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
-        // If the file is open then read the metadata
         if (!ok) {
-            cout << "XMPUtil Error: Failed to open " << filePath << endl;
-            return "";
+            if (errorMessage != nullptr) *errorMessage = "Failed to open file: " + filePath;
+            return false;
         }
 
-        // Create the xmp object and get the xmp data.
-        // GetXMP() returns false when the file has no XMP packet; in that case
-        // meta stays default-constructed and SerializeToBuffer would produce a
-        // minimal XML envelope — not actual metadata.  Return "" so the caller
-        // can distinguish "no XMP" from "has XMP".
+        // GetXMP() returns false when there is no packet and nothing native to import. The WAV,
+        // AIFF and MP3 handlers import native metadata regardless, so a file of those formats
+        // without a packet can still report one.
         SXMPMeta meta;
-        if (!myFile.GetXMP(&meta)) {
-            myFile.CloseFile();
-            return "";
+        if (myFile.GetXMP(&meta)) {
+            meta.SerializeToBuffer(xml);
+            *hasPacket = true;
         }
-        meta.SerializeToBuffer(&buffer);
 
         myFile.CloseFile();
     } catch (XMP_Error & e) {
-        cout << "XMPUtil ERROR: " << e.GetErrMsg() << endl;
-        return "";
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
+        return false;
     }
 
-    return buffer;
+    return true;
 }
 
 bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* errorMessage) {

@@ -98,14 +98,19 @@ public enum XMP {
     // MARK: - Static API
 
     /// Parse XMP metadata from an audio/video file.
+    ///
+    /// - Throws: ``XMPReadError/noPacket`` for a file that holds no XMP, and
+    ///   ``XMPReadError/readFailed(_:)`` for one that could not be read.
     public static func parse(url: URL) throws -> String {
         XMPLifecycle.initialize()
 
-        guard let xmlString = XMPFile(path: url.path)?.xmpString else {
-            throw NSError(description: "Failed to find an XMP chunk in the file: \(url.path)")
+        do {
+            return try XMPFile.xmpString(atPath: url.path)
+        } catch let error as NSError where error.domain == "XMPFile" && error.code == XMPFileErrorCode.noPacket.rawValue {
+            throw XMPReadError.noPacket
+        } catch {
+            throw XMPReadError.readFailed("\(url.path) — \(error.localizedDescription)")
         }
-
-        return xmlString
     }
 
     /// Write an XMP XML string to a file.
@@ -223,6 +228,22 @@ public enum XMP {
         guard XMPFile.setTrackType(trackType ?? "", trackName: trackName ?? "", toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
             throw NSError(description: "Failed to set XMP track info on file: \(url.path) — \(reason)")
+        }
+    }
+}
+
+/// Why ``XMP/parse(url:)`` returned no packet.
+public enum XMPReadError: Error, Equatable, LocalizedError {
+    /// The file was read and holds no XMP.
+    case noPacket
+
+    /// The file could not be opened or read.
+    case readFailed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .noPacket: "The file holds no XMP"
+        case let .readFailed(reason): "Failed to read XMP: \(reason)"
         }
     }
 }

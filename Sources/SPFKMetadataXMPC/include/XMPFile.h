@@ -55,13 +55,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+/// `NSError` codes in the `XMPFile` domain.
+typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
+    /// The file could not be opened or the toolkit failed reading it.
+    XMPFileErrorCodeFailed = 1,
+    /// The file was read and holds no XMP.
+    XMPFileErrorCodeNoPacket = 2,
+};
+
 @interface XMPFile : NSObject
 
-@property (nonatomic, strong, nullable) NSString *xmpString;
-
-/// get XMP metadata as a XML string
-/// - Parameter path: path to the file to parse
-- (nullable instancetype)initWithPath:(nonnull NSString *)path;
+/// The file's XMP packet as an XML string, or nil with an error whose code is
+/// `XMPFileErrorCodeNoPacket` when it has none and `XMPFileErrorCodeFailed` when it can't be read.
++ (nullable NSString *)xmpStringAtPath:(nonnull NSString *)path
+                                 error:(NSError * _Nullable * _Nullable)error;
 
 /// write XMP xml string to file (XMP chunk only, no reconciliation)
 + (bool)write:(nonnull NSString *)xmlString

@@ -59,7 +59,11 @@ private:
     );
 
 public:
-    static std::string getXMP(const std::string& filePath);
+    /// Reads the file's packet into `xml`.
+    ///
+    /// Returns false when the file cannot be read, with `errorMessage` saying why. Returns true
+    /// with `hasPacket` false when it was read and holds no XMP.
+    static bool getXMP(const std::string& filePath, std::string* xml, bool* hasPacket, std::string* errorMessage);
 
     /// One property to read in a batch `getXMPProperties` call.
     struct XMPPropertyRead {
