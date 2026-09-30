@@ -7,7 +7,7 @@
 #include <mutex>
 
 /// One of MAC_ENV, WIN_ENV, UNIX_ENV or IOS_ENV must be defined by the client
-/// Also definied in XMPEnvironment.h
+/// Also defined in XMP_Environment.h
 #define MAC_ENV              1
 
 /// Must be defined to instantiate template classes

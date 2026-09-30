@@ -9,9 +9,10 @@ import Testing
 
 /// Reading properties back out, the counterpart to `PropertyRemovalTests`.
 ///
-/// The shapes matter here for the same reason they do when writing: the toolkit reconciles some
-/// scalars into language alternatives, and a lang-alt read with `GetProperty` comes back empty
-/// with no error -- a field would look absent when it is present. These pin each shape.
+/// The shapes matter here for the same reason they do when writing: the toolkit normalizes some
+/// scalars into language alternatives on parse (`NormalizeDCArrays`), and a lang-alt read with
+/// `GetProperty` comes back empty with no error -- a field would look absent when it is present.
+/// These pin each shape.
 @Suite
 class PropertyReadTests: BinTestCase {
     private static let dc = "http://purl.org/dc/elements/1.1/"

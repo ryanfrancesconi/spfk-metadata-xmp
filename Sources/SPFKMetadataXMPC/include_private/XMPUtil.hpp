@@ -33,10 +33,7 @@ struct XMPPropertyWrite {
 
 class XMPUtil {
 private:
-    /// Creates an XMP object from an RDF string.  The string is used to
-    /// to simulate creating and XMP object from multiple input buffers.
-    /// The last call to ParseFromBuffer has no kXMP_ParseMoreBuffers options,
-    /// thereby indicating this is the last input buffer.
+    /// Parses an RDF/XML string into a new `SXMPMeta` in one `ParseFromBuffer` call.
     ///
     /// - Parameter string: string to parse
     static SXMPMeta createXMPFromRDF(const std::string& rdfString);
@@ -58,10 +55,7 @@ public:
     /// yields one entry per item, and a property that is absent yields an empty vector -- absence
     /// is not an error, it is the ordinary state of most fields on most files.
     ///
-    /// Scalars go through `GetLocalizedText` first so a language alternative (`dc:title`,
-    /// `dc:description`, `dc:rights`) returns its `x-default` text rather than nothing;
-    /// `GetProperty` is the fallback for plain values. Asking for the wrong one of those two is
-    /// otherwise silent -- a lang-alt read with `GetProperty` simply comes back empty.
+    /// `GetProperty` reads the shape; an alt-text value is then read with `GetLocalizedText`.
     static bool getXMPProperties(
         const std::string& filePath,
         const std::vector<XMPPropertyRead>& requests,
@@ -115,8 +109,7 @@ public:
     ///   - ns: schema namespace URI
     ///   - propName: array property name
     ///   - values: the new full set of array item values, in order
-    ///   - arrayForm: one of kXMP_PropArrayIsUnordered, kXMP_PropArrayIsOrdered,
-    ///     kXMP_PropArrayIsAlternate (see XMP_Const.h)
+    ///   - arrayForm: kXMP_PropArrayIsOrdered or kXMP_PropArrayIsUnordered.
     ///   - errorMessage: see `writeXMP`.
     static bool setXMPArrayProperty(
         const std::string& filePath,
@@ -146,7 +139,7 @@ public:
 
     /// Writes the first item of the `xmpDM:Tracks` bag's `trackType`/`trackName` fields,
     /// creating the `Tracks` bag and its first (struct-typed) item if none exists yet —
-    /// mirroring `XMPMetadata`'s read path, which already only ever looks at the first
+    /// mirroring `XMPDynamicMedia`'s read path, which already only ever looks at the first
     /// track entry found. Pass an empty string to leave a field unchanged (skips that
     /// SetProperty call rather than writing an empty value over an existing one).
     ///

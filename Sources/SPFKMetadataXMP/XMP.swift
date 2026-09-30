@@ -20,7 +20,8 @@ private let _xmpCopyLock = NSLock()
 /// Thread-safe XMP file parsing and writing.
 ///
 /// Two-level locking:
-/// - C++ mutex (`xmpOperationMutex` in `XMPUtil.cpp`): prevents simultaneous SDK calls.
+/// - C++ mutex (`XMPLifecycleCXX::operationMutex` in `XMPLifecycleCXX.cpp`): prevents
+///   simultaneous SDK calls.
 /// - Swift lock (`_xmpCopyLock`): ensures parse+write pairs are atomic end-to-end.
 ///
 /// Use ``XMP/Accessor/copyXMP(from:to:)`` (via `XMP.shared.copyXMP`) for the common
@@ -28,7 +29,8 @@ private let _xmpCopyLock = NSLock()
 /// atomicity across both operations.
 public enum XMP {
     /// Singleton-like access point. Kept for API compatibility with existing
-    /// `XMP.shared.parse(...)` call sites — `shared` is simply `XMP.self`.
+    /// `XMP.shared.parse(...)` call sites — `shared` is an `Accessor` instance forwarding to the
+    /// static functions.
     public static let shared = Accessor()
 
     /// Lightweight accessor that forwards to the static methods.
