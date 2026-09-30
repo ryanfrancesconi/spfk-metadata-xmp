@@ -55,10 +55,6 @@ string XMPUtil::getXMP(const string& filePath) {
             return "";
         }
 
-        // cout << status << endl;
-
-        // cout << filename << " is opened successfully" << endl;
-
         // Create the xmp object and get the xmp data.
         // GetXMP() returns false when the file has no XMP packet; in that case
         // meta stays default-constructed and SerializeToBuffer would produce a
@@ -70,9 +66,6 @@ string XMPUtil::getXMP(const string& filePath) {
             return "";
         }
         meta.SerializeToBuffer(&buffer);
-
-        // this will print the raw xml:
-        // cout << buffer;
 
         myFile.CloseFile();
     } catch (XMP_Error & e) {
