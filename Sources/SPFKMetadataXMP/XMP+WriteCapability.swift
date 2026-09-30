@@ -33,6 +33,9 @@ public extension XMP {
 
         // MPEG-4 handler. Verified 2026-08-02 against a real iPhone .mov, all fourteen fields.
         "mov", "mp4", "m4v",
+
+        // AIFF, MPEG-4, MP3 and WAVE handlers, round-tripped by `FileTests.concurrentWrite`.
+        "aif", "m4a", "mp3", "wav",
     ]
 
     /// Extensions no shipped handler covers, so `OpenFile` fails outright.

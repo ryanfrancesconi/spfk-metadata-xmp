@@ -20,6 +20,13 @@ struct WriteCapabilityTests {
         #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.m4v")) == .verified)
     }
 
+    /// Round-tripped by `FileTests.concurrentWrite`, which writes and reads back a title on each.
+    @Test func audioFormatsThisPackageRoundTripsAreVerifiedWritable() {
+        for pathExtension in ["aif", "m4a", "mp3", "wav"] {
+            #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.\(pathExtension)")) == .verified, "\(pathExtension)")
+        }
+    }
+
     /// The opposite direction, and the reason this is not derived from "is this a movie": the
     /// vendored XMPFiles binary carries no Matroska handler, so the file cannot be opened at all.
     @Test func matroskaIsUnsupported() {
