@@ -125,6 +125,24 @@ public enum XMP {
         }
     }
 
+    /// Applies an edit to the file's current packet: only the top-level properties that differ
+    /// between `baseline` and `edited` are written, and one missing from `edited` is removed.
+    ///
+    /// Metadata the file gained since `baseline` was read -- another app's edit, or native metadata
+    /// the toolkit imported after a tag save -- is kept. Throws for an `edited` packet holding no
+    /// properties.
+    ///
+    /// - Parameter baseline: the packet the edit started from, `nil` when the file had none.
+    public static func applyChanges(from baseline: String?, to edited: String, url: URL) throws {
+        XMPLifecycle.initialize()
+
+        var error: NSError?
+        guard XMPFile.applyChanges(fromBaseline: baseline, edited: edited, toPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to apply XMP changes to file: \(url.path) — \(reason)")
+        }
+    }
+
     /// Sets a single simple-value XMP property, preserving all other existing content
     /// (load-then-mutate-then-put — unlike `write(string:to:)`, which replaces the whole packet).
     ///

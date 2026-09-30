@@ -103,6 +103,21 @@ public:
     ///     failure reason) — otherwise left untouched.
     static bool writeXMP(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
 
+    /// Applies the top-level properties that differ between `baseline` and `edited` to the file's
+    /// current packet, in one open/read/write/close cycle. A property in `baseline` but not in
+    /// `edited` is removed; properties equal in both are left as the file has them.
+    ///
+    /// - Parameters:
+    ///   - baseline: the packet the edit started from, or null when the file had none
+    ///   - edited: the edited packet; refused when it holds no properties
+    ///   - errorMessage: see `writeXMP`.
+    static bool applyXMPChanges(
+        const std::string* baseline,
+        const std::string& edited,
+        const std::string& filePath,
+        std::string* errorMessage = nullptr
+    );
+
     /// Sets a single simple-value XMP property, preserving all other existing content.
     /// Loads the existing XMP packet first (load-then-mutate-then-put), unlike `writeXMP`
     /// which blindly overwrites the whole packet.

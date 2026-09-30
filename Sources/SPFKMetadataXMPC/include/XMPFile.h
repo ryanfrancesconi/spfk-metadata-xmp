@@ -79,6 +79,13 @@ typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
        toPath:(nonnull NSString *)toPath
         error:(NSError * _Nullable * _Nullable)error;
 
+/// Applies the top-level properties that differ between `baseline` and `edited` to the file's
+/// current packet, leaving the rest as the file has them. `baseline` nil means the file had none.
++ (bool)applyChangesFromBaseline:(nullable NSString *)baseline
+                          edited:(nonnull NSString *)edited
+                          toPath:(nonnull NSString *)toPath
+                           error:(NSError * _Nullable * _Nullable)error;
+
 /// Set a single simple-value XMP property, preserving all other existing content
 /// (load-then-mutate-then-put, unlike write:toPath: which overwrites the whole packet).
 + (bool)setProperty:(nonnull NSString *)ns

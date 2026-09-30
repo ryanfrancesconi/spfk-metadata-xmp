@@ -123,6 +123,21 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     return ok;
 }
 
++ (bool)applyChangesFromBaseline:(nullable NSString *)baseline
+                          edited:(NSString *)edited
+                          toPath:(NSString *)toPath
+                           error:(NSError * _Nullable * _Nullable)error {
+    std::string baselineString = baseline == nil ? "" : baseline.UTF8String;
+    std::string errorMessage;
+    bool ok = XMPUtil::applyXMPChanges(
+        baseline == nil ? nullptr : &baselineString, edited.UTF8String, toPath.UTF8String, &errorMessage
+    );
+    if (!ok && error != nullptr) {
+        *error = XMPFileError(errorMessage);
+    }
+    return ok;
+}
+
 + (bool)setProperty:(NSString *)ns
             propName:(NSString *)propName
                value:(NSString *)value
