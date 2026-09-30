@@ -138,6 +138,16 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     return ok;
 }
 
++ (bool)removeFromPath:(NSString *)path
+                 error:(NSError * _Nullable * _Nullable)error {
+    std::string errorMessage;
+    bool ok = XMPUtil::removeXMP(path.UTF8String, &errorMessage);
+    if (!ok && error != nullptr) {
+        *error = XMPFileError(errorMessage);
+    }
+    return ok;
+}
+
 + (bool)setProperty:(NSString *)ns
             propName:(NSString *)propName
                value:(NSString *)value

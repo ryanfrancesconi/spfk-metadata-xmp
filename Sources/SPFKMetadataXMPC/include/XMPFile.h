@@ -86,6 +86,11 @@ typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
                           toPath:(nonnull NSString *)toPath
                            error:(NSError * _Nullable * _Nullable)error;
 
+/// Removes the file's XMP. Refused for any format but the MPEG-4 family, whose XMP writes also
+/// rewrite the native metadata the packet mirrors.
++ (bool)removeFromPath:(nonnull NSString *)path
+                 error:(NSError * _Nullable * _Nullable)error;
+
 /// Set a single simple-value XMP property, preserving all other existing content
 /// (load-then-mutate-then-put, unlike write:toPath: which overwrites the whole packet).
 + (bool)setProperty:(nonnull NSString *)ns

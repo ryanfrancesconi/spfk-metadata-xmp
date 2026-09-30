@@ -143,6 +143,34 @@ public enum XMP {
         }
     }
 
+    /// Removes the file's XMP.
+    ///
+    /// Only for the MPEG-4 family (see ``canRemove(from:)``). On WAV, AIFF, MP3 and TIFF the toolkit
+    /// writes XMP into the native metadata it mirrors, so an empty packet would also delete BEXT,
+    /// INFO, iXML or ID3 fields; those formats throw without the file being touched.
+    public static func remove(from url: URL) throws {
+        guard canRemove(from: url) else {
+            throw NSError(description: "XMP can't be removed from a .\(url.pathExtension) file without removing the native metadata it mirrors")
+        }
+
+        XMPLifecycle.initialize()
+
+        var error: NSError?
+        guard XMPFile.remove(fromPath: url.path, error: &error) else {
+            let reason = error?.localizedDescription ?? "unknown reason"
+            throw NSError(description: "Failed to remove XMP from file: \(url.path) — \(reason)")
+        }
+    }
+
+    /// Extensions whose XMP ``remove(from:)`` can remove: the MPEG-4 family, whose handler keeps
+    /// XMP apart from the file's native metadata.
+    public static let removablePathExtensions: Set<String> = ["mp4", "m4a", "m4v", "m4b", "mov"]
+
+    /// Whether ``remove(from:)`` can remove this file's XMP, from the path extension.
+    public static func canRemove(from url: URL) -> Bool {
+        removablePathExtensions.contains(url.pathExtension.lowercased())
+    }
+
     /// Sets a single simple-value XMP property, preserving all other existing content
     /// (load-then-mutate-then-put — unlike `write(string:to:)`, which replaces the whole packet).
     ///

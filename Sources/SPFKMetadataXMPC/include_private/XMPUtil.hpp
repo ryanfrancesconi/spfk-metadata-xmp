@@ -118,6 +118,10 @@ public:
         std::string* errorMessage = nullptr
     );
 
+    /// Removes the file's XMP. Refused, leaving the file untouched, for any format but the MPEG-4
+    /// family, whose handler alone keeps XMP apart from the native metadata it mirrors.
+    static bool removeXMP(const std::string& filePath, std::string* errorMessage = nullptr);
+
     /// Sets a single simple-value XMP property, preserving all other existing content.
     /// Loads the existing XMP packet first (load-then-mutate-then-put), unlike `writeXMP`
     /// which blindly overwrites the whole packet.
