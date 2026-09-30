@@ -21,6 +21,8 @@ import SwiftTimecode
 /// time-based half of XMP; that one is the descriptive half. They share a namespace vocabulary and
 /// nothing else.
 public struct XMPDynamicMedia: Equatable, Sendable {
+    /// Compares the technical fields, the six editable ones and the keywords. `title`, `creatorTool`,
+    /// `createDate`, `duration`, `startTimeScale` and `startTimeSampleSize` are not compared.
     public static func == (lhs: XMPDynamicMedia, rhs: XMPDynamicMedia) -> Bool {
         lhs.frameRate == rhs.frameRate && lhs.markers == rhs.markers && lhs.nominalFrameRate == rhs.nominalFrameRate
             && lhs.audioSampleRate == rhs.audioSampleRate && lhs.audioChannelType == rhs.audioChannelType
@@ -35,13 +37,15 @@ public struct XMPDynamicMedia: Equatable, Sendable {
     public private(set) var document: AEXMLDocument
 
     /**
+     Read from the packet at parse; titles are written through `XMPMetadata`.
+
      <dc:title>
          <rdf:Alt>
              <rdf:li xml:lang="x-default">HELLO</rdf:li>
          </rdf:Alt>
      </dc:title>
      */
-    public var title: String?
+    public private(set) var title: String?
 
     public var frameRate: TimecodeFrameRate? {
         startTimecodeResolved?.frameRate ?? estimatedFrameRate
