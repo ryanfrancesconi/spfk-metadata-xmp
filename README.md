@@ -10,7 +10,7 @@ A Swift package for reading and writing [Adobe XMP](https://developer.adobe.com/
 
 Three main pieces:
 
-- **`XMP`** — A thread-safe `actor` singleton for reading and writing raw XMP XML strings, and for reading and writing individual properties in a batch. Manages the Adobe XMP SDK lifecycle; its file I/O is `nonisolated`, so concurrent file operations do not serialize on the actor.
+- **`XMP`** — Reading and writing raw XMP XML strings, and individual properties in a batch. Manages the Adobe XMP SDK lifecycle; every SDK call in the process is serialized behind one lock.
 - **`XMPDynamicMedia`** — A `Sendable` struct parsing XMP XML into strongly-typed properties focused on timecode, markers and media metadata.
 - **`VideoXMP`** — Reading, writing and clearing the descriptive fields of a QuickTime container. Not QuickTime-only in practice: it addresses the same fourteen fields on any format a handler covers, and TorchTag routes DNG here because ImageIO cannot encode it.
 - **`XMP.writeSupport(for:)`** — Which formats the toolkit is known to write, three-valued.
@@ -34,10 +34,8 @@ can neither write XMP into a HEIC nor read back what ImageIO wrote there.
 
 ### XMP
 
-Singleton actor wrapping the Adobe XMP C++ SDK, handling SDK initialization through mutex-protected
-C++ lifecycle management. `parse`, `write` and the batch property calls are `nonisolated` — they
-bypass the actor's serial executor because the underlying C++ uses stack-local `SXMPFiles` /
-`SXMPMeta` instances with no shared state, so several files can be read or written in parallel.
+Wraps the Adobe XMP C++ SDK and its one-time initialization. Calls are serialized: every SDK
+operation holds one process-wide mutex.
 
 ### XMPDynamicMedia
 
@@ -72,19 +70,16 @@ A `String`-backed enum representing XMP namespace elements (`rdf:RDF`, `xmpDM:Tr
 
 ## Thread Safety
 
-The package is designed for concurrent use across multiple files:
-
 - **SDK initialization** (`SXMPMeta::Initialize`, `SXMPFiles::Initialize`) is protected by a `std::mutex` in the C++ layer, ensuring safe one-time setup even under concurrent access.
-- **`parse()` and `write()` are `nonisolated`** on the `XMP` actor. Each call creates stack-local `SXMPFiles` and `SXMPMeta` C++ objects with no shared mutable state, so multiple files can be read or written in parallel.
+- **Every read and write holds the same mutex** (`XMPLifecycleCXX::operationMutex`), so XMP file I/O is serialized process-wide.
 - **`XMPDynamicMedia` is `Sendable`** — all properties are value types, immutable after initialization. Instances can be safely passed across concurrency domains.
 - **Same-file writes** are not internally serialized. The caller is responsible for not writing to the same file from multiple threads concurrently.
-- **`terminate()` and `isInitialized`** remain actor-isolated to prevent teardown during active operations.
 
 ## Architecture
 
 Four tiers, because the Adobe SDK is C++ and none of it can be reached from Swift directly.
 
-`SPFKMetadataXMP` is the Swift surface — the `XMP` actor plus the value types it returns
+`SPFKMetadataXMP` is the Swift surface — the `XMP` namespace plus the value types it returns
 (`XMPDynamicMedia`, `VideoXMP`, `XMPMarker`, `XMPElement`, `FrameRate`).
 
 `SPFKMetadataXMPC` is the ObjC++ bridge. It exists in two halves on purpose: `.mm` files that
