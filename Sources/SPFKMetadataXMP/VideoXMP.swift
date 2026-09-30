@@ -52,7 +52,7 @@ public enum VideoXMP {
             }
 
             if field.isArray {
-                return .array(namespace: field.namespace, name: field.localName, values: values)
+                return .array(namespace: field.namespace, name: field.localName, values: values, isOrdered: field.isOrderedArray)
             }
 
             return field.isLanguageAlternative

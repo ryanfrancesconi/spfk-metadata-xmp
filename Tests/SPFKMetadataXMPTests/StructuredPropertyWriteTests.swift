@@ -1,6 +1,7 @@
 import AEXML
 import Foundation
 import SPFKBase
+import SPFKMetadataImage
 import SPFKMetadataXMP
 import SPFKTesting
 import Testing
@@ -233,5 +234,23 @@ class StructuredPropertyWriteTests: BinTestCase {
         let after = try XMPDynamicMedia(url: url)
         #expect(after.trackName == "Renamed Track")
         #expect(after.trackType == originalTrackType, "trackType should be unchanged when nil is passed")
+    }
+
+    // MARK: - Array form
+
+    /// `dc:creator` is an ordered list, an `rdf:Seq`, as `ImageXMP` writes it for stills.
+    @Test func videoCreatorsAreWrittenAsAnOrderedList() async throws {
+        deleteBinOnExit = true
+        let url = try copyToBin(url: TestBundleResources.shared.sample_mov)
+
+        var metadata = try VideoXMP.readMetadata(from: url)
+        metadata.creators = ["Second Unit", "First Unit"]
+        try VideoXMP.writeMetadata(metadata, url: url)
+
+        let document = try AEXMLDocument(xml: try xmp.parse(url: url))
+        let creator = try #require(document.allDescendants(where: { $0.name == "dc:creator" }).first)
+        let seq = creator.children.first { $0.name == "rdf:Seq" }
+
+        #expect(seq?.children.map(\.string) == ["Second Unit", "First Unit"], "\(creator.xml)")
     }
 }

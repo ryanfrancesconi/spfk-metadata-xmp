@@ -15,16 +15,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSString *propName;
 @property (nonatomic, strong, readonly) NSArray<NSString *> *values;
 @property (nonatomic, readonly) bool isArray;
+@property (nonatomic, readonly) bool isOrdered;
 @property (nonatomic, readonly) bool isLocalized;
 
 @property (nonatomic, readonly) bool isRemoval;
 
 /// `isArray: false` uses `values.firstObject` as a single simple value.
-/// `isArray: true` replaces the whole array with `values`, in order (rdf:Bag form).
+/// `isArray: true` replaces the whole array with `values`, in order: an `rdf:Seq` when
+/// `isOrdered`, an `rdf:Bag` otherwise.
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
                                   propName:(nonnull NSString *)propName
                                     values:(nonnull NSArray<NSString *> *)values
-                                   isArray:(bool)isArray;
+                                   isArray:(bool)isArray
+                                 isOrdered:(bool)isOrdered;
 
 /// Writes `value` as the `x-default` entry of an `rdf:Alt` language alternative, keeping the
 /// other languages' entries.

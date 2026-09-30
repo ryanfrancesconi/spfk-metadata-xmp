@@ -12,12 +12,14 @@
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
                                   propName:(nonnull NSString *)propName
                                     values:(nonnull NSArray<NSString *> *)values
-                                   isArray:(bool)isArray {
+                                   isArray:(bool)isArray
+                                 isOrdered:(bool)isOrdered {
     self = [super init];
     _ns = ns;
     _propName = propName;
     _values = values;
     _isArray = isArray;
+    _isOrdered = isOrdered;
     _isLocalized = false;
     _isRemoval = false;
     return self;
@@ -185,6 +187,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
         write.propName = entry.propName.UTF8String;
         write.values = cppValues;
         write.isArray = entry.isArray;
+        write.isOrdered = entry.isOrdered;
         write.isLocalized = entry.isLocalized;
         write.isRemoval = entry.isRemoval;
         cppProperties.push_back(write);

@@ -370,11 +370,12 @@ bool XMPUtil::setXMPProperties(
                 meta.DeleteProperty(property.ns.c_str(), property.propName.c_str());
             } else if (property.isArray) {
                 meta.DeleteProperty(property.ns.c_str(), property.propName.c_str());
+                const XMP_OptionBits arrayForm = property.isOrdered ? kXMP_PropArrayIsOrdered : kXMP_PropArrayIsUnordered;
                 for (const auto& value : property.values) {
                     meta.AppendArrayItem(
                         property.ns.c_str(),
                         property.propName.c_str(),
-                        kXMP_PropArrayIsUnordered,
+                        arrayForm,
                         value.c_str()
                     );
                 }

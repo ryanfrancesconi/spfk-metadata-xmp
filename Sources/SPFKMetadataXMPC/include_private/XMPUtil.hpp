@@ -19,6 +19,9 @@ struct XMPPropertyWrite {
     std::vector<std::string> values;
     bool isArray;
 
+    /// Writes an array as an `rdf:Seq` rather than an `rdf:Bag`.
+    bool isOrdered = false;
+
     /// Writes the single value as the `x-default` entry of an `rdf:Alt` language alternative.
     bool isLocalized = false;
 
@@ -151,9 +154,8 @@ public:
     ///
     /// - Parameters:
     ///   - filePath: path to the file
-    ///   - properties: the properties to write; array items use kXMP_PropArrayIsUnordered
-    ///     (bag) form — sufficient for both known consumers (dc:subject and xmpDM fields),
-    ///     see XMPPropertyWrite
+    ///   - properties: the properties to write; an array is an `rdf:Seq` when its
+    ///     `isOrdered` is set and an `rdf:Bag` otherwise, see XMPPropertyWrite
     ///   - errorMessage: see `writeXMP`.
     static bool setXMPProperties(
         const std::string& filePath,

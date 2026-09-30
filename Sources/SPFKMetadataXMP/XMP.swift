@@ -182,7 +182,10 @@ public enum XMP {
             } else if property.isLocalized, let value = property.values.first {
                 XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, localizedValue: value)
             } else {
-                XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, values: property.values, isArray: property.isArray)
+                XMPPropertyWriteEntry(
+                    namespace: property.namespace, propName: property.name, values: property.values,
+                    isArray: property.isArray, isOrdered: property.isOrdered
+                )
             }
         }
 
@@ -270,17 +273,24 @@ public struct XMPPropertyWrite: Sendable {
     public let values: [String]
     public let isArray: Bool
 
+    /// Writes an array as an `rdf:Seq` rather than an `rdf:Bag`.
+    public let isOrdered: Bool
+
     /// Writes the single value as the `x-default` entry of an `rdf:Alt` language alternative.
     public let isLocalized: Bool
 
     /// Removes the property instead of writing it. Takes precedence over `values`/`isArray`.
     public let isRemoval: Bool
 
-    init(namespace: String, name: String, values: [String], isArray: Bool, isLocalized: Bool = false, isRemoval: Bool = false) {
+    init(
+        namespace: String, name: String, values: [String], isArray: Bool,
+        isOrdered: Bool = false, isLocalized: Bool = false, isRemoval: Bool = false
+    ) {
         self.namespace = namespace
         self.name = name
         self.values = values
         self.isArray = isArray
+        self.isOrdered = isOrdered
         self.isLocalized = isLocalized
         self.isRemoval = isRemoval
     }
@@ -298,9 +308,9 @@ public struct XMPPropertyWrite: Sendable {
         XMPPropertyWrite(namespace: namespace, name: name, values: [value], isArray: false, isLocalized: true)
     }
 
-    /// A whole-array-replace property write.
-    public static func array(namespace: String, name: String, values: [String]) -> XMPPropertyWrite {
-        XMPPropertyWrite(namespace: namespace, name: name, values: values, isArray: true)
+    /// A whole-array-replace property write: an `rdf:Seq` when `isOrdered`, an `rdf:Bag` otherwise.
+    public static func array(namespace: String, name: String, values: [String], isOrdered: Bool = false) -> XMPPropertyWrite {
+        XMPPropertyWrite(namespace: namespace, name: name, values: values, isArray: true, isOrdered: isOrdered)
     }
 
     /// Removes a property entirely.
