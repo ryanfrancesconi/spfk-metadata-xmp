@@ -70,13 +70,13 @@ bool XMPUtil::applyXMPChanges(
             }
         }
 
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         SXMPFiles myFile;
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 

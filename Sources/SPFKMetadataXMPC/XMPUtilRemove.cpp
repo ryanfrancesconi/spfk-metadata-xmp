@@ -11,6 +11,7 @@ bool XMPUtil::removeXMP(const string& filePath, string* errorMessage) {
 
     try {
         SXMPFiles myFile;
+        // OnlyXMP, so the empty put exports nothing into the native metadata.
         const XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
 
         if (!myFile.OpenFile(filePath, kXMP_UnknownFile, opts)) {

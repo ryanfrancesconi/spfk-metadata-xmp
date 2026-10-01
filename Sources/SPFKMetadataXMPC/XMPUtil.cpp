@@ -72,9 +72,9 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
     }
 
     try {
-        // OnlyXMP is honored by the MPEG-4 handler alone; WAV, AIFF, MP3 and TIFF export the packet
-        // into the native metadata it mirrors.
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        // No OnlyXMP: the MPEG-4 handler rewrites `moov` from what it parsed at open, and with the
+        // flag it parses no native items, so a QuickTime movie loses its `udta` text items.
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         bool ok;
         SXMPFiles myFile;
@@ -84,7 +84,7 @@ bool XMPUtil::writeXMP(const string& xmlString, const string& filePath, string* 
 
         if (!ok) {
             // Now try using packet scanning
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -230,13 +230,13 @@ bool XMPUtil::setXMPProperty(
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
     try {
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         SXMPFiles myFile;
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -284,13 +284,13 @@ bool XMPUtil::setXMPArrayProperty(
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
     try {
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         SXMPFiles myFile;
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -339,13 +339,13 @@ bool XMPUtil::setXMPProperties(
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
     try {
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         SXMPFiles myFile;
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 
@@ -407,13 +407,13 @@ bool XMPUtil::setXMPTrackInfo(
     std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
 
     try {
-        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler | kXMPFiles_OpenOnlyXMP;
+        XMP_OptionBits opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUseSmartHandler;
 
         SXMPFiles myFile;
         bool ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
 
         if (!ok) {
-            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning | kXMPFiles_OpenOnlyXMP;
+            opts = kXMPFiles_OpenForUpdate | kXMPFiles_OpenUsePacketScanning;
             ok = myFile.OpenFile(filePath, kXMP_UnknownFile, opts);
         }
 

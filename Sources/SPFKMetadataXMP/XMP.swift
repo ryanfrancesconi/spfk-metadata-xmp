@@ -77,9 +77,9 @@ public enum XMP {
 
     /// Replaces the file's XMP packet with an XML string.
     ///
-    /// On WAV, AIFF, MP3 and TIFF the toolkit also rewrites the native metadata the packet
-    /// mirrors -- BEXT, INFO, iXML, ID3, TIFF tags -- so a packet lacking those properties
-    /// removes them from the file. Throws for a packet holding no XMP properties.
+    /// The toolkit also rewrites the native metadata the packet mirrors -- BEXT, INFO, iXML, ID3,
+    /// TIFF tags, MPEG-4 `cprt` and timecode -- so a packet lacking those properties removes them
+    /// from the file. Throws for a packet holding no XMP properties.
     ///
     /// The caller is responsible for not writing to the same file from multiple threads.
     public static func write(string: String, to url: URL) throws {
