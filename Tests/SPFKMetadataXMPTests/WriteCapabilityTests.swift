@@ -35,12 +35,45 @@ struct WriteCapabilityTests {
         #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.mka")) == .unsupported)
     }
 
-    /// The third answer, and the one a `Bool` cannot express. A handler for these probably exists
-    /// -- the binary ships RIFF and MPEG2 handlers -- but no round trip has been run, and calling
-    /// that `false` alongside Matroska's `false` is what would make one caller wrong.
+    @Test func aviAndWindowsMediaAreVerifiedWritable() {
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.avi")) == .verified)
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.wmv")) == .verified)
+    }
+
+    /// The MPEG-2 handler writes a sidecar rather than into the file, and AVCHD streams have no
+    /// handler registered, so the write fails after the edit was offered.
+    @Test func mpeg2AndAVCHDAreUnsupported() {
+        for pathExtension in ["mpg", "mpeg", "vob", "m2v", "mts", "m2ts"] {
+            #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.\(pathExtension)")) == .unsupported, "\(pathExtension)")
+        }
+    }
+
+    /// The third answer, and the one a `Bool` cannot express. The binary ships an FLV handler, but
+    /// no round trip has been run, and calling that `false` alongside Matroska's `false` is what
+    /// would make one caller wrong.
     @Test func anUntestedFormatIsUnknownRatherThanEither() {
-        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.avi")) == .unknown)
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.flv")) == .unknown)
         #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.bin")) == .unknown)
         #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a")) == .unknown)
+    }
+}
+
+/// Which store owns a container's mirrored fields.
+@Suite
+struct ContainerPolicyTests {
+    @Test func waveAndMP3AreNativeOwned() {
+        #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a.wav")) == .nativeOwned)
+        #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a.MP3")) == .nativeOwned)
+    }
+
+    @Test func toolkitWrittenFormatsAreReconciled() {
+        for pathExtension in ["aif", "aifc", "m4a", "mov", "mp4", "dng", "avi", "wmv"] {
+            #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a.\(pathExtension)")) == .reconciled, "\(pathExtension)")
+        }
+    }
+
+    @Test func aFormatWithNoPolicyIsNil() {
+        #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a.flv")) == nil)
+        #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a")) == nil)
     }
 }

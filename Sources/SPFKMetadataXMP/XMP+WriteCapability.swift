@@ -11,7 +11,8 @@ public enum XMPWriteSupport: Sendable, Hashable {
     /// A write and read-back has been run against a real file of this format.
     case verified
 
-    /// The toolkit ships no handler covering this format, so it cannot open the file at all.
+    /// The toolkit cannot write XMP into the file itself: no handler covers the format, or the
+    /// one that does writes a sidecar.
     case unsupported
 
     /// Neither established.
@@ -36,17 +37,11 @@ public extension XMP {
 
         // AIFF, MPEG-4, MP3 and WAVE handlers, round-tripped by `FileTests.concurrentWrite`.
         "aif", "m4a", "mp3", "wav",
-    ]
 
-    /// Extensions no shipped handler covers, so `OpenFile` fails outright.
-    ///
-    /// Read from the symbol table of the vendored `XMPFiles` binary, which carries TIFF, JPEG,
-    /// PNG, GIF, PSD, MPEG4, MPEG2, RIFF, WAVE, AIFF, MP3, ASF, SVG, FLV, SWF, PostScript,
-    /// InDesign and the folder-based camera handlers -- and nothing for Matroska or MXF.
-    ///
-    /// `mxf` is here despite the P2, AVCHD and XDCAM handlers next to it: those are *folder*
-    /// handlers, which read a camera card's directory layout rather than a standalone `.mxf`.
-    static let unsupportedPathExtensions: Set<String> = ["mkv", "mka", "webm", "mxf"]
+        // RIFF and ASF handlers, round-tripped by `VideoContainerRoundTripTests`, which also
+        // checks that the native title follows `dc:title`.
+        "avi", "wmv",
+    ]
 
     /// What is known about writing XMP into this file's format, from the path extension.
     ///
@@ -56,7 +51,7 @@ public extension XMP {
         let pathExtension = url.pathExtension.lowercased()
 
         if verifiedWritablePathExtensions.contains(pathExtension) { return .verified }
-        if unsupportedPathExtensions.contains(pathExtension) { return .unsupported }
+        if XMPContainerPolicy(url: url) == .unsupported { return .unsupported }
 
         return .unknown
     }
