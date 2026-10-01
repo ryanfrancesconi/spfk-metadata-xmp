@@ -64,34 +64,3 @@ class QuickTimeUserDataTests: BinTestCase {
         #expect(try XMP.parse(url: url).contains("01:00:00:00"))
     }
 }
-
-/// QuickTime atoms: 32-bit big-endian size, then the four-character type.
-enum QuickTimeBoxes {
-    /// The types of `moov/udta`'s children.
-    static func userDataTypes(in url: URL) throws -> Set<String> {
-        let data = try Data(contentsOf: url)
-
-        guard let moov = children(of: data, in: 0 ..< data.count).first(where: { $0.type == "moov" }),
-              let udta = children(of: data, in: moov.body).first(where: { $0.type == "udta" })
-        else { return [] }
-
-        return Set(children(of: data, in: udta.body).map(\.type))
-    }
-
-    private static func children(of data: Data, in range: Range<Int>) -> [(type: String, body: Range<Int>)] {
-        var boxes: [(type: String, body: Range<Int>)] = []
-        var offset = range.lowerBound
-
-        while offset + 8 <= range.upperBound {
-            let size = data[offset ..< offset + 4].reduce(0) { $0 << 8 | Int($1) }
-            guard size >= 8, offset + size <= range.upperBound else { break }
-
-            // Latin-1, so `0xA9` reads as `©`.
-            let type = String(data[offset + 4 ..< offset + 8].map { Character(Unicode.Scalar($0)) })
-            boxes.append((type, offset + 8 ..< offset + size))
-            offset += size
-        }
-
-        return boxes
-    }
-}

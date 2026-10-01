@@ -29,7 +29,7 @@ struct XMPElementTests {
         </root>
         """
         let doc = try AEXMLDocument(xml: xml)
-        let result = doc.root[.name]
+        let result = doc.root[XMPElement.name]
         #expect(result != nil)
         #expect(result?.value == "TestName")
     }
@@ -38,7 +38,7 @@ struct XMPElementTests {
     func subscriptAbsent() throws {
         let xml = "<root><other>value</other></root>"
         let doc = try AEXMLDocument(xml: xml)
-        let result = doc.root[.name]
+        let result = doc.root[XMPElement.name]
         #expect(result == nil)
     }
 }
