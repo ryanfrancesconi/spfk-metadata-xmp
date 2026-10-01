@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "XMPLifecycleCXX.hpp"
@@ -35,6 +36,10 @@ struct XMPPropertyWrite {
 };
 
 class XMPUtil {
+public:
+    /// A schema namespace and a top-level property path within it, such as `xmpDM:scene`.
+    using PropertyKey = std::pair<std::string, std::string>;
+
 private:
     /// Parses an RDF/XML string into a new `SXMPMeta` in one `ParseFromBuffer` call.
     ///
@@ -60,6 +65,14 @@ private:
         const std::string& value,
         bool isLocalized
     );
+
+    /// The top-level properties whose subtrees differ between the two trees, including those
+    /// present in only one.
+    static std::vector<PropertyKey> changedTopLevelProperties(const SXMPMeta& baseline, const SXMPMeta& edited);
+
+    /// Replaces each of `keys` in `current` with `edited`'s subtree, removing it where `edited`
+    /// lacks it.
+    static void applyTopLevelProperties(const SXMPMeta& edited, SXMPMeta* current, const std::vector<PropertyKey>& keys);
 
 public:
     /// Reads the file's packet into `xml`.
@@ -87,6 +100,35 @@ public:
         const std::string& filePath,
         const std::vector<XMPPropertyRead>& requests,
         std::vector<std::vector<std::string>>* results,
+        std::string* errorMessage
+    );
+
+    /// `getXMPProperties` over a packet string rather than a file.
+    static bool getPacketProperties(
+        const std::string& packet,
+        const std::vector<XMPPropertyRead>& requests,
+        std::vector<std::vector<std::string>>* results,
+        std::string* errorMessage
+    );
+
+    /// The top-level properties that differ between `baseline` (null when there was none) and
+    /// `edited`.
+    static bool changedXMPProperties(
+        const std::string* baseline,
+        const std::string& edited,
+        std::vector<PropertyKey>* changed,
+        std::string* errorMessage
+    );
+
+    /// `applyXMPChanges` in memory: applies the properties that differ between `baseline` and
+    /// `edited` onto `current` (null for an empty packet) and serializes the result with the
+    /// packet wrapper and the toolkit's default padding. `merged` is empty when the result holds
+    /// no properties.
+    static bool mergeXMPChanges(
+        const std::string* baseline,
+        const std::string& edited,
+        const std::string* current,
+        std::string* merged,
         std::string* errorMessage
     );
 
@@ -189,6 +231,14 @@ public:
         const std::string& trackType,
         const std::string& trackName,
         std::string* errorMessage = nullptr
+    );
+
+private:
+    /// Reads each request from `meta`, index-aligned; see `getXMPProperties`.
+    static void readProperties(
+        const SXMPMeta& meta,
+        const std::vector<XMPPropertyRead>& requests,
+        std::vector<std::vector<std::string>>* results
     );
 };
 

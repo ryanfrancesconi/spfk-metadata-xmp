@@ -162,52 +162,7 @@ bool XMPUtil::getXMPProperties(
             return true;
         }
 
-        for (size_t i = 0; i < requests.size(); ++i) {
-            const auto& request = requests[i];
-            auto& out = (*results)[i];
-
-            // Per-property isolation: one field in an odd shape must not fail the whole read.
-            // The toolkit throws rather than returning false for several mismatches -- asking
-            // GetLocalizedText for a plain scalar raises "Localized text array is not alt-text".
-            try {
-                if (request.isArray) {
-                    const XMP_Index count = meta.CountArrayItems(request.ns.c_str(), request.propName.c_str());
-                    for (XMP_Index item = 1; item <= count; ++item) {
-                        string value;
-                        if (meta.GetArrayItem(request.ns.c_str(), request.propName.c_str(), item, &value, nullptr)) {
-                            out.push_back(value);
-                        }
-                    }
-                    continue;
-                }
-
-                string value;
-                XMP_OptionBits options = 0;
-
-                // Ask what shape the property actually is rather than guessing. A caller cannot
-                // know which scalars the toolkit has reconciled into a language alternative, and
-                // choosing the wrong accessor either throws or silently returns nothing.
-                if (!meta.GetProperty(request.ns.c_str(), request.propName.c_str(), &value, &options)) {
-                    continue;
-                }
-
-                if (XMP_PropIsArray(options) && XMP_ArrayIsAltText(options)) {
-                    string localized;
-                    string actualLang;
-                    if (meta.GetLocalizedText(
-                            request.ns.c_str(), request.propName.c_str(), "", "x-default",
-                            &actualLang, &localized, nullptr
-                        )) {
-                        out.push_back(localized);
-                    }
-                } else if (!XMP_PropIsArray(options)) {
-                    out.push_back(value);
-                }
-            } catch (XMP_Error & e) {
-                cout << "XMPUtil: skipping " << request.ns << ":" << request.propName
-                     << " — " << e.GetErrMsg() << endl;
-            }
-        }
+        XMPUtil::readProperties(meta, requests, results);
 
         myFile.CloseFile();
     } catch (XMP_Error & e) {
