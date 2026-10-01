@@ -12,8 +12,7 @@ import SPFKMetadataImage
 /// ``XMPField`` set, which is what keeps a video and an image from supporting different
 /// fields.
 ///
-/// Writing keeps the file's QuickTime user data -- GPS, make, model, capture date -- duration and
-/// track count. The toolkit appends an XMP atom rather than rewriting the container.
+/// Writing keeps the file's QuickTime user data and metadata items, duration and track count.
 public enum VideoXMP {
     /// Reads every modeled field in one open/read/close cycle.
     ///

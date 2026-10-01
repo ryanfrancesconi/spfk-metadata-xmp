@@ -8,30 +8,52 @@ A Swift package for reading and writing [Adobe XMP](https://developer.adobe.com/
 
 ## Overview
 
-Three main pieces:
+The main pieces:
 
 - **`XMP`** — Reading and writing raw XMP XML strings, and individual properties in a batch. Manages the Adobe XMP SDK lifecycle; every SDK call in the process is serialized behind one lock.
 - **`XMPDynamicMedia`** — A `Sendable` struct parsing XMP XML into strongly-typed properties focused on timecode, markers and media metadata.
+- **`XMPEdit`** — A pending edit, saved through `MetaAudioFileDescription.save(dirtyFlags:xmpEdit:)` by the container's policy.
 - **`VideoXMP`** — Reading, writing and clearing the descriptive fields of a QuickTime container. Not QuickTime-only in practice: it addresses the same fourteen fields on any format a handler covers, and TorchTag routes DNG here because ImageIO cannot encode it.
 - **`XMP.writeSupport(for:)`** — Which formats the toolkit is known to write, three-valued.
 
 ### Supported File Formats
 
-The XMP SDK supports reading and writing metadata for common media containers including AIF, M4A, MP3, MP4, and WAV. Raw AAC containers are read-only (no XMP write support).
+The SDK reads and writes XMP in AIF, M4A, MP3, MP4, MOV, M4V, WAV, DNG, AVI and WMV. Raw AAC
+containers are read-only. `XMPContainerPolicy` says, per container, which store owns the fields the
+packet shares with the file's native metadata, and `XMP.writeSupport(for:)` what is known about
+writing it at all.
 
 ### Native metadata
 
-Only the MPEG-4 handler keeps XMP apart from the file's other metadata. On WAV, AIFF, MP3 and TIFF
-the toolkit imports the native metadata the packet mirrors on every read — BEXT, INFO and iXML,
-ID3 frames, TIFF tags — and exports the packet back into it on every write, so writing a packet
-whole also rewrites or deletes those fields. On a WAV it adds the chunks it exports to, an iXML and
-a `_PMX` chunk among them, and no option prevents that.
+On every format except ISO MPEG-4 the toolkit reconciles the packet with the file's native metadata:
+a read imports native values over the packet's, and a write exports the packet back into them,
+creating and deleting chunks to match. The policy follows from that:
+
+| Policy | Containers | Who writes |
+|---|---|---|
+| `.nativeOwned` | WAV, MP3 | TagLib stores the packet (`_PMX`, ID3v2 `PRIV`) in the same save as the native chunks. The toolkit only reads these files. An edit to a mirrored property (Scene, Log Comment, title, artist, `bext:*`) is applied to the native field it mirrors. |
+| `.reconciled` | AIFF, MPEG-4, QuickTime, DNG, AVI, WMV | The toolkit, in one open without `kXMPFiles_OpenOnlyXMP`, so its export runs against the native state it just imported. |
+| `.unsupported` | Matroska, MXF, MPEG-2, AVCHD | Nothing: no handler, a sidecar written beside the file, or packet scanning that cannot place a packet. |
+
+`MetaAudioFileDescription.save(dirtyFlags:xmpEdit:)` dispatches on the policy, so a caller hands it
+an `XMPEdit` (the packet the edit began from and the edited one) and needs no per-format code.
+
+**Never open a reconciled file for update with `kXMPFiles_OpenOnlyXMP`.** The MPEG-4 handler still
+exports, against a `moov` it parsed without native items, and deletes every QuickTime `udta` text
+item (`©nam`, `©ART`, `©cpy`) when it rewrites `moov`.
+
+**On DNG, XMP owns the IPTC-mapped fields.** Every write deletes the IPTC-IIM (33723) and Photoshop
+resources (34377) tags, per Adobe's DNG convention, and rewrites EXIF 270/315/33432 from the packet.
+Their values survive in the packet; only a reader of IIM alone loses them.
+
+Clearing (`XMPEdit.canClear(url:)`) removes the packet on WAV and MP3, and on MPEG-4 every property
+except those the handler mirrors from native metadata (dates, duration, `cprt`, timecode). It is
+refused on AIFF and DNG, where any packet property can be native-backed.
 
 `XMP.writeSupport(for:)` answers what is actually known about a given file, and is three-valued
 rather than a `Bool` because the two negatives are different answers. `.verified` means a write and
-read-back has been run against a real file of that format; `.unsupported` means no shipped handler
-covers it at all — Matroska, which is why `.mkv` tags go through TagLib instead; `.unknown` means
-nobody has established either.
+read-back has been run against a real file of that format; `.unsupported` means the toolkit cannot
+write into the file itself; `.unknown` means nobody has established either.
 
 The list is static because there is nothing to ask. Unlike ImageIO's
 `CGImageDestinationCopyTypeIdentifiers()`, the SDK exposes no queryable handler list. Recognizing a
@@ -60,8 +82,14 @@ and converting between them from its frame rate.
 
 The video half: fourteen fields written into a QuickTime container through the toolkit, verified
 against a real 4K iPhone `.mov` — all of them write, read back and clear, with the file's QuickTime
-user data, duration and track count preserved, in single-digit milliseconds. The toolkit appends an
-XMP atom rather than rewriting the container.
+user data, duration and track count preserved. The first write, and any that outgrows the packet's
+padding, rewrites `moov`.
+
+### XMPEdit
+
+A pending edit: the packet it began from and the packet it ends at. Only the top-level properties
+that differ are written, so a property another app changed in the meantime is kept unless the edit
+changed it too. `XMP.merging(changesFrom:to:onto:)` is the same merge without a file.
 
 ### XMPPropertyRead / XMPPropertyWrite
 
@@ -102,6 +130,7 @@ what lets consumers avoid `.interoperabilityMode(.Cxx)`.
 | Package | Purpose |
 |---------|---------|
 | [spfk-base](https://github.com/ryanfrancesconi/spfk-base) | Foundation extensions, logging, error utilities |
+| [spfk-metadata](https://github.com/ryanfrancesconi/spfk-metadata) | TagLib storage of the WAV and MP3 packet, and the native fields an edit is redirected to |
 | [spfk-metadata-image](https://github.com/ryanfrancesconi/spfk-metadata-image) | Image metadata types shared with the TagLib path |
 | [spfk-time](https://github.com/ryanfrancesconi/spfk-time) | CMTime utilities, SwiftTimecode re-export |
 | [spfk-utils](https://github.com/ryanfrancesconi/spfk-utils) | AEXML XML parsing, string extensions |
