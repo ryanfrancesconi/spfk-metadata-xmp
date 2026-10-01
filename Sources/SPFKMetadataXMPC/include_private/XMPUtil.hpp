@@ -92,8 +92,8 @@ public:
 
     /// Replaces the file's packet with the xml string.
     ///
-    /// On WAV, AIFF, MP3 and TIFF the toolkit also rewrites the native metadata the packet
-    /// mirrors (BEXT, INFO, iXML, ID3, TIFF tags), deleting what the packet lacks.
+    /// The toolkit also rewrites the native metadata the packet mirrors (BEXT, INFO, iXML, ID3,
+    /// TIFF tags, MPEG-4 `cprt` and timecode), deleting what the packet lacks.
     ///
     /// - Parameters:
     ///   - xmlString: xml
@@ -118,8 +118,9 @@ public:
         std::string* errorMessage = nullptr
     );
 
-    /// Removes the file's XMP. Refused, leaving the file untouched, for any format but the MPEG-4
-    /// family, whose handler alone keeps XMP apart from the native metadata it mirrors.
+    /// Removes every top-level property except those the MPEG-4 handler mirrors from native
+    /// metadata, which the put would otherwise delete from the file. Refused, leaving the file
+    /// untouched, for any format but the MPEG-4 family.
     static bool removeXMP(const std::string& filePath, std::string* errorMessage = nullptr);
 
     /// Sets a single simple-value XMP property, preserving all other existing content.

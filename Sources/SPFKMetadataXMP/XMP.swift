@@ -110,11 +110,11 @@ public enum XMP {
         }
     }
 
-    /// Removes the file's XMP.
+    /// Removes the file's XMP-only properties.
     ///
-    /// Only for the MPEG-4 family (see ``canRemove(from:)``). On WAV, AIFF, MP3 and TIFF the toolkit
-    /// writes XMP into the native metadata it mirrors, so an empty packet would also delete BEXT,
-    /// INFO, iXML or ID3 fields; those formats throw without the file being touched.
+    /// Only for the MPEG-4 family (see ``canRemove(from:)``). Properties the toolkit mirrors from
+    /// native metadata -- `mvhd` dates, `cprt`, timecode -- are kept, since a packet without them
+    /// deletes them from the file. Other formats throw without the file being touched.
     public static func remove(from url: URL) throws {
         guard canRemove(from: url) else {
             throw NSError(description: "XMP can't be removed from a .\(url.pathExtension) file without removing the native metadata it mirrors")
@@ -129,8 +129,9 @@ public enum XMP {
         }
     }
 
-    /// Extensions whose XMP ``remove(from:)`` can remove: the MPEG-4 family, whose handler keeps
-    /// XMP apart from the file's native metadata.
+    /// Extensions whose XMP ``remove(from:)`` can remove: the MPEG-4 family, whose handler mirrors
+    /// a known, small set of native fields. AIFF and DNG are reconciled too, but every packet
+    /// property there can be native-backed.
     public static let removablePathExtensions: Set<String> = ["mp4", "m4a", "m4v", "m4b", "mov"]
 
     /// Whether ``remove(from:)`` can remove this file's XMP, from the path extension.

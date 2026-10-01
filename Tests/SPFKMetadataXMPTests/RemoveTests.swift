@@ -11,6 +11,7 @@ import Testing
 @Suite
 class RemoveTests: BinTestCase {
     private static let photoshop = "http://ns.adobe.com/photoshop/1.0/"
+    private static let dc = "http://purl.org/dc/elements/1.1/"
 
     @Test(arguments: [TestBundleResources.shared.sample_mov, TestBundleResources.shared.tabla_m4a])
     func removingClearsTheMPEG4FamilysXMP(fixture: URL) async throws {
@@ -23,6 +24,33 @@ class RemoveTests: BinTestCase {
 
         try XMP.remove(from: url)
 
+        #expect(try XMP.getProperties([city], url: url)[0].isEmpty)
+    }
+
+    /// Clearing a movie's XMP keeps the native metadata the toolkit mirrors into the packet.
+    @Test func removingKeepsAMoviesUserDataAndDropsPacketOnlyProperties() async throws {
+        let url = try copyToBin(url: TestBundleResources.shared.qtmeta_mov)
+        let subject = XMPPropertyRead(namespace: Self.dc, name: "subject", isArray: true)
+
+        try XMP.setProperties([.array(namespace: Self.dc, name: "subject", values: ["keyword"])], url: url)
+        try #require(try XMP.getProperties([subject], url: url)[0] == ["keyword"])
+
+        try XMP.remove(from: url)
+
+        #expect(try XMP.getProperties([subject], url: url)[0].isEmpty)
+        #expect(try QuickTimeBoxes.userDataTypes(in: url).isSuperset(of: ["©nam", "©ART", "©cpy"]))
+    }
+
+    @Test func removingKeepsAnMPEG4Copyright() async throws {
+        let url = try copyToBin(url: TestBundleResources.shared.tabla_cprt_m4a)
+        let city = XMPPropertyRead(namespace: Self.photoshop, name: "City")
+
+        try XMP.setProperty(namespace: Self.photoshop, name: "City", value: "Lisbon", url: url)
+
+        try XMP.remove(from: url)
+
+        #expect(try QuickTimeBoxes.userDataTypes(in: url).contains("cprt"))
+        #expect(try XMP.getProperties([XMPPropertyRead(namespace: Self.dc, name: "rights")], url: url)[0] == ["ISO Copy"])
         #expect(try XMP.getProperties([city], url: url)[0].isEmpty)
     }
 
