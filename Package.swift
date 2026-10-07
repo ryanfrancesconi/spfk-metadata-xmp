@@ -15,7 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "1.2.2"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-metadata", from: "1.15.2"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-metadata", from: "2.0.0"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-metadata-image", from: "0.0.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-time", from: "1.1.3"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "1.6.1"),
