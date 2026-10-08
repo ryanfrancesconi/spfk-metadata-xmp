@@ -52,14 +52,22 @@ class NativeOwnedXMPSaveTests: BinTestCase {
         #expect(try IFFChunks.payload(id: "bext", in: url, bigEndian: false) == bext)
     }
 
+    /// A WAV's chunk IDs without the `JUNK` the save signs as its own filler (`SPFK`), which
+    /// reserves room after a chunk it writes and stands in for one it removes.
+    private static func chunkIDs(in url: URL) throws -> [String] {
+        try RIFFChunks(contentsOf: url).chunks
+            .filter { !($0.id == "JUNK" && $0.payload.prefix(4) == Data("SPFK".utf8)) }
+            .map(\.id)
+    }
+
     @Test func aWaveGainsOnlyThePacketChunk() async throws {
         let url = try copyToBin(url: TestBundleResources.shared.cowbell_bext_wav)
-        let before = try IFFChunks.ids(in: url, bigEndian: false)
+        let before = try Self.chunkIDs(in: url)
 
         try await saveCity(to: url)
 
         // As a set: the native save moves `bext` after `data`, packet or not.
-        #expect(try Set(IFFChunks.ids(in: url, bigEndian: false)) == Set(before + ["_PMX"]))
+        #expect(try Set(Self.chunkIDs(in: url)) == Set(before + ["_PMX"]))
     }
 
     @Test func aWavesIXMLIsByteIdentical() async throws {
@@ -93,14 +101,14 @@ class NativeOwnedXMPSaveTests: BinTestCase {
 
     @Test func clearingAWaveRemovesOnlyThePacketChunk() async throws {
         let url = try copyToBin(url: TestBundleResources.shared.cowbell_bext_wav)
-        let before = try IFFChunks.ids(in: url, bigEndian: false)
+        let before = try Self.chunkIDs(in: url)
         let bext = try IFFChunks.payload(id: "bext", in: url, bigEndian: false)
         try await saveCity(to: url)
 
         var description = try await MetaAudioFileDescription(parsing: url)
         try description.save(dirtyFlags: [], xmpEdit: XMPEdit(baseline: try XMP.parse(url: url), edited: nil))
 
-        #expect(try Set(IFFChunks.ids(in: url, bigEndian: false)) == Set(before))
+        #expect(try Set(Self.chunkIDs(in: url)) == Set(before))
         #expect(try IFFChunks.payload(id: "bext", in: url, bigEndian: false) == bext)
         #expect(try XMP.getProperties([Self.city], url: url)[0].isEmpty)
     }
