@@ -68,6 +68,7 @@ let package = Package(
             dependencies: [
                 .targetItem(name: "SPFKMetadataXMP", condition: nil),
                 .targetItem(name: "SPFKMetadataXMPC", condition: nil),
+                .product(name: "SPFKBase", package: "spfk-base"),
                 .product(name: "SPFKTesting", package: "spfk-testing"),
             ],
             resources: [.process("Resources")],
