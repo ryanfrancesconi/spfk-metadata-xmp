@@ -37,6 +37,9 @@ creating and deleting chunks to match. The policy follows from that:
 
 `MetaAudioFileDescription.save(dirtyFlags:xmpEdit:)` dispatches on the policy, so a caller hands it
 an `XMPEdit` (the packet the edit began from and the edited one) and needs no per-format code.
+On a reconciled file the toolkit write runs even when part of the native save failed, and both
+results arrive in one `MetadataError.incompleteSave(written:failures:)`, with `.xmp` among the
+written components when the packet was saved.
 
 **Never open a reconciled file for update with `kXMPFiles_OpenOnlyXMP`.** The MPEG-4 handler still
 exports, against a `moov` it parsed without native items, and deletes every QuickTime `udta` text
@@ -59,6 +62,16 @@ The list is static because there is nothing to ask. Unlike ImageIO's
 `CGImageDestinationCopyTypeIdentifiers()`, the SDK exposes no queryable handler list. Recognizing a
 format is also not writing it: the binary's extension table lists `heic`/`heif`, and that handler
 can neither write XMP into a HEIC nor read back what ImageIO wrote there.
+
+## Installation
+
+```swift
+.package(url: "https://github.com/ryanfrancesconi/spfk-metadata-xmp", from: "2.0.0")
+```
+
+```swift
+import SPFKMetadataXMP
+```
 
 ## Key Types
 
