@@ -31,7 +31,7 @@ class ReconciledPartialSaveTests: BinTestCase {
             data: nil, width: 70000, height: 1, bitsPerComponent: 8, bytesPerRow: 0,
             space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue
         ))
-        description.imageDescription.cgImage = context.makeImage()
+        description.artwork.cgImage = context.makeImage()
         description.tagProperties[.title] = "Partial"
 
         let baseline = try packetIfPresent(at: url)
@@ -41,7 +41,7 @@ class ReconciledPartialSaveTests: BinTestCase {
             written: Set(MetadataDirtyFlag.tags.components + [.xmp]),
             failures: [.writeFailed(.artwork, url)]
         )) {
-            try description.save(dirtyFlags: [.tags, .image, .xmp], xmpEdit: XMPEdit(baseline: baseline, edited: edited))
+            try description.save(dirtyFlags: [.tags, .artwork, .xmp], xmpEdit: XMPEdit(baseline: baseline, edited: edited))
         }
 
         #expect(try XMP.parse(url: url).contains("Partial Scene"))
