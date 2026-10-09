@@ -47,7 +47,7 @@ extension MetaAudioFileDescription {
             var packet = StoredXMPPacketWrite.remove
 
             if try applyMirroredChanges(of: xmpEdit) {
-                dirtyFlags.insert(.metadata)
+                dirtyFlags.insert(.tags)
             }
 
             if let edited = xmpEdit.edited {
@@ -63,14 +63,14 @@ extension MetaAudioFileDescription {
             try saveReconciled(dirtyFlags: dirtyFlags, xmpEdit: xmpEdit)
 
         case .unsupported, nil:
-            throw NSError(description: "XMP can't be written to a .\(url.pathExtension) file")
+            throw MetadataError.unsupportedFormat(fileType?.utType, .xmp)
         }
     }
 
     /// The native save, then the toolkit's XMP write, which a native part that failed does not
     /// skip. Either one's failures arrive in one ``MetadataError/incompleteSave(written:failures:)``.
     private mutating func saveReconciled(dirtyFlags: Set<MetadataDirtyFlag>, xmpEdit: XMPEdit) throws {
-        var written = dirtyFlags.subtracting([.xmp])
+        var written = Set(dirtyFlags.subtracting([.xmp]).flatMap(\.components))
         var failures: [MetadataError] = []
 
         do {
@@ -87,7 +87,7 @@ extension MetaAudioFileDescription {
                 try XMP.remove(from: url)
             }
 
-            written.formUnion(dirtyFlags.intersection([.xmp]))
+            if dirtyFlags.contains(.xmp) { written.insert(.xmp) }
         } catch {
             // Nothing else was written, so the toolkit's own reason is the whole story.
             guard written.isNotEmpty || failures.isNotEmpty else { throw error }

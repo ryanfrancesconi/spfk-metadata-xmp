@@ -138,7 +138,7 @@ struct XMPMirroredField: Sendable {
 extension MetaAudioFileDescription {
     /// Applies the edit's changes to mirrored properties onto the native fields they mirror.
     ///
-    /// - Returns: whether any native field was written, which the save routes as `.metadata`.
+    /// - Returns: whether any native field was written, which the save routes as `.tags`.
     mutating func applyMirroredChanges(of edit: XMPEdit) throws -> Bool {
         guard let edited = edit.edited else { return false }
 

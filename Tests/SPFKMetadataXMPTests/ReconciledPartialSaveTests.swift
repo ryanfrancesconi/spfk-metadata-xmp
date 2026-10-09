@@ -38,10 +38,10 @@ class ReconciledPartialSaveTests: BinTestCase {
         let edited = try #require(try XMP.merging(changesFrom: nil, to: Self.packet, onto: baseline))
 
         #expect(throws: MetadataError.incompleteSave(
-            written: [.metadata, .xmp],
+            written: Set(MetadataDirtyFlag.tags.components + [.xmp]),
             failures: [.writeFailed(.artwork, url)]
         )) {
-            try description.save(dirtyFlags: [.metadata, .image, .xmp], xmpEdit: XMPEdit(baseline: baseline, edited: edited))
+            try description.save(dirtyFlags: [.tags, .image, .xmp], xmpEdit: XMPEdit(baseline: baseline, edited: edited))
         }
 
         #expect(try XMP.parse(url: url).contains("Partial Scene"))

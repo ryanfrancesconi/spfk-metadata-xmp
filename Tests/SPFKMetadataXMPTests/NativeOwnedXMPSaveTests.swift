@@ -31,7 +31,7 @@ class NativeOwnedXMPSaveTests: BinTestCase {
 
     private func saveCity(to url: URL) async throws {
         var description = try await MetaAudioFileDescription(parsing: url)
-        try description.save(dirtyFlags: [.metadata], xmpEdit: try cityEdit(for: url))
+        try description.save(dirtyFlags: [.tags], xmpEdit: try cityEdit(for: url))
     }
 
     @Test(arguments: [TestBundleResources.shared.cowbell_bext_wav, TestBundleResources.shared.tabla_mp3])
@@ -86,7 +86,7 @@ class NativeOwnedXMPSaveTests: BinTestCase {
         try FileManager.default.copyItem(at: url, to: reference)
 
         var tagsOnly = try await MetaAudioFileDescription(parsing: reference)
-        try tagsOnly.save(dirtyFlags: [.metadata])
+        try tagsOnly.save(dirtyFlags: [.tags])
 
         try await saveCity(to: url)
 

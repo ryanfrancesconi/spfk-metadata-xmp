@@ -48,7 +48,7 @@ class MirroredFieldRedirectTests: BinTestCase {
         ixml.scene = "Pane Scene"
         description.iXMLMetadata = ixml.xml
 
-        try description.save(dirtyFlags: [.metadata], xmpEdit: xmpEdit)
+        try description.save(dirtyFlags: [.tags], xmpEdit: xmpEdit)
 
         let saved = try await MetaAudioFileDescription(parsing: url)
         #expect(try saved.iXMLMetadata.map { try IXMLMetadata(xml: $0) }?.scene == "XMP Scene")

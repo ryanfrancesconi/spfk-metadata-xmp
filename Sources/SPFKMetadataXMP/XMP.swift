@@ -2,7 +2,9 @@
 
 import Foundation
 import SPFKBase
+import SPFKMetadataBase
 import SPFKMetadataXMPC
+import UniformTypeIdentifiers
 
 /// Thread-safe XMP file parsing and writing.
 ///
@@ -117,7 +119,7 @@ public enum XMP {
     /// deletes them from the file. Other formats throw without the file being touched.
     public static func remove(from url: URL) throws {
         guard canRemove(from: url) else {
-            throw NSError(description: "XMP can't be removed from a .\(url.pathExtension) file without removing the native metadata it mirrors")
+            throw MetadataError.unsupportedFormat(UTType(filenameExtension: url.pathExtension), .xmp)
         }
 
         XMPLifecycle.initialize()

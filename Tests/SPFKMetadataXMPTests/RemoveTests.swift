@@ -2,9 +2,11 @@
 
 import Foundation
 import SPFKBase
+import SPFKMetadata
 import SPFKMetadataXMP
 import SPFKTesting
 import Testing
+import UniformTypeIdentifiers
 
 /// Removing a file's XMP is possible only where the toolkit keeps XMP apart from the native
 /// metadata it mirrors.
@@ -60,8 +62,22 @@ class RemoveTests: BinTestCase {
         let before = try Data(contentsOf: url)
 
         #expect(XMP.canRemove(from: url) == false)
-        #expect(throws: (any Error).self) {
+        #expect(throws: MetadataError.unsupportedFormat(UTType(filenameExtension: "wav"), .xmp)) {
             try XMP.remove(from: url)
+        }
+
+        #expect(try Data(contentsOf: url) == before)
+    }
+
+    /// A container with no XMP writer refuses the save as a typed error naming the file type.
+    @Test func anXMPSaveToAContainerWithoutAWriterIsRefused() async throws {
+        deleteBinOnExit = true
+        let url = try copyToBin(url: TestBundleResources.shared.tabla_mka)
+        let before = try Data(contentsOf: url)
+        var description = MetaAudioFileDescription(url: url, fileType: .mka)
+
+        #expect(throws: MetadataError.unsupportedFormat(UTType(filenameExtension: "mka"), .xmp)) {
+            try description.save(dirtyFlags: [.xmp], xmpEdit: XMPEdit(baseline: nil, edited: nil))
         }
 
         #expect(try Data(contentsOf: url) == before)
