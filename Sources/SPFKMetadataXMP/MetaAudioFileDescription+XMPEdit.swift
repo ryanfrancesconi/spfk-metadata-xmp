@@ -60,19 +60,47 @@ extension MetaAudioFileDescription {
             try save(dirtyFlags: dirtyFlags, storedXMPPacket: packet)
 
         case .reconciled:
-            try save(dirtyFlags: dirtyFlags)
+            try saveReconciled(dirtyFlags: dirtyFlags, xmpEdit: xmpEdit)
 
+        case .unsupported, nil:
+            throw NSError(description: "XMP can't be written to a .\(url.pathExtension) file")
+        }
+    }
+
+    /// The native save, then the toolkit's XMP write, which a native part that failed does not
+    /// skip. Either one's failures arrive in one ``MetadataError/incompleteSave(written:failures:)``.
+    private mutating func saveReconciled(dirtyFlags: Set<MetadataDirtyFlag>, xmpEdit: XMPEdit) throws {
+        var written = dirtyFlags.subtracting([.xmp])
+        var failures: [MetadataError] = []
+
+        do {
+            try save(dirtyFlags: dirtyFlags)
+        } catch let MetadataError.incompleteSave(nativeWritten, nativeFailures) {
+            written = nativeWritten
+            failures = nativeFailures
+        }
+
+        do {
             if let edited = xmpEdit.edited {
                 try XMP.applyChanges(from: xmpEdit.baseline, to: edited, url: url)
             } else {
                 try XMP.remove(from: url)
             }
 
-            // The native save read the date before the toolkit moved it.
-            urlProperties = URLProperties(url: url)
+            written.formUnion(dirtyFlags.intersection([.xmp]))
+        } catch {
+            // Nothing else was written, so the toolkit's own reason is the whole story.
+            guard written.isNotEmpty || failures.isNotEmpty else { throw error }
 
-        case .unsupported, nil:
-            throw NSError(description: "XMP can't be written to a .\(url.pathExtension) file")
+            Log.error(error)
+            failures.append(.writeFailed(.xmp, url))
+        }
+
+        // The native save read the date before the toolkit moved it.
+        urlProperties = URLProperties(url: url)
+
+        if failures.isNotEmpty {
+            throw MetadataError.incompleteSave(written: written, failures: failures)
         }
     }
 }
