@@ -24,7 +24,7 @@ class NativeOwnedXMPSaveTests: BinTestCase {
 
     /// The packet the XMP pane would show, plus a City.
     private func cityEdit(for url: URL) throws -> XMPEdit {
-        let baseline = try? XMP.parse(url: url)
+        let baseline = try packetIfPresent(at: url)
         let edited = try #require(try XMP.merging(changesFrom: nil, to: Self.addition, onto: baseline))
         return XMPEdit(baseline: baseline, edited: edited)
     }

@@ -34,7 +34,7 @@ class ReconciledPartialSaveTests: BinTestCase {
         description.imageDescription.cgImage = context.makeImage()
         description.tagProperties[.title] = "Partial"
 
-        let baseline = try? XMP.parse(url: url)
+        let baseline = try packetIfPresent(at: url)
         let edited = try #require(try XMP.merging(changesFrom: nil, to: Self.packet, onto: baseline))
 
         #expect(throws: MetadataError.incompleteSave(

@@ -23,7 +23,7 @@ class MirroredFieldRedirectTests: BinTestCase {
 
     /// The packet the XMP pane would show, with `body`'s properties set over it.
     private func edit(_ url: URL, setting body: String) throws -> XMPEdit {
-        let baseline = try? XMP.parse(url: url)
+        let baseline = try packetIfPresent(at: url)
         let edited = try #require(try XMP.merging(changesFrom: nil, to: Self.packet(body), onto: baseline))
         return XMPEdit(baseline: baseline, edited: edited)
     }
