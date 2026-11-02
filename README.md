@@ -6,8 +6,8 @@
 
 Reads and writes [Adobe XMP](https://developer.adobe.com/xmp/docs/) embedded in audio and video
 files, and in DNG, through Adobe's XMP Toolkit, vendored here as prebuilt `XMPCore` and `XMPFiles`
-binaries behind an Objective-C++ bridge. An app embeds it to read Dynamic Media data (timecode,
-markers, frame rate) and to edit the descriptive XMP fields of a file in place.
+binaries behind an Objective-C++ bridge. It reads Dynamic Media data (timecode, markers, frame
+rate) and edits the descriptive XMP fields of a file in place.
 
 Native tags, BEXT and iXML belong to
 [spfk-metadata](https://github.com/ryanfrancesconi/spfk-metadata), which stores the WAV and MP3
