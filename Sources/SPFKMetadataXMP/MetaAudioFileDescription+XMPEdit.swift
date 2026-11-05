@@ -6,28 +6,6 @@ import SPFKMetadata
 import SPFKMetadataBase
 import SPFKUtils
 
-/// A pending edit to a file's XMP: the packet it began from and the packet it ends at.
-///
-/// Only the top-level properties that differ between the two are written, so a property another
-/// app changed after `baseline` was read is kept unless the edit changed it too.
-public struct XMPEdit: Sendable, Hashable {
-    /// The packet the edit began from, `nil` when the file had none.
-    public var baseline: String?
-
-    /// The edited packet, `nil` to clear the file's XMP.
-    public var edited: String?
-
-    public init(baseline: String?, edited: String?) {
-        self.baseline = baseline
-        self.edited = edited
-    }
-
-    /// Whether a clear can remove this file's XMP while keeping its native metadata.
-    public static func canClear(url: URL) -> Bool {
-        XMPContainerPolicy(url: url) == .nativeOwned || XMP.canRemove(from: url)
-    }
-}
-
 extension MetaAudioFileDescription {
     /// Writes what `dirtyFlags` names and the XMP edit, by the container's ``XMPContainerPolicy``.
     ///
@@ -81,11 +59,7 @@ extension MetaAudioFileDescription {
         }
 
         do {
-            if let edited = xmpEdit.edited {
-                try XMP.applyChanges(from: xmpEdit.baseline, to: edited, url: url)
-            } else {
-                try XMP.remove(from: url)
-            }
+            try xmpEdit.applyThroughToolkit(to: url)
 
             if dirtyFlags.contains(.xmp) { written.insert(.xmp) }
         } catch {

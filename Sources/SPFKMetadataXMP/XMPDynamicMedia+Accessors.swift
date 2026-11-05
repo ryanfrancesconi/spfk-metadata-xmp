@@ -59,7 +59,7 @@ extension XMPDynamicMedia {
         document.root[.rdf]?[.description]
     }
 
-    private func value(for element: XMPElement) -> String? {
+    func value(for element: XMPElement) -> String? {
         descriptionElement?.value(for: element)
     }
 
