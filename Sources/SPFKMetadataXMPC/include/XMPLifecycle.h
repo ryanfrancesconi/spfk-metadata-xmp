@@ -1,7 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-metadata-xmp
 
-#ifndef XMPWrapper_H
-#define XMPWrapper_H
+#pragma once
 
 #import <Foundation/Foundation.h>
 
@@ -18,5 +17,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif // !XMPWrapper_H

@@ -1,7 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-metadata-xmp
 
-#ifndef XMPPacket_H
-#define XMPPacket_H
+#pragma once
 
 #import <Foundation/Foundation.h>
 
@@ -32,5 +31,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif /* XMPPacket_H */

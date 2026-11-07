@@ -1,7 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-metadata-xmp
 
-#ifndef XMPLifecycle_H
-#define XMPLifecycle_H
+#pragma once
 
 #include <iostream>
 #include <mutex>
@@ -38,5 +37,3 @@ public:
     /// thread is inside OpenFile() dispatching through those same pointers.
     static std::mutex operationMutex;
 };
-
-#endif // !XMPLifecycle_H

@@ -1,7 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-metadata-xmp
 
-#ifndef XMPUtil_H
-#define XMPUtil_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -241,5 +240,3 @@ private:
         std::vector<std::vector<std::string>>* results
     );
 };
-
-#endif // !XMPUtil_H
