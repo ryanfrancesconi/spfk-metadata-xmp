@@ -26,6 +26,7 @@ public enum XMPContainerPolicy: Sendable, Hashable {
         "mp4", "m4a", "m4b", "m4v", "mov",
         "dng",
         "avi", "wmv",
+        "svg",
     ]
 
     /// `mxf` despite the toolkit's P2, AVCHD and XDCAM handlers: those read a camera card's folder

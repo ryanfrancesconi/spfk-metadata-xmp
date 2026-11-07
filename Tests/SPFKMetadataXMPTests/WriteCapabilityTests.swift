@@ -40,6 +40,13 @@ struct WriteCapabilityTests {
         #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.wmv")) == .verified)
     }
 
+    /// Round-tripped by `SVGRoundTripTests`. Compressed `.svgz` has not been.
+    @Test func svgIsVerifiedWritable() {
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.svg")) == .verified)
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.SVG")) == .verified)
+        #expect(XMP.writeSupport(for: URL(fileURLWithPath: "/tmp/a.svgz")) == .unknown)
+    }
+
     /// The MPEG-2 handler writes a sidecar rather than into the file, and AVCHD streams have no
     /// handler registered, so the write fails after the edit was offered.
     @Test func mpeg2AndAVCHDAreUnsupported() {
@@ -67,7 +74,7 @@ struct ContainerPolicyTests {
     }
 
     @Test func toolkitWrittenFormatsAreReconciled() {
-        for pathExtension in ["aif", "aifc", "m4a", "mov", "mp4", "dng", "avi", "wmv"] {
+        for pathExtension in ["aif", "aifc", "m4a", "mov", "mp4", "dng", "avi", "wmv", "svg"] {
             #expect(XMPContainerPolicy(url: URL(fileURLWithPath: "/tmp/a.\(pathExtension)")) == .reconciled, "\(pathExtension)")
         }
     }

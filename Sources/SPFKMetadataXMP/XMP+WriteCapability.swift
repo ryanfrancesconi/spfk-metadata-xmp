@@ -41,6 +41,10 @@ public extension XMP {
         // RIFF and ASF handlers, round-tripped by `VideoContainerRoundTripTests`, which also
         // checks that the native title follows `dc:title`.
         "avi", "wmv",
+
+        // SVG handler, round-tripped by `SVGRoundTripTests`, which also checks that `<title>` and
+        // `<desc>` follow `dc:title` and `dc:description` and that the file still renders.
+        "svg",
     ]
 
     /// What is known about writing XMP into this file's format, from the path extension.
