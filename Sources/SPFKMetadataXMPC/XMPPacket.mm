@@ -7,14 +7,14 @@
 
 @implementation XMPPacket : NSObject
 
-static NSError *XMPPacketError(const std::string &message) {
+static NSError *makeError(const std::string &message) {
     NSString *description = [NSString stringWithUTF8String:message.empty() ? "XMP packet operation failed" : message.c_str()];
     return [NSError errorWithDomain:@"XMPFile"
                                 code:XMPFileErrorCodeFailed
                             userInfo:@{NSLocalizedDescriptionKey: description ?: @""}];
 }
 
-static NSString *XMPPacketString(const std::string &value) {
+static NSString *nsString(const std::string &value) {
     return [NSString stringWithUTF8String:value.c_str()] ?: @"";
 }
 
@@ -32,7 +32,7 @@ static NSString *XMPPacketString(const std::string &value) {
     std::string errorMessage;
 
     if (!XMPUtil::getPacketProperties(packet.UTF8String, requests, &values, &errorMessage)) {
-        if (error != nullptr) *error = XMPPacketError(errorMessage);
+        if (error != nullptr) *error = makeError(errorMessage);
         return nil;
     }
 
@@ -40,7 +40,7 @@ static NSString *XMPPacketString(const std::string &value) {
     for (const auto &items : values) {
         NSMutableArray<NSString *> *converted = [NSMutableArray arrayWithCapacity:items.size()];
         for (const auto &item : items) {
-            [converted addObject:XMPPacketString(item)];
+            [converted addObject:nsString(item)];
         }
         [results addObject:converted];
     }
@@ -56,13 +56,13 @@ static NSString *XMPPacketString(const std::string &value) {
     std::string errorMessage;
 
     if (!XMPUtil::changedXMPProperties(baseline == nil ? nullptr : &baselineString, edited.UTF8String, &changed, &errorMessage)) {
-        if (error != nullptr) *error = XMPPacketError(errorMessage);
+        if (error != nullptr) *error = makeError(errorMessage);
         return nil;
     }
 
     NSMutableArray<NSArray<NSString *> *> *results = [NSMutableArray arrayWithCapacity:changed.size()];
     for (const auto &key : changed) {
-        [results addObject:@[ XMPPacketString(key.first), XMPPacketString(key.second) ]];
+        [results addObject:@[ nsString(key.first), nsString(key.second) ]];
     }
 
     return results;
@@ -86,11 +86,11 @@ static NSString *XMPPacketString(const std::string &value) {
     );
 
     if (!ok) {
-        if (error != nullptr) *error = XMPPacketError(errorMessage);
+        if (error != nullptr) *error = makeError(errorMessage);
         return nil;
     }
 
-    return XMPPacketString(merged);
+    return nsString(merged);
 }
 
 @end

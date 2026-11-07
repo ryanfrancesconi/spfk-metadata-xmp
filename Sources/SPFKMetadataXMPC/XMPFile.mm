@@ -71,7 +71,7 @@
 /// Builds an `NSError` from a C++ failure message, or `nil` if the message is empty
 /// (defensive — every failure path in `XMPUtil.cpp` populates it, but an empty message
 /// shouldn't produce a blank-description error).
-static NSError * _Nullable XMPFileError(const std::string &message) {
+static NSError * _Nullable makeError(const std::string &message) {
     if (message.empty()) {
         return nil;
     }
@@ -89,7 +89,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
 
     if (!XMPUtil::getXMP(path.UTF8String, &xml, &hasPacket, &errorMessage)) {
         if (error != nullptr) {
-            *error = XMPFileError(errorMessage.empty() ? "Failed to read XMP" : errorMessage);
+            *error = makeError(errorMessage.empty() ? "Failed to read XMP" : errorMessage);
         }
         return nil;
     }
@@ -106,7 +106,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     NSString *string = [NSString stringWithUTF8String:xml.c_str()];
 
     if (string == nil && error != nullptr) {
-        *error = XMPFileError("The XMP packet is not valid UTF-8");
+        *error = makeError("The XMP packet is not valid UTF-8");
     }
 
     return string;
@@ -118,7 +118,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::writeXMP(xmlString.UTF8String, toPath.UTF8String, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -133,7 +133,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
         baseline == nil ? nullptr : &baselineString, edited.UTF8String, toPath.UTF8String, &errorMessage
     );
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -143,7 +143,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::removeXMP(path.UTF8String, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -156,7 +156,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::setXMPProperty(toPath.UTF8String, ns.UTF8String, propName.UTF8String, value.UTF8String, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -178,7 +178,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::setXMPArrayProperty(toPath.UTF8String, ns.UTF8String, propName.UTF8String, cppValues, arrayForm, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -210,7 +210,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::setXMPProperties(toPath.UTF8String, cppProperties, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
@@ -234,7 +234,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
 
     if (!XMPUtil::getXMPProperties(fromPath.UTF8String, cppRequests, &cppResults, &errorMessage)) {
         if (error != nullptr) {
-            *error = XMPFileError(errorMessage);
+            *error = makeError(errorMessage);
         }
         return nil;
     }
@@ -258,7 +258,7 @@ static NSError * _Nullable XMPFileError(const std::string &message) {
     std::string errorMessage;
     bool ok = XMPUtil::setXMPTrackInfo(toPath.UTF8String, trackType.UTF8String, trackName.UTF8String, &errorMessage);
     if (!ok && error != nullptr) {
-        *error = XMPFileError(errorMessage);
+        *error = makeError(errorMessage);
     }
     return ok;
 }
