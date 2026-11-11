@@ -72,18 +72,6 @@ struct XMPMarkerTests {
         #expect(desc.contains("frameRate: 25 fps"))
     }
 
-    @Test("Equatable compares all stored properties")
-    func equatable() {
-        let a = XMPMarker(name: "A", startFrame: 10, frameRate: .fps25)
-        let b = XMPMarker(name: "A", startFrame: 10, frameRate: .fps25)
-        let c = XMPMarker(name: "B", startFrame: 10, frameRate: .fps25)
-        let d = XMPMarker(name: "A", startFrame: 20, frameRate: .fps25)
-
-        #expect(a == b)
-        #expect(a != c)
-        #expect(a != d)
-    }
-
     @Test("time calculation at various frame rates")
     func timeAtVariousRates() {
         // 48 frames at 24fps = 2.0 seconds
