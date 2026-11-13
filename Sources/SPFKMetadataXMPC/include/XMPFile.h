@@ -109,7 +109,7 @@ typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
                     error:(NSError * _Nullable * _Nullable)error;
 
 /// Write multiple properties (simple, array, and/or removals) in a single open/read/[mutations]/
-/// write/close cycle — fewer open/close cycles than repeated setProperty/setArrayProperty
+/// write/close cycle - fewer open/close cycles than repeated setProperty/setArrayProperty
 /// calls, and avoids the interleaved-thread stale-state window between separate calls.
 + (bool)setProperties:(nonnull NSArray<XMPPropertyWriteEntry *> *)properties
                 toPath:(nonnull NSString *)toPath
@@ -117,7 +117,7 @@ typedef NS_ENUM(NSInteger, XMPFileErrorCode) {
 
 /// Reads several properties in one open/read/close cycle. The returned array is index-aligned
 /// with `properties`: a scalar yields zero or one value, an array yields one entry per item, and
-/// an absent property yields an empty array — absence is the ordinary state of most fields.
+/// an absent property yields an empty array - absence is the ordinary state of most fields.
 + (nullable NSArray<NSArray<NSString *> *> *)getProperties:(nonnull NSArray<XMPPropertyReadEntry *> *)properties
                                                    fromPath:(nonnull NSString *)fromPath
                                                       error:(NSError * _Nullable * _Nullable)error;

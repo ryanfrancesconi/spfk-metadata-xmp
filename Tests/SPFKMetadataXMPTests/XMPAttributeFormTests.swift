@@ -9,7 +9,7 @@ import Testing
 
 /// RDF lets a structured property put its fields in child elements or in attributes of the same
 /// qualified name, and both appear in the wild: Premiere writes children, QuickTime-authored files
-/// write attributes. Reading only children drops the attribute form silently — every value comes
+/// write attributes. Reading only children drops the attribute form silently - every value comes
 /// back `nil` with no parse error to notice.
 @Suite
 final class XMPAttributeFormTests {

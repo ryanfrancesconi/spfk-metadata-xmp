@@ -141,7 +141,7 @@ public:
     ///   - filePath: path to the file
     ///   - errorMessage: if non-null and the call fails, receives a description of the
     ///     actual failure (the caught `XMP_Error`'s message, or the specific open/put
-    ///     failure reason) — otherwise left untouched.
+    ///     failure reason) - otherwise left untouched.
     static bool writeXMP(const std::string& xmlString, const std::string& filePath, std::string* errorMessage = nullptr);
 
     /// Applies the top-level properties that differ between `baseline` and `edited` to the file's
@@ -184,7 +184,7 @@ public:
 
     /// Replaces a whole array-value XMP property (e.g. `dc:subject`), preserving all other
     /// existing content. Clears any existing items for `propName` first, then appends `values`
-    /// in order — "replace with this new set" semantics, not incremental append.
+    /// in order - "replace with this new set" semantics, not incremental append.
     ///
     /// - Parameters:
     ///   - filePath: path to the file
@@ -203,7 +203,7 @@ public:
     );
 
     /// Writes multiple properties (simple and/or array) in a single OpenFile/GetXMP/
-    /// [mutations]/PutXMP/CloseFile cycle — fewer open/close cycles than calling
+    /// [mutations]/PutXMP/CloseFile cycle - fewer open/close cycles than calling
     /// setXMPProperty/setXMPArrayProperty repeatedly, and avoids the interleaved-thread
     /// stale-state window between separate calls.
     ///
@@ -219,7 +219,7 @@ public:
     );
 
     /// Writes the first item of the `xmpDM:Tracks` bag's `trackType`/`trackName` fields,
-    /// creating the `Tracks` bag and its first (struct-typed) item if none exists yet —
+    /// creating the `Tracks` bag and its first (struct-typed) item if none exists yet -
     /// mirroring `XMPDynamicMedia`'s read path, which already only ever looks at the first
     /// track entry found. Pass an empty string to leave a field unchanged (skips that
     /// SetProperty call rather than writing an empty value over an existing one).

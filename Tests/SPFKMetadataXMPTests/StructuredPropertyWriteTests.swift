@@ -38,7 +38,7 @@ class StructuredPropertyWriteTests: BinTestCase {
         #expect(xml.contains("interior-day"))
     }
 
-    /// The test that actually matters: confirms setProperty does NOT blind-overwrite —
+    /// The test that actually matters: confirms setProperty does NOT blind-overwrite -
     /// pre-existing, unrelated properties from sample1.xml must survive.
     @Test func setPropertyPreservesUnrelatedContent() async throws {
         deleteBinOnExit = true
@@ -152,7 +152,7 @@ class StructuredPropertyWriteTests: BinTestCase {
 
     // MARK: - xmpDM simple-value fields (frame rate)
 
-    /// Confirms frameRate — genuinely a simple top-level value, unlike timecode/trackInfo —
+    /// Confirms frameRate - genuinely a simple top-level value, unlike timecode/trackInfo -
     /// round-trips through the simple-value setProperty API.
     @Test func setPropertyWritesFrameRate() async throws {
         deleteBinOnExit = true

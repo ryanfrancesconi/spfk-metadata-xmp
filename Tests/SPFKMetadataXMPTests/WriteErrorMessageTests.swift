@@ -35,7 +35,7 @@ class WriteErrorMessageTests: BinTestCase {
         }
     }
 
-    /// Covers the load-then-mutate-then-put path (`setXMPProperty` in `XMPUtil.cpp`) —
+    /// Covers the load-then-mutate-then-put path (`setXMPProperty` in `XMPUtil.cpp`) -
     /// a structurally distinct function from `writeXMP`, so its reason is checked separately.
     @Test func setPropertyOnNonexistentFileIncludesRealFailureReason() async throws {
         deleteBinOnExit = true

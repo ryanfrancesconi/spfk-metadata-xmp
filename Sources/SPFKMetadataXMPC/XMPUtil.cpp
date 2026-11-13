@@ -201,7 +201,7 @@ bool XMPUtil::setXMPProperty(
             return false;
         }
 
-        // Load existing XMP first — GetXMP returns false when the file has no XMP
+        // Load existing XMP first - GetXMP returns false when the file has no XMP
         // packet yet, which is not an error here; proceed with a default-constructed
         // (empty) meta so the first property write to a fresh file still succeeds.
         SXMPMeta meta;

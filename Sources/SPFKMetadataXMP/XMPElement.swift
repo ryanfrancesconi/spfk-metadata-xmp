@@ -80,7 +80,7 @@ public enum XMPElement: String, Sendable {
     /// Keywords, an `rdf:Bag` (unordered) of `rdf:li` values -- the property Lightroom, Bridge and Photos use.
     case subject = "dc:subject"
 
-    /// XMP Dynamic Media — editable production/camera fields, flat children of `rdf:Description`.
+    /// XMP Dynamic Media - editable production/camera fields, flat children of `rdf:Description`.
     /// https://www.adobe.io/xmp/docs/XMPNamespaces/xmpDM/
     case scene = "xmpDM:scene"
     case shotDate = "xmpDM:shotDate"

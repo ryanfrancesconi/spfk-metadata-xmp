@@ -9,12 +9,12 @@ import Testing
 @testable import SPFKMetadataXMP
 
 /// RF64 is a `.wav` whose 32-bit RIFF size fields are `0xFFFFFFFF` sentinels, with the real 64-bit
-/// sizes in a `ds64` chunk — what a wave file becomes past 4 GB, and what field recorders write for
+/// sizes in a `ds64` chunk - what a wave file becomes past 4 GB, and what field recorders write for
 /// long takes. A writer that recomputes a RIFF size into the sentinel makes readers fall back to
 /// the 32-bit figure, which past 4 GB cannot describe the file.
 ///
 /// The Adobe SDK handles this correctly and these tests exist to keep it that way across SDK
-/// upgrades. Verified 2026-08-13 against a real 4.5 GB RF64 as well — same result, so the small
+/// upgrades. Verified 2026-08-13 against a real 4.5 GB RF64 as well - same result, so the small
 /// fixture here is sufficient.
 @Suite(.tags(.file), .serialized)
 final class RF64WriteTests: BinTestCase {
@@ -70,7 +70,7 @@ final class RF64WriteTests: BinTestCase {
     /// Writes a one-second RF64 file.
     ///
     /// Core Audio's RF64 writer emits a plain `RIFF`/`WAVE` file with a 28-byte `JUNK` placeholder
-    /// until the data actually crosses 4 GB, so the sentinels are filled in by hand here — the
+    /// until the data actually crosses 4 GB, so the sentinels are filled in by hand here - the
     /// alternative is a 4 GB fixture per run. `JUNK` is exactly the size of `ds64` and sits at
     /// exactly its offset, so this is a substitution and every chunk offset is unchanged.
     private func makeRF64File(named name: String) throws -> URL {

@@ -173,7 +173,7 @@ public struct XMPDynamicMedia: Equatable, Sendable {
 
     /// Create a XMPDynamicMedia struct by passing it a URL to a file.
     ///
-    /// Thread-safe — multiple instances can be created concurrently.
+    /// Thread-safe - multiple instances can be created concurrently.
     /// - Parameter url: the file to open
     public init(url: URL) throws {
         let xmlString = try XMP.shared.parse(url: url)

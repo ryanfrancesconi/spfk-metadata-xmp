@@ -117,7 +117,7 @@ void XMPUtil::readProperties(
             }
         } catch (XMP_Error & e) {
             cout << "XMPUtil: skipping " << request.ns << ":" << request.propName
-                 << " — " << e.GetErrMsg() << endl;
+                 << " - " << e.GetErrMsg() << endl;
         }
     }
 }

@@ -69,7 +69,7 @@
 @implementation XMPFile : NSObject
 
 /// Builds an `NSError` from a C++ failure message, or `nil` if the message is empty
-/// (defensive — every failure path in `XMPUtil.cpp` populates it, but an empty message
+/// (defensive - every failure path in `XMPUtil.cpp` populates it, but an empty message
 /// shouldn't produce a blank-description error).
 static NSError * _Nullable makeError(const std::string &message) {
     if (message.empty()) {

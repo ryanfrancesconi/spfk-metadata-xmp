@@ -13,7 +13,7 @@ import UniformTypeIdentifiers
 /// by a write, are not atomic together.
 public enum XMP {
     /// Singleton-like access point. Kept for API compatibility with existing
-    /// `XMP.shared.parse(...)` call sites — `shared` is an `Accessor` instance forwarding to the
+    /// `XMP.shared.parse(...)` call sites - `shared` is an `Accessor` instance forwarding to the
     /// static functions.
     public static let shared = Accessor()
 
@@ -73,7 +73,7 @@ public enum XMP {
         } catch let error as NSError where error.domain == "XMPFile" && error.code == XMPFileErrorCode.noPacket.rawValue {
             throw XMPReadError.noPacket
         } catch {
-            throw XMPReadError.readFailed("\(url.path) — \(error.localizedDescription)")
+            throw XMPReadError.readFailed("\(url.path) - \(error.localizedDescription)")
         }
     }
 
@@ -90,7 +90,7 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.write(string, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to write XMP string to file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to write XMP string to file: \(url.path) - \(reason)")
         }
     }
 
@@ -108,7 +108,7 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.applyChanges(fromBaseline: baseline, edited: edited, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to apply XMP changes to file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to apply XMP changes to file: \(url.path) - \(reason)")
         }
     }
 
@@ -127,7 +127,7 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.remove(fromPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to remove XMP from file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to remove XMP from file: \(url.path) - \(reason)")
         }
     }
 
@@ -142,7 +142,7 @@ public enum XMP {
     }
 
     /// Sets a single simple-value XMP property, preserving all other existing content
-    /// (load-then-mutate-then-put — unlike `write(string:to:)`, which replaces the whole packet).
+    /// (load-then-mutate-then-put - unlike `write(string:to:)`, which replaces the whole packet).
     ///
     /// The whole load-mutate-put sequence happens within one C++ call, under the toolkit mutex.
     public static func setProperty(namespace: String, name: String, value: String, url: URL) throws {
@@ -151,24 +151,24 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.setProperty(namespace, propName: name, value: value, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to set XMP property \(namespace):\(name) on file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to set XMP property \(namespace):\(name) on file: \(url.path) - \(reason)")
         }
     }
 
     /// Replaces a whole array-value XMP property (e.g. `dc:subject`/keywords) with `values`,
     /// preserving all other existing content. `isOrdered` selects `rdf:Seq` (true) vs.
-    /// `rdf:Bag` (false, the default — correct for `dc:subject`).
+    /// `rdf:Bag` (false, the default - correct for `dc:subject`).
     public static func setArrayProperty(namespace: String, name: String, values: [String], isOrdered: Bool = false, url: URL) throws {
         XMPLifecycle.initialize()
 
         var error: NSError?
         guard XMPFile.setArrayProperty(namespace, propName: name, values: values, isOrdered: isOrdered, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to set XMP array property \(namespace):\(name) on file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to set XMP array property \(namespace):\(name) on file: \(url.path) - \(reason)")
         }
     }
 
-    /// Writes multiple properties (simple, array, and/or removals) in a single open/read/write/close cycle —
+    /// Writes multiple properties (simple, array, and/or removals) in a single open/read/write/close cycle -
     /// fewer open/close cycles than repeated `setProperty`/`setArrayProperty` calls, and avoids
     /// the interleaved-thread stale-state window between separate calls.
     public static func setProperties(_ properties: [XMPPropertyWrite], url: URL) throws {
@@ -190,7 +190,7 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.setProperties(entries, toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to set XMP properties on file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to set XMP properties on file: \(url.path) - \(reason)")
         }
     }
 
@@ -216,7 +216,7 @@ public enum XMP {
         do {
             return try XMPFile.getProperties(entries, fromPath: url.path)
         } catch {
-            throw NSError(description: "Failed to read XMP properties from file: \(url.path) — \(error.localizedDescription)")
+            throw NSError(description: "Failed to read XMP properties from file: \(url.path) - \(error.localizedDescription)")
         }
     }
 
@@ -228,7 +228,7 @@ public enum XMP {
         var error: NSError?
         guard XMPFile.setTrackType(trackType ?? "", trackName: trackName ?? "", toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
-            throw NSError(description: "Failed to set XMP track info on file: \(url.path) — \(reason)")
+            throw NSError(description: "Failed to set XMP track info on file: \(url.path) - \(reason)")
         }
     }
 }

@@ -45,13 +45,13 @@ extension XMPDynamicMedia {
 
     /// Regenerates the full XMP packet string, reflecting any edits made through the
     /// properties above alongside everything else `document` already holds (markers,
-    /// tracks, timecode, and any other namespace this type doesn't model) — since
+    /// tracks, timecode, and any other namespace this type doesn't model) - since
     /// mutation happens directly on `document` rather than a separate property bag,
     /// nothing else needs to be rebuilt.
     public var xml: String { document.xml }
 
     /// Direct children of `rdf:Description`, read live off `document` rather than
-    /// cached at parse time — these are the only fields on this type that are
+    /// cached at parse time - these are the only fields on this type that are
     /// user-editable, so backing them by the live document (instead of the
     /// stored-property + full-rebuild pattern `IXMLMetadata` uses) means edits
     /// can't drift out of sync with round-trip content this type doesn't model.
