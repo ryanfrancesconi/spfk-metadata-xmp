@@ -50,6 +50,21 @@
     return self;
 }
 
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                structName:(nonnull NSString *)structName
+                                 fieldName:(nonnull NSString *)fieldName
+                                     value:(nullable NSString *)value {
+    self = [super init];
+    _ns = ns;
+    _propName = fieldName;
+    _structName = structName;
+    _values = value == nil ? @[] : @[value];
+    _isArray = false;
+    _isLocalized = false;
+    _isRemoval = value == nil;
+    return self;
+}
+
 @end
 
 @implementation XMPPropertyReadEntry : NSObject
@@ -61,6 +76,17 @@
     _ns = ns;
     _propName = propName;
     _isArray = isArray;
+    return self;
+}
+
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                structName:(nonnull NSString *)structName
+                                 fieldName:(nonnull NSString *)fieldName {
+    self = [super init];
+    _ns = ns;
+    _propName = fieldName;
+    _structName = structName;
+    _isArray = false;
     return self;
 }
 
@@ -204,6 +230,7 @@ static NSError * _Nullable makeError(const std::string &message) {
         write.isOrdered = entry.isOrdered;
         write.isLocalized = entry.isLocalized;
         write.isRemoval = entry.isRemoval;
+        if (entry.structName != nil) write.structName = entry.structName.UTF8String;
         cppProperties.push_back(write);
     }
 
@@ -226,6 +253,7 @@ static NSError * _Nullable makeError(const std::string &message) {
         request.ns = entry.ns.UTF8String;
         request.propName = entry.propName.UTF8String;
         request.isArray = entry.isArray;
+        if (entry.structName != nil) request.structName = entry.structName.UTF8String;
         cppRequests.push_back(request);
     }
 

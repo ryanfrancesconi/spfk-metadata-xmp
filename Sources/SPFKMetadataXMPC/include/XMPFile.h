@@ -19,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) bool isRemoval;
 
+/// When set, `propName` is a field of this struct, in the same namespace.
+@property (nonatomic, strong, readonly, nullable) NSString *structName;
+
 /// `isArray: false` uses `values.firstObject` as a single simple value.
 /// `isArray: true` replaces the whole array with `values`, in order: an `rdf:Seq` when
 /// `isOrdered`, an `rdf:Bag` otherwise.
@@ -42,6 +45,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (nonnull instancetype)initWithRemovalOfNamespace:(nonnull NSString *)ns
                                            propName:(nonnull NSString *)propName;
 
+/// Sets one text field of a struct, creating the struct if needed, or removes the field when
+/// `value` is nil. Removing the last field removes the struct.
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                structName:(nonnull NSString *)structName
+                                 fieldName:(nonnull NSString *)fieldName
+                                     value:(nullable NSString *)value;
+
 @end
 
 /// One property to read in a batch `getProperties:fromPath:error:` call.
@@ -51,9 +61,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSString *propName;
 @property (nonatomic, readonly) bool isArray;
 
+/// When set, `propName` is a field of this struct, in the same namespace.
+@property (nonatomic, strong, readonly, nullable) NSString *structName;
+
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
                                   propName:(nonnull NSString *)propName
                                    isArray:(bool)isArray;
+
+/// Reads one text field of a struct.
+- (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
+                                structName:(nonnull NSString *)structName
+                                 fieldName:(nonnull NSString *)fieldName;
 
 @end
 

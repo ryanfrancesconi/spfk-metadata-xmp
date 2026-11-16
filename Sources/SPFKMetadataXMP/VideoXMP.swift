@@ -4,7 +4,7 @@ import Foundation
 import SPFKBase
 import SPFKMetadataImage
 
-/// Reads and writes the same fourteen XMP fields `ImageXMP` handles, for QuickTime containers.
+/// Reads and writes the same XMP fields `ImageXMP` handles, for QuickTime containers.
 ///
 /// A separate type because the mechanism is entirely different, not because the vocabulary is:
 /// `ImageXMP` is ImageIO-based (`CGImageSource`) and will not open a `.mov` at all, while this
@@ -22,7 +22,9 @@ public enum VideoXMP {
         let fields = XMPField.allCases
 
         let values = try XMP.getProperties(
-            fields.map { XMPPropertyRead(namespace: $0.namespace, name: $0.localName, isArray: $0.isArray) },
+            fields.map {
+                XMPPropertyRead(namespace: $0.namespace, name: $0.localName, isArray: $0.isArray, structName: $0.structName)
+            },
             url: url
         )
 
@@ -36,7 +38,7 @@ public enum VideoXMP {
     /// Sending removals rather than skipping absent fields is what makes emptying a field in the
     /// editor empty it on the file. It is safe here for the same reason it is in the image path:
     /// the caller's metadata carries the complete state of the modeled set, because
-    /// ``readMetadata(from:)`` populates all fourteen.
+    /// ``readMetadata(from:)`` populates every field.
     ///
     /// - Important: this is only sound while reading and writing cover the same field set. If a
     ///   field is ever added to ``XMPField`` and read but not written -- or vice versa --
@@ -45,6 +47,10 @@ public enum VideoXMP {
     public static func writeMetadata(_ metadata: XMPMetadata, url: URL) throws {
         let properties: [XMPPropertyWrite] = XMPField.allCases.map { field in
             let values = metadata.values(for: field)
+
+            if let structName = field.structName {
+                return .structField(namespace: field.namespace, structName: structName, name: field.localName, value: values.first)
+            }
 
             guard values.isNotEmpty else {
                 return .removal(namespace: field.namespace, name: field.localName)

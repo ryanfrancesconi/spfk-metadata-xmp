@@ -175,7 +175,12 @@ public enum XMP {
         XMPLifecycle.initialize()
 
         let entries = properties.map { property in
-            if property.isRemoval {
+            if let structName = property.structName {
+                XMPPropertyWriteEntry(
+                    namespace: property.namespace, structName: structName, fieldName: property.name,
+                    value: property.isRemoval ? nil : property.values.first
+                )
+            } else if property.isRemoval {
                 XMPPropertyWriteEntry(removalOfNamespace: property.namespace, propName: property.name)
             } else if property.isLocalized, let value = property.values.first {
                 XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, localizedValue: value)
@@ -208,7 +213,11 @@ public enum XMP {
         XMPLifecycle.initialize()
 
         let entries = requests.map {
-            XMPPropertyReadEntry(namespace: $0.namespace, propName: $0.name, isArray: $0.isArray)
+            if let structName = $0.structName {
+                XMPPropertyReadEntry(namespace: $0.namespace, structName: structName, fieldName: $0.name)
+            } else {
+                XMPPropertyReadEntry(namespace: $0.namespace, propName: $0.name, isArray: $0.isArray)
+            }
         }
 
         // Imported as `throws`: the ObjC method returns a nullable array with an NSError** out
@@ -257,10 +266,14 @@ public struct XMPPropertyRead: Sendable {
     /// Read every item of an `rdf:Bag`/`rdf:Seq` rather than a single value.
     public let isArray: Bool
 
-    public init(namespace: String, name: String, isArray: Bool = false) {
+    /// When set, `name` is a text field of this struct, in the same namespace.
+    public let structName: String?
+
+    public init(namespace: String, name: String, isArray: Bool = false, structName: String? = nil) {
         self.namespace = namespace
         self.name = name
         self.isArray = isArray
+        self.structName = structName
     }
 }
 
@@ -280,9 +293,12 @@ public struct XMPPropertyWrite: Sendable {
     /// Removes the property instead of writing it. Takes precedence over `values`/`isArray`.
     public let isRemoval: Bool
 
+    /// When set, `name` is a text field of this struct, in the same namespace.
+    public let structName: String?
+
     init(
         namespace: String, name: String, values: [String], isArray: Bool,
-        isOrdered: Bool = false, isLocalized: Bool = false, isRemoval: Bool = false
+        isOrdered: Bool = false, isLocalized: Bool = false, isRemoval: Bool = false, structName: String? = nil
     ) {
         self.namespace = namespace
         self.name = name
@@ -291,6 +307,7 @@ public struct XMPPropertyWrite: Sendable {
         self.isOrdered = isOrdered
         self.isLocalized = isLocalized
         self.isRemoval = isRemoval
+        self.structName = structName
     }
 
     /// A single simple-value property write. A property the file already holds as a language
@@ -320,5 +337,14 @@ public struct XMPPropertyWrite: Sendable {
     /// no-op, not an error -- clearing an already-empty field is the ordinary case.
     public static func removal(namespace: String, name: String) -> XMPPropertyWrite {
         XMPPropertyWrite(namespace: namespace, name: name, values: [], isArray: false, isRemoval: true)
+    }
+
+    /// Sets one text field of a struct, creating the struct if needed, or removes the field when
+    /// `value` is `nil`. Removing the last field removes the struct.
+    public static func structField(namespace: String, structName: String, name: String, value: String?) -> XMPPropertyWrite {
+        XMPPropertyWrite(
+            namespace: namespace, name: name, values: value.map { [$0] } ?? [], isArray: false,
+            isRemoval: value == nil, structName: structName
+        )
     }
 }

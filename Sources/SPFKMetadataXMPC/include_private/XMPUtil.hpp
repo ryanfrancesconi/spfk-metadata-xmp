@@ -32,6 +32,10 @@ struct XMPPropertyWrite {
     ///
     /// Takes precedence over `values`/`isArray` when set, so a caller cannot ask for both.
     bool isRemoval = false;
+
+    /// When set, `propName` is a field of this struct, in the same namespace, written with
+    /// `SetStructField` or removed with `DeleteStructField`.
+    std::string structName;
 };
 
 class XMPUtil {
@@ -86,6 +90,8 @@ public:
         std::string propName;
         /// Read every item of an `rdf:Bag`/`rdf:Seq` rather than a single value.
         bool isArray;
+        /// When set, `propName` is a field of this struct, in the same namespace.
+        std::string structName;
     };
 
     /// Reads several properties in one open/read/close cycle.
@@ -233,6 +239,9 @@ public:
     );
 
 private:
+    /// Applies one write to `meta`; see `XMPPropertyWrite`.
+    static void applyPropertyWrite(SXMPMeta& meta, const XMPPropertyWrite& property);
+
     /// Reads each request from `meta`, index-aligned; see `getXMPProperties`.
     static void readProperties(
         const SXMPMeta& meta,

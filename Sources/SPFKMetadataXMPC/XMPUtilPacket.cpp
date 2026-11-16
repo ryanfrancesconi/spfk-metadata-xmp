@@ -82,6 +82,17 @@ void XMPUtil::readProperties(
         // The toolkit throws rather than returning false for several mismatches -- asking
         // GetLocalizedText for a plain scalar raises "Localized text array is not alt-text".
         try {
+            if (!request.structName.empty()) {
+                string value;
+                if (meta.GetStructField(
+                        request.ns.c_str(), request.structName.c_str(), request.ns.c_str(), request.propName.c_str(),
+                        &value, nullptr
+                    )) {
+                    out.push_back(value);
+                }
+                continue;
+            }
+
             if (request.isArray) {
                 const XMP_Index count = meta.CountArrayItems(request.ns.c_str(), request.propName.c_str());
                 for (XMP_Index item = 1; item <= count; ++item) {
