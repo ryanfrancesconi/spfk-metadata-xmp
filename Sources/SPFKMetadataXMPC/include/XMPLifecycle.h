@@ -14,6 +14,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (bool)isInitialized;
 + (void)terminate;
 
+/// Registers a schema namespace for the rest of the process, returning the prefix in use for it.
+/// Repeating the call returns the prefix already registered.
++ (nullable NSString *)registerNamespace:(nonnull NSString *)uri
+                         suggestedPrefix:(nonnull NSString *)suggestedPrefix
+                                   error:(NSError * _Nullable * _Nullable)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

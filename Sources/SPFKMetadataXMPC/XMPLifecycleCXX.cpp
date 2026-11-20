@@ -52,3 +52,17 @@ void XMPLifecycleCXX::terminate() {
     SXMPMeta::Terminate();
     _isInitialized = false;
 }
+
+bool XMPLifecycleCXX::registerNamespace(const std::string& uri, const std::string& suggestedPrefix, std::string* registeredPrefix, std::string* errorMessage) {
+    initialize();
+    std::lock_guard<std::mutex> lock(operationMutex);
+
+    try {
+        SXMPMeta::RegisterNamespace(uri.c_str(), suggestedPrefix.c_str(), registeredPrefix);
+    } catch (XMP_Error & e) {
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
+        return false;
+    }
+
+    return true;
+}

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <mutex>
+#include <string>
 
 /// One of MAC_ENV, WIN_ENV, UNIX_ENV or IOS_ENV must be defined by the client
 /// Also defined in XMP_Environment.h
@@ -30,6 +31,10 @@ public:
     static bool isInitialized();
     static bool initialize();
     static void terminate();
+
+    /// Registers `uri` for the rest of the process, returning the prefix in use for it: the
+    /// existing one when the URI is already registered. False with `errorMessage` set on failure.
+    static bool registerNamespace(const std::string& uri, const std::string& suggestedPrefix, std::string* registeredPrefix, std::string* errorMessage);
 
     /// The operation mutex that serializes all SXMPFiles open/read/write/close calls.
     /// Exposed here so terminate() can acquire it before calling SXMPFiles::Terminate(),
