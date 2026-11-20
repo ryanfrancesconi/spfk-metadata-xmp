@@ -28,6 +28,8 @@ void XMPUtil::applyPropertyWrite(SXMPMeta& meta, const XMPPropertyWrite& propert
     } else if (property.isArray) {
         meta.DeleteProperty(ns, name);
         const XMP_OptionBits arrayForm = property.isOrdered ? kXMP_PropArrayIsOrdered : kXMP_PropArrayIsUnordered;
+        // Created even with no items, so an empty array is present rather than absent.
+        meta.SetProperty(ns, name, nullptr, arrayForm);
         for (const auto& value : property.values) {
             meta.AppendArrayItem(ns, name, arrayForm, value.c_str());
         }

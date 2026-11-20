@@ -28,6 +28,12 @@ NS_ASSUME_NONNULL_BEGIN
                                            onto:(nullable NSString *)current
                                           error:(NSError * _Nullable * _Nullable)error;
 
+/// Applies the writes to `packet` (nil or empty for a new one), serialized as `mergeChangesFromBaseline`
+/// serializes. Properties not written are kept. An empty string when the result holds no properties.
++ (nullable NSString *)applyProperties:(nonnull NSArray<XMPPropertyWriteEntry *> *)properties
+                              toPacket:(nullable NSString *)packet
+                                 error:(NSError * _Nullable * _Nullable)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

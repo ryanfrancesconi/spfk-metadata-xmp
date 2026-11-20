@@ -219,3 +219,37 @@ bool XMPUtil::mergeXMPChanges(
 
     return true;
 }
+
+bool XMPUtil::applyPropertyWrites(
+    const string* packet,
+    const vector<XMPPropertyWrite>& properties,
+    string* result,
+    string* errorMessage
+) {
+    if (result == nullptr) return false;
+
+    XMPLifecycleCXX::initialize();
+    std::lock_guard<std::mutex> lock(XMPLifecycleCXX::operationMutex);
+
+    // A packet that parses to nothing is refused rather than replaced by the writes alone.
+    SXMPMeta meta;
+    if (packet != nullptr && !XMPUtil::parsePacket(*packet, &meta, errorMessage)) {
+        return false;
+    }
+
+    try {
+        for (const auto& property : properties) {
+            XMPUtil::applyPropertyWrite(meta, property);
+        }
+
+        result->clear();
+        if (hasProperties(meta)) {
+            meta.SerializeToBuffer(result);
+        }
+    } catch (XMP_Error & e) {
+        if (errorMessage != nullptr) *errorMessage = e.GetErrMsg();
+        return false;
+    }
+
+    return true;
+}

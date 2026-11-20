@@ -39,6 +39,18 @@ public extension XMP {
         }
     }
 
+    /// ``setProperties(_:url:)`` over a packet string: `properties` applied to `packet`, `nil` or
+    /// empty for a new one. Properties not written are kept.
+    ///
+    /// - Returns: the packet with its wrapper and padding, or an empty string when it holds no
+    ///   properties. Throws for a non-empty `packet` holding no XMP properties.
+    static func applying(_ properties: [XMPPropertyWrite], toPacket packet: String?) throws -> String {
+        XMPLifecycle.initialize()
+
+        let current = packet?.isEmpty == false ? packet : nil
+        return try XMPPacket.applyProperties(properties.map(\.entry), toPacket: current)
+    }
+
     /// ``getProperties(_:url:)`` over a packet string.
     static func getProperties(_ requests: [XMPPropertyRead], inPacket packet: String) throws -> [[String]] {
         XMPLifecycle.initialize()

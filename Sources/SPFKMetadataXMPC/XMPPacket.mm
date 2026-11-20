@@ -3,6 +3,7 @@
 #import <Foundation/Foundation.h>
 
 #import "XMPPacket.h"
+#import "XMPPropertyWriteBridge.hpp"
 #import "XMPUtil.hpp"
 
 @implementation XMPPacket : NSObject
@@ -91,6 +92,28 @@ static NSString *nsString(const std::string &value) {
     }
 
     return nsString(merged);
+}
+
++ (nullable NSString *)applyProperties:(NSArray<XMPPropertyWriteEntry *> *)properties
+                              toPacket:(nullable NSString *)packet
+                                 error:(NSError * _Nullable * _Nullable)error {
+    std::string packetString = packet == nil ? "" : packet.UTF8String;
+    std::string result;
+    std::string errorMessage;
+
+    bool ok = XMPUtil::applyPropertyWrites(
+        packetString.empty() ? nullptr : &packetString,
+        XMPPropertyWriteBridge::fromEntries(properties),
+        &result,
+        &errorMessage
+    );
+
+    if (!ok) {
+        if (error != nullptr) *error = makeError(errorMessage);
+        return nil;
+    }
+
+    return nsString(result);
 }
 
 @end

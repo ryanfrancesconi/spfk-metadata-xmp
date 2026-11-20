@@ -5,7 +5,31 @@
 #import <Foundation/Foundation.h>
 #import "XMPFile.h"
 
+#import "XMPPropertyWriteBridge.hpp"
 #import "XMPUtil.hpp"
+
+std::vector<XMPPropertyWrite> XMPPropertyWriteBridge::fromEntries(NSArray<XMPPropertyWriteEntry *> *entries) {
+    std::vector<XMPPropertyWrite> writes;
+    writes.reserve(entries.count);
+
+    for (XMPPropertyWriteEntry *entry in entries) {
+        XMPPropertyWrite write;
+        write.ns = entry.ns.UTF8String;
+        write.propName = entry.propName.UTF8String;
+        write.values.reserve(entry.values.count);
+        for (NSString *value in entry.values) {
+            write.values.push_back(value.UTF8String);
+        }
+        write.isArray = entry.isArray;
+        write.isOrdered = entry.isOrdered;
+        write.isLocalized = entry.isLocalized;
+        write.isRemoval = entry.isRemoval;
+        if (entry.structName != nil) write.structName = entry.structName.UTF8String;
+        writes.push_back(write);
+    }
+
+    return writes;
+}
 
 @implementation XMPPropertyWriteEntry : NSObject
 
@@ -212,27 +236,7 @@ static NSError * _Nullable makeError(const std::string &message) {
 + (bool)setProperties:(NSArray<XMPPropertyWriteEntry *> *)properties
                 toPath:(NSString *)toPath
                  error:(NSError * _Nullable * _Nullable)error {
-    std::vector<XMPPropertyWrite> cppProperties;
-    cppProperties.reserve(properties.count);
-
-    for (XMPPropertyWriteEntry *entry in properties) {
-        std::vector<std::string> cppValues;
-        cppValues.reserve(entry.values.count);
-        for (NSString *value in entry.values) {
-            cppValues.push_back(value.UTF8String);
-        }
-
-        XMPPropertyWrite write;
-        write.ns = entry.ns.UTF8String;
-        write.propName = entry.propName.UTF8String;
-        write.values = cppValues;
-        write.isArray = entry.isArray;
-        write.isOrdered = entry.isOrdered;
-        write.isLocalized = entry.isLocalized;
-        write.isRemoval = entry.isRemoval;
-        if (entry.structName != nil) write.structName = entry.structName.UTF8String;
-        cppProperties.push_back(write);
-    }
+    std::vector<XMPPropertyWrite> cppProperties = XMPPropertyWriteBridge::fromEntries(properties);
 
     std::string errorMessage;
     bool ok = XMPUtil::setXMPProperties(toPath.UTF8String, cppProperties, &errorMessage);

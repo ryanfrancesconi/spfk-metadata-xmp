@@ -137,6 +137,16 @@ public:
         std::string* errorMessage
     );
 
+    /// Applies `properties` to `packet` (null for an empty one) in memory and serializes the
+    /// result as `mergeXMPChanges` does. Properties not written are kept. `result` is empty when
+    /// the packet holds no properties afterwards. A packet holding no properties is refused.
+    static bool applyPropertyWrites(
+        const std::string* packet,
+        const std::vector<XMPPropertyWrite>& properties,
+        std::string* result,
+        std::string* errorMessage
+    );
+
     /// Replaces the file's packet with the xml string.
     ///
     /// The toolkit also rewrites the native metadata the packet mirrors (BEXT, INFO, iXML, ID3,

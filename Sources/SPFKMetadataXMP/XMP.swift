@@ -174,26 +174,8 @@ public enum XMP {
     public static func setProperties(_ properties: [XMPPropertyWrite], url: URL) throws {
         XMPLifecycle.initialize()
 
-        let entries = properties.map { property in
-            if let structName = property.structName {
-                XMPPropertyWriteEntry(
-                    namespace: property.namespace, structName: structName, fieldName: property.name,
-                    value: property.isRemoval ? nil : property.values.first
-                )
-            } else if property.isRemoval {
-                XMPPropertyWriteEntry(removalOfNamespace: property.namespace, propName: property.name)
-            } else if property.isLocalized, let value = property.values.first {
-                XMPPropertyWriteEntry(namespace: property.namespace, propName: property.name, localizedValue: value)
-            } else {
-                XMPPropertyWriteEntry(
-                    namespace: property.namespace, propName: property.name, values: property.values,
-                    isArray: property.isArray, isOrdered: property.isOrdered
-                )
-            }
-        }
-
         var error: NSError?
-        guard XMPFile.setProperties(entries, toPath: url.path, error: &error) else {
+        guard XMPFile.setProperties(properties.map(\.entry), toPath: url.path, error: &error) else {
             let reason = error?.localizedDescription ?? "unknown reason"
             throw NSError(description: "Failed to set XMP properties on file: \(url.path) - \(reason)")
         }
@@ -324,6 +306,7 @@ public struct XMPPropertyWrite: Sendable {
     }
 
     /// A whole-array-replace property write: an `rdf:Seq` when `isOrdered`, an `rdf:Bag` otherwise.
+    /// No values writes an empty array, which is present, unlike a ``removal(namespace:name:)``.
     public static func array(namespace: String, name: String, values: [String], isOrdered: Bool = false) -> XMPPropertyWrite {
         XMPPropertyWrite(namespace: namespace, name: name, values: values, isArray: true, isOrdered: isOrdered)
     }
@@ -346,5 +329,25 @@ public struct XMPPropertyWrite: Sendable {
             namespace: namespace, name: name, values: value.map { [$0] } ?? [], isArray: false,
             isRemoval: value == nil, structName: structName
         )
+    }
+}
+
+extension XMPPropertyWrite {
+    /// The bridge entry describing this write.
+    var entry: XMPPropertyWriteEntry {
+        if let structName {
+            XMPPropertyWriteEntry(
+                namespace: namespace, structName: structName, fieldName: name,
+                value: isRemoval ? nil : values.first
+            )
+        } else if isRemoval {
+            XMPPropertyWriteEntry(removalOfNamespace: namespace, propName: name)
+        } else if isLocalized, let value = values.first {
+            XMPPropertyWriteEntry(namespace: namespace, propName: name, localizedValue: value)
+        } else {
+            XMPPropertyWriteEntry(
+                namespace: namespace, propName: name, values: values, isArray: isArray, isOrdered: isOrdered
+            )
+        }
     }
 }
