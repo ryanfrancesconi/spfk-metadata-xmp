@@ -45,14 +45,24 @@ public enum VideoXMP {
     ///   saving would erase it. Both sides iterate `allCases` precisely so that cannot happen
     ///   silently.
     public static func writeMetadata(_ metadata: XMPMetadata, url: URL) throws {
-        let properties: [XMPPropertyWrite] = XMPField.allCases.map { field in
+        try XMP.setProperties(propertyWrites(for: metadata), url: url)
+    }
+
+    /// One write per modeled field: its value, or a removal when it is empty.
+    ///
+    /// An empty field in `keptEmpty` is written as an explicitly empty value instead, which stays
+    /// present, so it can override the same field held elsewhere (an XMP sidecar over its file).
+    public static func propertyWrites(for metadata: XMPMetadata, keptEmpty: Set<XMPField> = []) -> [XMPPropertyWrite] {
+        XMPField.allCases.map { field in
             let values = metadata.values(for: field)
+            let isEmpty = values.isEmpty
 
             if let structName = field.structName {
-                return .structField(namespace: field.namespace, structName: structName, name: field.localName, value: values.first)
+                let value = isEmpty && keptEmpty.contains(field) ? "" : values.first
+                return .structField(namespace: field.namespace, structName: structName, name: field.localName, value: value)
             }
 
-            guard values.isNotEmpty else {
+            if isEmpty, !keptEmpty.contains(field) {
                 return .removal(namespace: field.namespace, name: field.localName)
             }
 
@@ -60,11 +70,11 @@ public enum VideoXMP {
                 return .array(namespace: field.namespace, name: field.localName, values: values, isOrdered: field.isOrderedArray)
             }
 
-            return field.isLanguageAlternative
-                ? .localized(namespace: field.namespace, name: field.localName, value: values[0])
-                : .simple(namespace: field.namespace, name: field.localName, value: values[0])
-        }
+            let value = values.first ?? ""
 
-        try XMP.setProperties(properties, url: url)
+            return field.isLanguageAlternative
+                ? .localized(namespace: field.namespace, name: field.localName, value: value)
+                : .simple(namespace: field.namespace, name: field.localName, value: value)
+        }
     }
 }
